@@ -34,8 +34,8 @@
 				  <?php				  
    $no=1;   
    $c=0;
-   $sql = mysqli_query($con," SELECT * FROM tblopname_11 WHERE tgl_tutup='$_GET[tgl]' ORDER BY id ASC");		  
-    while($r = mysqli_fetch_array($sql)){
+   $sql = sqlsrv_query($con," SELECT * FROM dbnow_gkg.tblopname_11 WHERE tgl_tutup='$_GET[tgl]' ORDER BY id ASC");		  
+    while($r = sqlsrv_fetch_array($sql)){
 		
 ?>
 	  <tr>
@@ -57,8 +57,8 @@
       <td style="text-align: center"><?php echo $r['lokasi'];;?></td>
       </tr>				  
 <?php	$no++;
-		$totrol=$totrol+$r['rol'];
-		$totkg=$totkg+$r['weight'];
+		@$totrol=$totrol+$r['rol'];
+		@$totkg=$totkg+$r['weight'];
 	} ?>
 				  </tbody>
 				<tfoot>
