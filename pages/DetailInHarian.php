@@ -1,4 +1,7 @@
 <?php
+
+include "utils/helper.php";
+
 $Awal	= isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : '';
 $Akhir	= isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
 ?>
@@ -51,13 +54,13 @@ $Akhir	= isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
 	 
 $no=1;   
 $c=0;
-$sql = mysqli_query($con," SELECT * FROM tblmasukkain WHERE tgl_tutup='$_GET[tgl]' ORDER BY id ASC");		  
-    while($r = mysqli_fetch_array($sql)){										   
+$sql = sqlsrv_query($con," SELECT * FROM dbnow_gkg.tblmasukkain WHERE tgl_tutup='$_GET[tgl]' ORDER BY id ASC");		  
+    while($r = sqlsrv_fetch_array($sql)){										   
 			
 ?>
 	  <tr>
 	  <td style="text-align: center"><?php echo $no;?></td>
-	  <td style="text-align: center"><?php echo $r['tgl_masuk']; ?></td>
+	  <td style="text-align: center"><?php echo cek($r['tgl_masuk']); ?></td>
       <td style="text-align: center"><?php echo $r['no_bon']; ?></td>
       <td style="text-align: left"><?php echo $r['buyer']; ?></td>
       <td style="text-align: left"><?php echo $r['customer']; ?></td>
@@ -85,8 +88,8 @@ $sql = mysqli_query($con," SELECT * FROM tblmasukkain WHERE tgl_tutup='$_GET[tgl
 	  				  
 	<?php 
 	 $no++; 
-	$tMRol+=$r['qty'];
-	$tMKG +=$r['berat'];
+	@$tMRol+=$r['qty'];
+	@$tMKG +=$r['berat'];
 	} ?>
 				  </tbody>
                   <tfoot>

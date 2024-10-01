@@ -1,4 +1,7 @@
 <?php
+
+include "utils/helper.php";
+
 $Awal	= isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : '';
 ?>
 
@@ -71,17 +74,26 @@ $Awal	= isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : '';
 <?php	 
 $no=1;   
 $c=0;				  
-$sql = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg,DATE_FORMAT(now(),'%Y-%m-%d') as tgl FROM tblmasukkain GROUP BY tgl_tutup ORDER BY tgl_tutup DESC LIMIT 30");		  
-    while($r = mysqli_fetch_array($sql)){
-		
+$sql = sqlsrv_query($con,"SELECT TOP 30 
+										tgl_tutup, 
+										SUM(qty) AS rol, 
+										SUM(berat) AS kg, 
+										FORMAT(GETDATE(), 'yyyy-MM-dd') AS tgl 
+									FROM 
+										dbnow_gkg.tblmasukkain 
+									GROUP BY 
+										tgl_tutup 
+									ORDER BY 
+										tgl_tutup DESC;");		  
+    while($r = sqlsrv_fetch_array($sql)){	
 ?>
 	  <tr>
 	  <td style="text-align: center"><?php echo $no;?></td>
-	  <td style="text-align: center"><a href="DetailInHarian-<?php echo $r['tgl_tutup'];?>" class="btn btn-info btn-xs" target="_blank"> <i class="fa fa-link"></i> Lihat Data</a></td>
-	  <td style="text-align: center"><?php echo $r['tgl_tutup'];?></td>
+	  <td style="text-align: center"><a href="DetailInHarian-<?php echo cek($r['tgl_tutup']);?>" class="btn btn-info btn-xs" target="_blank"> <i class="fa fa-link"></i> Lihat Data</a></td>
+	  <td style="text-align: center"><?php echo cek($r['tgl_tutup']);?></td>
       <td style="text-align: center"><?php echo $r['rol'];?></td>
       <td style="text-align: right"><?php echo number_format(round($r['kg'],2),2);?></td>
-      <td style="text-align: center"><a href="#" class="btn btn-xs btn-danger <?php if($r['tgl']==$r['tgl_tutup']){ }else{/*echo"disabled";*/} ?>" onclick="confirm_deleteIn('DelInHarian-<?php echo $r['tgl_tutup']; ?>');" ><small class="fas fa-trash"> </small> Hapus</a></td>
+      <td style="text-align: center"><a href="#" class="btn btn-xs btn-danger <?php if(cek($r['tgl'])==cek($r['tgl_tutup'])){ }else{/*echo"disabled";*/} ?>" onclick="confirm_deleteIn('DelInHarian-<?php echo cek($r['tgl_tutup']); ?>');" ><small class="fas fa-trash"> </small> Hapus</a></td>
       </tr>
 	  				  
 	<?php 
@@ -118,17 +130,28 @@ $sql = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg,DAT
 <?php	 
 $no=1;   
 $c=0;				  
-$sql = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg,DATE_FORMAT(now(),'%Y-%m-%d') as tgl FROM tblkeluarkain GROUP BY tgl_tutup ORDER BY tgl_tutup DESC LIMIT 30");		  
-    while($r = mysqli_fetch_array($sql)){
+$sql = sqlsrv_query($con,"SELECT TOP 30 
+										tgl_tutup, 
+										SUM(qty) AS rol, 
+										SUM(berat) AS kg, 
+										FORMAT(GETDATE(), 'yyyy-MM-dd') AS tgl 
+									FROM 
+										dbnow_gkg.tblkeluarkain 
+									GROUP BY 
+										tgl_tutup 
+									ORDER BY 
+										tgl_tutup DESC;
+									");		  
+    while($r = sqlsrv_fetch_array($sql)){
 		
 ?>
 	  <tr>
 	  <td style="text-align: center"><?php echo $no;?></td>
-	  <td style="text-align: center"><a href="DetailOutHarian-<?php echo $r['tgl_tutup'];?>" class="btn btn-info btn-xs" target="_blank"> <i class="fa fa-link"></i> Lihat Data</a></td>
-	  <td style="text-align: center"><?php echo $r['tgl_tutup'];?></td>
+	  <td style="text-align: center"><a href="DetailOutHarian-<?php echo cek($r['tgl_tutup']);?>" class="btn btn-info btn-xs" target="_blank"> <i class="fa fa-link"></i> Lihat Data</a></td>
+	  <td style="text-align: center"><?php echo cek($r['tgl_tutup']);?></td>
       <td style="text-align: center"><?php echo $r['rol'];?></td>
       <td style="text-align: right"><?php echo number_format(round($r['kg'],2),2);?></td>
-      <td style="text-align: center"><a href="#" class="btn btn-xs btn-danger <?php if($r['tgl']==$r['tgl_tutup']){ }else{/*echo"disabled";*/} ?>" onclick="confirm_deleteOut('DelOutHarian-<?php echo $r['tgl_tutup']; ?>');" ><small class="fas fa-trash"> </small> Hapus</a></td>
+      <td style="text-align: center"><a href="#" class="btn btn-xs btn-danger <?php if($r['tgl']==cek($r['tgl_tutup'])){ }else{/*echo"disabled";*/} ?>" onclick="confirm_deleteOut('DelOutHarian-<?php echo cek($r['tgl_tutup']); ?>');" ><small class="fas fa-trash"> </small> Hapus</a></td>
       </tr>
 	  				  
 	<?php 
@@ -224,8 +247,19 @@ $sql = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg,DAT
 <?php	
 if(isset($_POST['submit'])){
 
-$cektgl=mysqli_query($con,"SELECT DATE_FORMAT(NOW(),'%Y-%m-%d') as tgl,COUNT(tgl_tutup) as ck ,DATE_FORMAT(NOW(),'%H') as jam,DATE_FORMAT(NOW(),'%H:%i') as jam1 FROM tblmasukkain WHERE tgl_tutup='".$Awal."' LIMIT 1");
-$dcek=mysqli_fetch_array($cektgl);
+$cektgl=sqlsrv_query($con,"SELECT TOP 1
+											FORMAT(GETDATE(), 'yyyy-MM-dd') AS tgl, 
+											COUNT(tgl_tutup) AS ck, 
+											DATEPART(HOUR, GETDATE()) AS jam, 
+											FORMAT(GETDATE(), 'HH:mm') AS jam1 
+										FROM 
+											tblmasukkain 
+										WHERE 
+											tgl_tutup = '$Awal' 
+										GROUP BY 
+											tgl_tutup;
+										");
+$dcek=sqlsrv_fetch_array($cektgl);
 $t1=strtotime($Awal);
 $t2=strtotime($dcek['tgl']);
 $selh=round(abs($t2-$t1)/(60*60*45));
@@ -449,33 +483,33 @@ if($rowdb25M['LEBAR1']!=""){$lbrM=round($rowdb25M['LEBAR1']);}else if($rowdb26M[
 if(substr($rowdb21M['EXTERNALREFERENCE'],0,3)!="000" or substr($rowdb21M['EXTERNALREFERENCE'],0,2)!="00"){$lotBM=$rowdb21M['EXTERNALREFERENCE'];}else{$lotBM="";}
 if(substr($rowdb21M['EXTERNALREFERENCE'],0,3)=="000" or substr($rowdb21M['EXTERNALREFERENCE'],0,2)=="00"){$prdOrM=$rowdb21M['EXTERNALREFERENCE'];}else{$prdOrM="";}	
 if($rowdb21M['QTY_KG']> 0){$KGS=$rowdb21M['QTY_KG'];}else{ $KGS=$rowdb21M['QTY1_KG']; }		
-$simpanM=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
-tgl_masuk	= '".$rowdb21M['TRANSACTIONDATE']."',
-no_bon	= '".$bonM."',
-buyer	= '".$buyerM."',
-customer	= '".$langgananM."',
-projectcode	= '".$rowdb21M['PROJECTCODE']."',
-prod_order	= '".$prdOrM."',
-code	= '".$itemcM."',
-mesin_rajut	= '".$mcM."',
-lot_benang	= '".$lotBM."',
-lebar_g	= '".$lbrM."',
-gramasi_g	= '".$gsmM."',
-lebar_kj	= '".round($rowdb28M['VALUEDECIMAL'])."',
-gramasi_kj	= '".round($rowdb29M['VALUEDECIMAL'])."',
-jenis_kain	= '".str_replace("'","''",$rowdb21M['SUMMARIZEDDESCRIPTION'])."',
-lot	= '".$rowdb21M['LOTCODE']."',
-benang1 = '".str_replace("'","''",$aM[0])."',
-benang2 = '".str_replace("'","''",$aM[1])."',
-benang3 = '".str_replace("'","''",$aM[2])."',
-benang4 = '".str_replace("'","''",$aM[3])."',
-qty	= '".$rowdb21M['QTY_ROL']."',
-berat	= '".$KGS."',
-blok	= '".$rowdb21M['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21M['WAREHOUSELOCATIONCODE']."',
-balance	= '".$rowdb24M['WAREHOUSELOCATIONCODE']."',
-userid	= '".$rowdb21M['CREATIONUSER']."',
-tgl_tutup = '".$Awal."',
-tgl_buat =now()") or die("GAGAL SIMPAN MASUK KAIN");		
+// $simpanM=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
+// tgl_masuk	= '".$rowdb21M['TRANSACTIONDATE']."',
+// no_bon	= '".$bonM."',
+// buyer	= '".$buyerM."',
+// customer	= '".$langgananM."',
+// projectcode	= '".$rowdb21M['PROJECTCODE']."',
+// prod_order	= '".$prdOrM."',
+// code	= '".$itemcM."',
+// mesin_rajut	= '".$mcM."',
+// lot_benang	= '".$lotBM."',
+// lebar_g	= '".$lbrM."',
+// gramasi_g	= '".$gsmM."',
+// lebar_kj	= '".round($rowdb28M['VALUEDECIMAL'])."',
+// gramasi_kj	= '".round($rowdb29M['VALUEDECIMAL'])."',
+// jenis_kain	= '".str_replace("'","''",$rowdb21M['SUMMARIZEDDESCRIPTION'])."',
+// lot	= '".$rowdb21M['LOTCODE']."',
+// benang1 = '".str_replace("'","''",$aM[0])."',
+// benang2 = '".str_replace("'","''",$aM[1])."',
+// benang3 = '".str_replace("'","''",$aM[2])."',
+// benang4 = '".str_replace("'","''",$aM[3])."',
+// qty	= '".$rowdb21M['QTY_ROL']."',
+// berat	= '".$KGS."',
+// blok	= '".$rowdb21M['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21M['WAREHOUSELOCATIONCODE']."',
+// balance	= '".$rowdb24M['WAREHOUSELOCATIONCODE']."',
+// userid	= '".$rowdb21M['CREATIONUSER']."',
+// tgl_tutup = '".$Awal."',
+// tgl_buat =now()") or die("GAGAL SIMPAN MASUK KAIN");		
 	
 }
 
@@ -578,27 +612,27 @@ $rowdb29RM = db2_fetch_assoc($stmt9RM);
 if($rowdb22R1M['LEGALNAME1']==""){$langgananRM="";}else{$langgananRM=$rowdb22R1M['LEGALNAME1'];}
 if($rowdb22R1M['ORDERPARTNERBRANDCODE']==""){$buyerRM="";}else{$buyerRM=$rowdb22R1M['ORDERPARTNERBRANDCODE'];}
 
-$simpanRM=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
-tgl_masuk	= '".$rowdb21RM['TRANSACTIONDATE']."',
-buyer	= '".$buyerRM."',
-customer	= '".$langgananRM."',
-code	= '".$itemcRM."',
-mesin_rajut	= '".$rowdb21RM['NOMESIN']."',
-lebar_kj	= '".round($rowdb28RM['VALUEDECIMAL'])."',
-gramasi_kj	= '".round($rowdb29RM['VALUEDECIMAL'])."',
-jenis_kain	= '".str_replace("'","''",$rowdb21RM['SUMMARIZEDDESCRIPTION'])."',
-lot	= '".$rowdb21RM['LOTCODE']."',
-benang1 = '".str_replace("'","''",$aRM[0])."',
-benang2 = '".str_replace("'","''",$aRM[1])."',
-benang3 = '".str_replace("'","''",$aRM[2])."',
-benang4 = '".str_replace("'","''",$aRM[3])."',
-qty	= '".$rowdb21RM['JML']."',
-berat	= '".$rowdb21RM['KG']."',
-blok	= '".$rowdb21RM['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21RM['WAREHOUSELOCATIONCODE']."',
-balance	= '".$rowdb22RM['WAREHOUSELOCATIONCODE']."',
-userid	= '".$rowdb21RM['CREATIONUSER']."',
-tgl_tutup = '".$Awal."',
-tgl_buat =now()") or die("GAGAL SIMPAN RETUR PRODUKSI");		
+// $simpanRM=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
+// tgl_masuk	= '".$rowdb21RM['TRANSACTIONDATE']."',
+// buyer	= '".$buyerRM."',
+// customer	= '".$langgananRM."',
+// code	= '".$itemcRM."',
+// mesin_rajut	= '".$rowdb21RM['NOMESIN']."',
+// lebar_kj	= '".round($rowdb28RM['VALUEDECIMAL'])."',
+// gramasi_kj	= '".round($rowdb29RM['VALUEDECIMAL'])."',
+// jenis_kain	= '".str_replace("'","''",$rowdb21RM['SUMMARIZEDDESCRIPTION'])."',
+// lot	= '".$rowdb21RM['LOTCODE']."',
+// benang1 = '".str_replace("'","''",$aRM[0])."',
+// benang2 = '".str_replace("'","''",$aRM[1])."',
+// benang3 = '".str_replace("'","''",$aRM[2])."',
+// benang4 = '".str_replace("'","''",$aRM[3])."',
+// qty	= '".$rowdb21RM['JML']."',
+// berat	= '".$rowdb21RM['KG']."',
+// blok	= '".$rowdb21RM['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21RM['WAREHOUSELOCATIONCODE']."',
+// balance	= '".$rowdb22RM['WAREHOUSELOCATIONCODE']."',
+// userid	= '".$rowdb21RM['CREATIONUSER']."',
+// tgl_tutup = '".$Awal."',
+// tgl_buat =now()") or die("GAGAL SIMPAN RETUR PRODUKSI");		
 		
 }
 
@@ -701,27 +735,27 @@ $rowdb29RMBU = db2_fetch_assoc($stmt9RMBU);
 if($rowdb22R1MBU['LEGALNAME1']==""){$langgananRMBU="";}else{$langgananRMBU=$rowdb22R1MBU['LEGALNAME1'];}
 if($rowdb22R1MBU['ORDERPARTNERBRANDCODE']==""){$buyerRMBU="";}else{$buyerRMBU=$rowdb22R1MBU['ORDERPARTNERBRANDCODE'];}
 
-$simpanRMBU=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
-tgl_masuk	= '".$rowdb21RMBU['TRANSACTIONDATE']."',
-buyer	= '".$buyerRMBU."',
-customer	= '".$langgananRMBU."',
-code	= '".$itemcRMBU."',
-mesin_rajut	= '".$rowdb21RMBU['NOMESIN']."',
-lebar_kj	= '".round($rowdb28RMBU['VALUEDECIMAL'])."',
-gramasi_kj	= '".round($rowdb29RMBU['VALUEDECIMAL'])."',
-jenis_kain	= '".str_replace("'","''",$rowdb21RMBU['SUMMARIZEDDESCRIPTION'])."',
-lot	= '".$rowdb21RMBU['LOTCODE']."',
-benang1 = '".str_replace("'","''",$aRMBU[0])."',
-benang2 = '".str_replace("'","''",$aRMBU[1])."',
-benang3 = '".str_replace("'","''",$aRMBU[2])."',
-benang4 = '".str_replace("'","''",$aRMBU[3])."',
-qty	= '".$rowdb21RMBU['JML']."',
-berat	= '".$rowdb21RMBU['KG']."',
-blok	= '".$rowdb21RMBU['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21RMBU['WAREHOUSELOCATIONCODE']."',
-balance	= '".$rowdb22RMBU['WAREHOUSELOCATIONCODE']."',
-userid	= '".$rowdb21RMBU['CREATIONUSER']."',
-tgl_tutup = '".$Awal."',
-tgl_buat =now()") or die("GAGAL SIMPAN RETUR BAGI ULANG");		
+// $simpanRMBU=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
+// tgl_masuk	= '".$rowdb21RMBU['TRANSACTIONDATE']."',
+// buyer	= '".$buyerRMBU."',
+// customer	= '".$langgananRMBU."',
+// code	= '".$itemcRMBU."',
+// mesin_rajut	= '".$rowdb21RMBU['NOMESIN']."',
+// lebar_kj	= '".round($rowdb28RMBU['VALUEDECIMAL'])."',
+// gramasi_kj	= '".round($rowdb29RMBU['VALUEDECIMAL'])."',
+// jenis_kain	= '".str_replace("'","''",$rowdb21RMBU['SUMMARIZEDDESCRIPTION'])."',
+// lot	= '".$rowdb21RMBU['LOTCODE']."',
+// benang1 = '".str_replace("'","''",$aRMBU[0])."',
+// benang2 = '".str_replace("'","''",$aRMBU[1])."',
+// benang3 = '".str_replace("'","''",$aRMBU[2])."',
+// benang4 = '".str_replace("'","''",$aRMBU[3])."',
+// qty	= '".$rowdb21RMBU['JML']."',
+// berat	= '".$rowdb21RMBU['KG']."',
+// blok	= '".$rowdb21RMBU['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21RMBU['WAREHOUSELOCATIONCODE']."',
+// balance	= '".$rowdb22RMBU['WAREHOUSELOCATIONCODE']."',
+// userid	= '".$rowdb21RMBU['CREATIONUSER']."',
+// tgl_tutup = '".$Awal."',
+// tgl_buat =now()") or die("GAGAL SIMPAN RETUR BAGI ULANG");		
 		
 }				
 				
@@ -824,27 +858,27 @@ $rowdb29FM = db2_fetch_assoc($stmt9FM);
 if($rowdb22F1M['LEGALNAME1']==""){$langgananFM="";}else{$langgananFM=$rowdb22F1M['LEGALNAME1'];}
 if($rowdb22F1M['ORDERPARTNERBRANDCODE']==""){$buyerFM="";}else{$buyerFM=$rowdb22F1M['ORDERPARTNERBRANDCODE'];}
 
-$simpanFM=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
-tgl_masuk	= '".$rowdb21FM['TRANSACTIONDATE']."',
-buyer	= '".$buyerFM."',
-customer	= '".$langgananFM."',
-code	= '".$itemcFM."',
-mesin_rajut	= '".$rowdb21FM['NOMESIN']."',
-lebar_kj	= '".round($rowdb28FM['VALUEDECIMAL'])."',
-gramasi_kj	= '".round($rowdb29FM['VALUEDECIMAL'])."',
-jenis_kain	= '".str_replace("'","''",$rowdb21FM['SUMMARIZEDDESCRIPTION'])."',
-lot	= '".$rowdb21FM['LOTCODE']."',
-benang1 = '".str_replace("'","''",$aFM[0])."',
-benang2 = '".str_replace("'","''",$aFM[1])."',
-benang3 = '".str_replace("'","''",$aFM[2])."',
-benang4 = '".str_replace("'","''",$aFM[3])."',
-qty	= '".$rowdb21FM['JML']."',
-berat	= '".$rowdb21FM['KG']."',
-blok	= '".$rowdb21FM['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21FM['WAREHOUSELOCATIONCODE']."',
-balance	= '".$rowdb22FM['WAREHOUSELOCATIONCODE']."',
-userid	= '".$rowdb21FM['CREATIONUSER']."',
-tgl_tutup = '".$Awal."',
-tgl_buat =now()") or die("GAGAL SIMPAN FLAT KNITT OPN");		
+// $simpanFM=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
+// tgl_masuk	= '".$rowdb21FM['TRANSACTIONDATE']."',
+// buyer	= '".$buyerFM."',
+// customer	= '".$langgananFM."',
+// code	= '".$itemcFM."',
+// mesin_rajut	= '".$rowdb21FM['NOMESIN']."',
+// lebar_kj	= '".round($rowdb28FM['VALUEDECIMAL'])."',
+// gramasi_kj	= '".round($rowdb29FM['VALUEDECIMAL'])."',
+// jenis_kain	= '".str_replace("'","''",$rowdb21FM['SUMMARIZEDDESCRIPTION'])."',
+// lot	= '".$rowdb21FM['LOTCODE']."',
+// benang1 = '".str_replace("'","''",$aFM[0])."',
+// benang2 = '".str_replace("'","''",$aFM[1])."',
+// benang3 = '".str_replace("'","''",$aFM[2])."',
+// benang4 = '".str_replace("'","''",$aFM[3])."',
+// qty	= '".$rowdb21FM['JML']."',
+// berat	= '".$rowdb21FM['KG']."',
+// blok	= '".$rowdb21FM['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21FM['WAREHOUSELOCATIONCODE']."',
+// balance	= '".$rowdb22FM['WAREHOUSELOCATIONCODE']."',
+// userid	= '".$rowdb21FM['CREATIONUSER']."',
+// tgl_tutup = '".$Awal."',
+// tgl_buat =now()") or die("GAGAL SIMPAN FLAT KNITT OPN");		
 		
 }				
 
@@ -953,27 +987,27 @@ $rowdb29AN = db2_fetch_assoc($stmt9AN);
 if($rowdb22A1N['LEGALNAME1']==""){$langgananAN="";}else{$langgananAN=$rowdb22A1N['LEGALNAME1'];}
 if($rowdb22A1N['ORDERPARTNERBRANDCODE']==""){$buyerAN="";}else{$buyerAN=$rowdb22A1N['ORDERPARTNERBRANDCODE'];}
 
-$simpanFMN=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
-tgl_masuk	= '".$rowdb21AN['TRANSACTIONDATE']."',
-buyer	= '".$buyerAN."',
-customer	= '".$langgananAN."',
-code	= '".$itemcAN."',
-mesin_rajut	= 'maklun',
-lebar_kj	= '".round($rowdb28AN['VALUEDECIMAL'])."',
-gramasi_kj	= '".round($rowdb29AN['VALUEDECIMAL'])."',
-jenis_kain	= '".str_replace("'","''",$rowdb21AN['SUMMARIZEDDESCRIPTION'])."',
-lot	= '".$rowdb21AN['LOTCODE']."',
-benang1 = '".str_replace("'","''",$aAN[0])."',
-benang2 = '".str_replace("'","''",$aAN[1])."',
-benang3 = '".str_replace("'","''",$aAN[2])."',
-benang4 = '".str_replace("'","''",$aAN[3])."',
-qty	= '".$rowdb21AN['JML']."',
-berat	= '".$rowdb21AN['KG']."',
-blok	= '".$rowdb21AN['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21AN['WAREHOUSELOCATIONCODE']."',
-balance	= '".$rowdb21AN['WAREHOUSELOCATIONCODE']."',
-userid	= '".$rowdb21AN['CREATIONUSER']."',
-tgl_tutup = '".$Awal."',
-tgl_buat =now()") or die("GAGAL SIMPAN FLAT KNITT MAKLUN");		
+// $simpanFMN=mysqli_query($con,"INSERT INTO `tblmasukkain` SET 
+// tgl_masuk	= '".$rowdb21AN['TRANSACTIONDATE']."',
+// buyer	= '".$buyerAN."',
+// customer	= '".$langgananAN."',
+// code	= '".$itemcAN."',
+// mesin_rajut	= 'maklun',
+// lebar_kj	= '".round($rowdb28AN['VALUEDECIMAL'])."',
+// gramasi_kj	= '".round($rowdb29AN['VALUEDECIMAL'])."',
+// jenis_kain	= '".str_replace("'","''",$rowdb21AN['SUMMARIZEDDESCRIPTION'])."',
+// lot	= '".$rowdb21AN['LOTCODE']."',
+// benang1 = '".str_replace("'","''",$aAN[0])."',
+// benang2 = '".str_replace("'","''",$aAN[1])."',
+// benang3 = '".str_replace("'","''",$aAN[2])."',
+// benang4 = '".str_replace("'","''",$aAN[3])."',
+// qty	= '".$rowdb21AN['JML']."',
+// berat	= '".$rowdb21AN['KG']."',
+// blok	= '".$rowdb21AN['WHSLOCATIONWAREHOUSEZONECODE']."-".$rowdb21AN['WAREHOUSELOCATIONCODE']."',
+// balance	= '".$rowdb21AN['WAREHOUSELOCATIONCODE']."',
+// userid	= '".$rowdb21AN['CREATIONUSER']."',
+// tgl_tutup = '".$Awal."',
+// tgl_buat =now()") or die("GAGAL SIMPAN FLAT KNITT MAKLUN");		
 		
 }				
 	//Keluar Kain Greige
@@ -1141,27 +1175,27 @@ $rowdb25K = db2_fetch_assoc($stmt5K);
 	if($rowdb21K['PROJAWAL']!=""){$projAk=$rowdb21K['PROJAWAL'];}else if($rowdb25K['PROJECT']!=""){$projAk=$rowdb25K['PROJECT'];}else{$projAk=$rowdb24K['INTERNALREFERENCE'];}
 	if($rowdb24K['PRODUCTIONDEMANDCODE']!=""){$demandK=$rowdb24K['PRODUCTIONDEMANDCODE'];}else{$demandK=$rowdb21K['PRODUCTIONDEMANDCODE'];}	
 		
-$simpanK=mysqli_query($con,"INSERT INTO `tblkeluarkain` SET 
-tglkeluar = '".$rowdb21K['TRANSACTIONDATE']."',
-buyer = '".$buyerK."',
-custumer = '".$langgananK."',
-projectcode = '".$projK."',
-prod_order = '".$rowdb21K['ORDERCODE']."',
-demand = '".$demandK."',
-code = '".$kdbenangK."',
-lot = '".$rowdb21K['LOTCODE']."',
-benang1 = '".str_replace("'","''",$aK[0])."',
-benang2 = '".str_replace("'","''",$aK[1])."',
-benang3 = '".str_replace("'","''",$aK[2])."',
-benang4 = '".str_replace("'","''",$aK[3])."',
-warna = '".str_replace("'","''",$rowdb24K['WARNA'])."',
-jenis_kain = '".str_replace("'","''",$rowdb21K['SUMMARIZEDDESCRIPTION'])."',
-qty = '".$rowdb21K['QTY_DUS']."',
-berat = '".$rowdb21K['QTY_KG']."',
-proj_awal = '".$projAk."',
-userid	= '".$rowdb21K['CREATIONUSER']."',
-tgl_tutup = '".$Awal."',
-tgl_buat =now()") or die("GAGAL SIMPAN TRANSAKSI KELUAR");
+// $simpanK=mysqli_query($con,"INSERT INTO `tblkeluarkain` SET 
+// tglkeluar = '".$rowdb21K['TRANSACTIONDATE']."',
+// buyer = '".$buyerK."',
+// custumer = '".$langgananK."',
+// projectcode = '".$projK."',
+// prod_order = '".$rowdb21K['ORDERCODE']."',
+// demand = '".$demandK."',
+// code = '".$kdbenangK."',
+// lot = '".$rowdb21K['LOTCODE']."',
+// benang1 = '".str_replace("'","''",$aK[0])."',
+// benang2 = '".str_replace("'","''",$aK[1])."',
+// benang3 = '".str_replace("'","''",$aK[2])."',
+// benang4 = '".str_replace("'","''",$aK[3])."',
+// warna = '".str_replace("'","''",$rowdb24K['WARNA'])."',
+// jenis_kain = '".str_replace("'","''",$rowdb21K['SUMMARIZEDDESCRIPTION'])."',
+// qty = '".$rowdb21K['QTY_DUS']."',
+// berat = '".$rowdb21K['QTY_KG']."',
+// proj_awal = '".$projAk."',
+// userid	= '".$rowdb21K['CREATIONUSER']."',
+// tgl_tutup = '".$Awal."',
+// tgl_buat =now()") or die("GAGAL SIMPAN TRANSAKSI KELUAR");
 		
 }
  // Permintaan Potong , Tarikan , hapus stok
@@ -1225,20 +1259,20 @@ $rowdb25P = db2_fetch_assoc($stmt5P);
 	if($rowdb22P['ORDERPARTNERBRANDCODE']==""){$buyerP="";}else{$buyerP=$rowdb22P['ORDERPARTNERBRANDCODE'];}
 	if($rowdb21P['PROJAWAL']!=""){$prjAP=$rowdb21P['PROJAWAL'];}else if($rowdb25P['PROJECT']!=""){$prjAP=$rowdb25P['PROJECT'];}else{$prjAP=$rowdb24P['INTERNALREFERENCE'];}	
 		
-	$simpanP=mysqli_query($con,"INSERT INTO `tblkeluarkain` SET 
-tglkeluar = '".$rowdb21P['TRANSACTIONDATE']."',
-buyer = '".$buyerP."',
-custumer = '".$langgananP."',
-projectcode = '".$projectP."',
-code = '".$kdbenangP."',
-lot = '".$rowdb21P['LOTCODE']."',
-ket = '".str_replace("'","''",$rowdb21P['NOTE'])."',
-qty = '".$rowdb21P['JML']."',
-berat = '".$rowdb21P['KG']."',
-proj_awal = '".$prjAP."',
-userid	= '".$rowdb21P['CREATIONUSER']."',
-tgl_tutup = '".$Awal."',
-tgl_buat =now()") or die("GAGAL SIMPAN PERMINTAAN POTONG");	
+// 	$simpanP=mysqli_query($con,"INSERT INTO `tblkeluarkain` SET 
+// tglkeluar = '".$rowdb21P['TRANSACTIONDATE']."',
+// buyer = '".$buyerP."',
+// custumer = '".$langgananP."',
+// projectcode = '".$projectP."',
+// code = '".$kdbenangP."',
+// lot = '".$rowdb21P['LOTCODE']."',
+// ket = '".str_replace("'","''",$rowdb21P['NOTE'])."',
+// qty = '".$rowdb21P['JML']."',
+// berat = '".$rowdb21P['KG']."',
+// proj_awal = '".$prjAP."',
+// userid	= '".$rowdb21P['CREATIONUSER']."',
+// tgl_tutup = '".$Awal."',
+// tgl_buat =now()") or die("GAGAL SIMPAN PERMINTAAN POTONG");	
 }
 		
 		echo "<script>";
