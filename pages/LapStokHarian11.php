@@ -90,9 +90,20 @@ $Lalu 		= $Bln2-1;
               <!-- /.card-header -->
               <div class="card-body">
 			<?php	  
-	$sql = mysqli_query($con," SELECT tgl_tutup,sum(rol) as rol,sum(weight) as kg FROM tblopname_11 
-	WHERE DATE_FORMAT(tgl_tutup,'%Y-%m')='$TBln' GROUP BY tgl_tutup ORDER BY tgl_tutup DESC LIMIT 1 ");		  
-    $r = mysqli_fetch_array($sql);
+	$sql = sqlsrv_query($con," SELECT TOP 1 
+												tgl_tutup, 
+												SUM(rol) AS rol, 
+												SUM(weight) AS kg 
+											FROM 
+												dbnow_gkg.tblopname_11 
+											WHERE 
+												FORMAT(tgl_tutup, 'yyyy-MM') = '$TBln' 
+											GROUP BY 
+												tgl_tutup 
+											ORDER BY 
+												tgl_tutup DESC;
+											");		  
+    $r = sqlsrv_fetch_array($sql);
 	?>			<strong>Sisa Stok Bulan Lalu Kain I : <?php echo number_format(round($r['kg'],3),3); ?> Kain II : 00.00 Total: <?php $total=$r['kg']+00.00; echo number_format(round($total,3),3);?></strong><br>
                 <table id="example16" width="100%" class="table table-sm table-bordered table-striped" style="font-size: 11px; text-align: center;">
                   <thead>
@@ -115,29 +126,96 @@ $Lalu 		= $Bln2-1;
                   </thead>
                   <tbody>
 <?php for ($i = 1; $i <= $d; $i++){ 
-	$sqlMasuk = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg FROM tblmasukkain_11 
-	WHERE tgl_tutup='$Thn2-$Bln2-$i' and NOT ISNULL(no_bon) GROUP BY tgl_tutup ");	
-	$rMasuk = mysqli_fetch_array($sqlMasuk);
-	$sqlRMasuk = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg FROM tblmasukkain_11 
-	WHERE tgl_tutup='$Thn2-$Bln2-$i' and ISNULL(no_bon) and NOT mesin_rajut ='maklun' GROUP BY tgl_tutup ");	
-	$rRMasuk = mysqli_fetch_array($sqlRMasuk);
-	$sqlMMasuk = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg FROM tblmasukkain_11 
-	WHERE tgl_tutup='$Thn2-$Bln2-$i' and ISNULL(no_bon) and mesin_rajut ='maklun' GROUP BY tgl_tutup ");	
-	$rMMasuk = mysqli_fetch_array($sqlMMasuk);
-	$sqlKeluar = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg FROM tblkeluarkain_11 
-	WHERE tgl_tutup='$Thn2-$Bln2-$i' AND NOT ISNULL(demand) GROUP BY tgl_tutup");		  
-    $rKeluar = mysqli_fetch_array($sqlKeluar);
-	$sqlPotong = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg FROM tblkeluarkain_11 
-	WHERE tgl_tutup='$Thn2-$Bln2-$i' AND ISNULL(demand) GROUP BY tgl_tutup");		  
-    $rPotong = mysqli_fetch_array($sqlPotong);
+	$sqlMasuk = sqlsrv_query($con," SELECT 
+														tgl_tutup, 
+														SUM(qty) AS rol, 
+														SUM(berat) AS kg 
+													FROM 
+														dbnow_gkg.tblmasukkain_11 
+													WHERE 
+														tgl_tutup = '$Thn2-$Bln2-$i' 
+														AND no_bon IS NOT NULL 
+													GROUP BY 
+														tgl_tutup;
+													");	
+	$rMasuk = sqlsrv_fetch_array($sqlMasuk);
+
+	$sqlRMasuk = sqlsrv_query($con," SELECT 
+														tgl_tutup, 
+														SUM(qty) AS rol, 
+														SUM(berat) AS kg 
+													FROM 
+														dbnow_gkg.tblmasukkain_11 
+													WHERE 
+														tgl_tutup = '$Thn2-$Bln2-$i' 
+														AND no_bon IS NULL 
+														AND mesin_rajut <> 'maklun' 
+													GROUP BY 
+														tgl_tutup;
+													");	
+	$rRMasuk = sqlsrv_fetch_array($sqlRMasuk);
+
+	$sqlMMasuk = sqlsrv_query($con," SELECT 
+														tgl_tutup, 
+														SUM(qty) AS rol, 
+														SUM(berat) AS kg 
+													FROM 
+														dbnow_gkg.tblmasukkain_11 
+													WHERE 
+														tgl_tutup = '$Thn2-$Bln2-$i' 
+														AND no_bon IS NULL 
+														AND mesin_rajut = 'maklun' 
+													GROUP BY 
+														tgl_tutup;
+													");	
+	$rMMasuk = sqlsrv_fetch_array($sqlMMasuk);
+	
+	$sqlKeluar = sqlsrv_query($con," SELECT 
+														tgl_tutup, 
+														SUM(qty) AS rol, 
+														SUM(berat) AS kg 
+													FROM 
+														dbnow_gkg.tblkeluarkain_11 
+													WHERE 
+														tgl_tutup = '$Thn2-$Bln2-$i' 
+														AND demand IS NOT NULL 
+													GROUP BY 
+														tgl_tutup;
+													");		  
+    $rKeluar = sqlsrv_fetch_array($sqlKeluar);
+
+	$sqlPotong = sqlsrv_query($con," SELECT 
+														tgl_tutup, 
+														SUM(qty) AS rol, 
+														SUM(berat) AS kg 
+													FROM 
+														dbnow_gkg.tblkeluarkain_11 
+													WHERE 
+														tgl_tutup = '$Thn2-$Bln2-$i' 
+														AND demand IS NULL 
+													GROUP BY 
+														tgl_tutup;
+													");		  
+    $rPotong = sqlsrv_fetch_array($sqlPotong);
+
 	if($i=="1"){
 	$sisa+=$total+((round($rMasuk['kg'],3)+round($rRMasuk['kg'],3))-(round($rKeluar['kg'],3)+round($rPotong['kg'],3)));	
 	}else{
 	$sisa+=((round($rMasuk['kg'],3)+round($rMMasuk['kg'],3)+round($rRMasuk['kg'],3))-(round($rKeluar['kg'],3)+round($rPotong['kg'],3)));
 	}
-	$sqlOP = mysqli_query($con," SELECT tgl_tutup,sum(rol) as rol,sum(weight) as kg,DATE_FORMAT(now(),'%Y-%m-%d') as tgl 
-FROM tblopname_11 WHERE tgl_tutup='$Thn2-$Bln2-$i' GROUP BY tgl_tutup");		  
-    $rOP = mysqli_fetch_array($sqlOP);
+	$sqlOP = sqlsrv_query($con," SELECT 
+												tgl_tutup, 
+												SUM(rol) AS rol, 
+												SUM(weight) AS kg, 
+												GETDATE() AS tgl 
+											FROM 
+												dbnow_gkg.tblopname_11 
+											WHERE 
+												tgl_tutup = '$Thn2-$Bln2-$i' 
+											GROUP BY 
+												tgl_tutup;
+											");		  
+    $rOP = sqlsrv_fetch_array($sqlOP);
 	
 	if(round($sisa)==round($sisa-$rOP['kg'])){
 		$sts="<small class='badge badge-info'> OK</small>";

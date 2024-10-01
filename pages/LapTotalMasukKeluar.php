@@ -106,19 +106,61 @@ if($b=="12"){ $Nbln="Desember";}
 		if(strlen($BlnLalu)==1){$bl0="0".$BlnLalu;}else{$bl0=$BlnLalu;}
 		$BlnLL=$Thn."-".$bl0;
 	}			  
-	$sql = mysqli_query($con," SELECT tgl_tutup,sum(rol) as rol,sum(weight) as kg FROM tblopname 
-	WHERE DATE_FORMAT(tgl_tutup,'%Y-%m')='$BlnLL' GROUP BY tgl_tutup ORDER BY tgl_tutup DESC LIMIT 1");		  
-    $r = mysqli_fetch_array($sql);
-	$sqlM = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg FROM tblmasukkain 
-	WHERE DATE_FORMAT(tgl_tutup,'%Y-%m')='$Bulan' GROUP BY DATE_FORMAT(tgl_tutup,'%Y-%m')");		  
-    $rM = mysqli_fetch_array($sqlM);
-	$sqlK = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg FROM tblkeluarkain 
-	WHERE DATE_FORMAT(tgl_tutup,'%Y-%m')='$Bulan' GROUP BY DATE_FORMAT(tgl_tutup,'%Y-%m')");		  
-    $rK = mysqli_fetch_array($sqlK);	
-	$sqlT = mysqli_query($con," SELECT tgl_tutup,sum(rol) as rol,sum(weight) as kg 
-	FROM tblopname WHERE DATE_FORMAT(tgl_tutup,'%Y-%m')='$Bulan'
-	GROUP BY tgl_tutup ORDER BY tgl_tutup DESC LIMIT 1");		  
-    $rT = mysqli_fetch_array($sqlT);		  
+	$sql = sqlsrv_query($con," SELECT TOP 1 
+												tgl_tutup, 
+												SUM(rol) AS rol, 
+												SUM(weight) AS kg 
+											FROM 
+												dbnow_gkg.tblopname 
+											WHERE 
+												FORMAT(tgl_tutup, 'yyyy-MM') = '$BlnLL' 
+											GROUP BY 
+												tgl_tutup 
+											ORDER BY 
+												tgl_tutup DESC;
+ ");		  
+    $r = sqlsrv_fetch_array($sql);
+
+	$sqlM = sqlsrv_query($con," SELECT 
+												FORMAT(tgl_tutup, 'yyyy-MM') AS tgl_tutup, 
+												SUM(qty) AS rol, 
+												SUM(berat) AS kg 
+											FROM 
+												dbnow_gkg.tblmasukkain 
+											WHERE 
+												FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan' 
+											GROUP BY 
+												FORMAT(tgl_tutup, 'yyyy-MM');
+ ");		  
+    $rM = sqlsrv_fetch_array($sqlM);
+
+	$sqlK = sqlsrv_query($con," SELECT 
+												FORMAT(tgl_tutup, 'yyyy-MM') AS tgl_tutup, 
+												SUM(qty) AS rol, 
+												SUM(berat) AS kg 
+											FROM 
+												dbnow_gkg.tblkeluarkain 
+											WHERE 
+												FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan' 
+											GROUP BY 
+												FORMAT(tgl_tutup, 'yyyy-MM');
+");		  
+    $rK = sqlsrv_fetch_array($sqlK);	
+
+	$sqlT = sqlsrv_query($con," SELECT TOP 1 
+												tgl_tutup, 
+												SUM(rol) AS rol, 
+												SUM(weight) AS kg 
+											FROM 
+												dbnow_gkg.tblopname 
+											WHERE 
+												FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan' 
+											GROUP BY 
+												tgl_tutup 
+											ORDER BY 
+												tgl_tutup DESC;
+ ");		  
+    $rT = sqlsrv_fetch_array($sqlT);		  
 	?>			<table id="example16" width="100%" class="table table-sm table-bordered table-striped" style="font-size: 11px; text-align: center;">
                   <thead>
                   <tr>
