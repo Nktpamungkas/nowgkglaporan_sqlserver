@@ -1,4 +1,7 @@
 <?php
+
+include "utils/helper.php";
+
 $Awal	= isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : '';
 ?>
 
@@ -71,18 +74,27 @@ $Awal	= isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : '';
 <?php	 
 $no=1;   
 $c=0;				  
-$sql = mysqli_query($con," SELECT tgl_tutup,sum(rol) as rol,sum(weight) as kg,DATE_FORMAT(now(),'%Y-%m-%d') as tgl 
-FROM tblopname GROUP BY tgl_tutup ORDER BY tgl_tutup DESC LIMIT 60");		  
-    while($r = mysqli_fetch_array($sql)){
-		
+$sql = sqlsrv_query($con," SELECT TOP 60 
+											tgl_tutup, 
+											SUM(rol) AS rol, 
+											SUM(weight) AS kg, 
+											CONVERT(DATE, GETDATE()) AS tgl 
+										FROM 
+											dbnow_gkg.tblopname 
+										GROUP BY 
+											tgl_tutup 
+										ORDER BY 
+											tgl_tutup DESC;
+										");		  
+    while($r = sqlsrv_fetch_array($sql)){
 ?>
 	  <tr>
 	  <td style="text-align: center"><?php echo $no;?></td>
-	  <td style="text-align: center"><a href="DetailOpname-<?php echo $r['tgl_tutup'];?>" class="btn btn-info btn-xs" target="_blank"> <i class="fa fa-link"></i> Lihat Data</a></td>
-	  <td style="text-align: center"><?php echo $r['tgl_tutup'];?></td>
+	  <td style="text-align: center"><a href="DetailOpname-<?php echo cek($r['tgl_tutup']);?>" class="btn btn-info btn-xs" target="_blank"> <i class="fa fa-link"></i> Lihat Data</a></td>
+	  <td style="text-align: center"><?php echo cek($r['tgl_tutup']);?></td>
       <td style="text-align: center"><?php echo $r['rol'];?></td>
       <td style="text-align: right"><?php echo number_format($r['kg'],3);?></td>
-      <td style="text-align: center"><a href="#" class="btn btn-xs btn-danger <?php if($r['tgl']==$r['tgl_tutup']){ }else{echo"disabled";} ?>" onclick="confirm_delete('DelOpname-<?php echo $r['tgl_tutup']; ?>');" ><small class="fas fa-trash"> </small> Hapus</a></td>
+      <td style="text-align: center"><a href="#" class="btn btn-xs btn-danger <?php if(cek($r['tgl'])==cek($r['tgl_tutup'])){ }else{echo"disabled";} ?>" onclick="confirm_delete('DelOpname-<?php echo cek($r['tgl_tutup']); ?>');" ><small class="fas fa-trash"> </small> Hapus</a></td>
       </tr>
 	  				  
 	<?php 
@@ -152,8 +164,19 @@ FROM tblopname GROUP BY tgl_tutup ORDER BY tgl_tutup DESC LIMIT 60");
 <?php	
 if(isset($_POST['submit'])){
 
-$cektgl=mysqli_query($con,"SELECT DATE_FORMAT(NOW(),'%Y-%m-%d') as tgl,COUNT(tgl_tutup) as ck ,DATE_FORMAT(NOW(),'%H') as jam,DATE_FORMAT(NOW(),'%H:%i') as jam1 FROM tblopname WHERE tgl_tutup='".$Awal."' LIMIT 1");
-$dcek=mysqli_fetch_array($cektgl);
+$cektgl=sqlsrv_query($con,"SELECT 
+											FORMAT(GETDATE(), 'yyyy-MM-dd') AS tgl, 
+											COUNT(tgl_tutup) AS ck, 
+											DATEPART(HOUR, GETDATE()) AS jam, 
+											FORMAT(GETDATE(), 'HH:mm') AS jam1 
+										FROM 
+											dbnow_gkg.tblopname 
+										WHERE 
+											tgl_tutup = '$Awal' 
+										GROUP BY 
+											tgl_tutup;
+										");
+$dcek=sqlsrv_fetch_array($cektgl);
 $t1=strtotime($Awal);
 $t2=strtotime($dcek['tgl']);
 $selh=round(abs($t2-$t1)/(60*60*45));
@@ -360,27 +383,52 @@ while($rowdb23 = db2_fetch_assoc($stmt3)){
 	$rowdb27 = db2_fetch_assoc($stmt7);	
 	
 	if($rowdb21['PROJAWAL']!=""){$proAwal=$rowdb21['PROJAWAL'];}else if($rowdb21['PROJAWAL1']!=""){$proAwal=$rowdb21['PROJAWAL1'];}else if($rowdb27['PROJECTCODE']!=""){ $proAwal=$rowdb27['PROJECTCODE']; }else if($rowdb27['ORIGDLVSALORDLINESALORDERCODE']!=""){ $proAwal=$rowdb27['ORIGDLVSALORDLINESALORDERCODE']; }else{ $proAwal=$rowdb21['LOTCODE']; }	
-	$simpan=mysqli_query($con,"INSERT INTO `tblopname` SET 
-					langganan = '".$langganan."',
-					buyer = '".$buyer."',
-					proj_akhir = '".$rowdb21['PROJECTCODE']."',
-					proj_awal = '".$proAwal."',
-					tipe = '".$jns."',
-					no_item = '".$itemNo."',
-					benang_1 = '".str_replace("'","''",$a[0])."',
-					benang_2 = '".str_replace("'","''",$a[1])."',
-					benang_3 = '".str_replace("'","''",$a[2])."',
-					benang_4 = '".str_replace("'","''",$a[3])."',
-					lot = '".$rowdb21['LOTCODE']."',
-					rol = '".$rowdb21['ROLL']."',
-					weight = '".round($rowdb21['BERAT'],3)."',
-					satuan = '".$rowdb21['BASEPRIMARYUNITCODE']."',
-					zone = '".$rowdb21['WHSLOCATIONWAREHOUSEZONECODE']."',
-					lokasi = '".$rowdb21['WAREHOUSELOCATIONCODE']."',
-					tgl_tutup = '".$Awal."',
-					tgl_buat =now()
-					
-					") or die("GAGAL SIMPAN");	
+	
+	$query = "INSERT INTO dbnow_gkg.tblopname (
+						langganan
+						,buyer
+						,proj_akhir
+						,proj_awal
+						,tipe
+						,no_item
+						,benang_1
+						,benang_2
+						,benang_3
+						,benang_4
+						,lot
+						,rol
+						,[weight]
+						,satuan
+						,[zone]
+						,lokasi
+						,tgl_tutup
+						,tgl_buat
+					) VALUES ( 
+							?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+					)";
+
+	$params = [
+		cek($langganan),
+		cek($buyer),
+		cek($rowdb21['PROJECTCODE']),
+		cek($proAwal),
+		cek($jns),
+		cek($itemNo),
+		cek(str_replace("'", "''", $a[0])),
+		cek(str_replace("'", "''", $a[1])),
+		cek(str_replace("'", "''", $a[2])),
+		cek(str_replace("'", "''", $a[3])),
+		cek($rowdb21['LOTCODE']),
+		cek($rowdb21['ROLL']),
+		cek(round($rowdb21['BERAT'], 3)),
+		cek($rowdb21['BASEPRIMARYUNITCODE']),
+		cek($rowdb21['WHSLOCATIONWAREHOUSEZONECODE']),
+		cek($rowdb21['WAREHOUSELOCATIONCODE']),
+		cek($Awal),
+		cek(date('Y-m-d H:i:s')),
+	];
+	
+	$simpan=sqlsrv_query($con,$query, $params) or die("GAGAL SIMPAN");	
 	
 	}
 	if($simpan){		
