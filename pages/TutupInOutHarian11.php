@@ -26,8 +26,19 @@
 <?php	 
 $no=1;   
 $c=0;				  
-$sql = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg,DATE_FORMAT(now(),'%Y-%m-%d') as tgl FROM tblmasukkain_11 GROUP BY tgl_tutup ORDER BY tgl_tutup DESC LIMIT 30");		  
-    while($r = mysqli_fetch_array($sql)){
+$sql = sqlsrv_query($con,"SELECT TOP 30 
+                                          FORMAT(tgl_tutup, 'yyyy-MM-dd') as tgl_tutup,
+                                          SUM(qty) AS rol, 
+                                          SUM(berat) AS kg, 
+                                          FORMAT(GETDATE(), 'yyyy-MM-dd') AS tgl 
+                                      FROM 
+                                          dbnow_gkg.tblmasukkain_11 
+                                      GROUP BY 
+                                          tgl_tutup 
+                                      ORDER BY 
+                                          tgl_tutup DESC;
+                                      ");		  
+    while($r = sqlsrv_fetch_array($sql)){
 		
 ?>
 	  <tr>
@@ -71,8 +82,19 @@ $sql = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg,DAT
 <?php	 
 $no=1;   
 $c=0;				  
-$sql = mysqli_query($con," SELECT tgl_tutup,sum(qty) as rol,sum(berat) as kg,DATE_FORMAT(now(),'%Y-%m-%d') as tgl FROM tblkeluarkain_11 GROUP BY tgl_tutup ORDER BY tgl_tutup DESC LIMIT 30");		  
-    while($r = mysqli_fetch_array($sql)){
+$sql = sqlsrv_query($con,"SELECT TOP 30 
+                                            FORMAT(tgl_tutup, 'yyyy-MM-dd') as tgl_tutup,
+                                            SUM(qty) AS rol, 
+                                            SUM(berat) AS kg, 
+                                            FORMAT(GETDATE(), 'yyyy-MM-dd') AS tgl 
+                                        FROM 
+                                            dbnow_gkg.tblkeluarkain_11 
+                                        GROUP BY 
+                                            tgl_tutup 
+                                        ORDER BY 
+                                            tgl_tutup DESC;
+                                        ");		  
+    while($r = sqlsrv_fetch_array($sql)){
 		
 ?>
 	  <tr>
