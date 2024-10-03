@@ -100,17 +100,12 @@ $Barcode	= substr($_POST['barcode'],-13);
 					WHERE tu.status='Open' $Where ");
 					$rowd=sqlsrv_fetch_array($sql);
 
-					// Problem insert
-					$sqlDataE=sqlsrv_query($con,"INSERT INTO dbnow_gkg.tbl_stokloss SET 
-					lokasi='$Lokasi',
-					lokasi_asli='$lokasiAsli',
-					KG='$KGnow',
-					zone='$Zone',
-					SN='$Barcode',
-					tgl_masuk='$tglMasuk',
-					id_upload='$rowd[id_upload]',
-					tgl_cek=GETDATE()");
+					$sqlDataE=sqlsrv_query($con,"INSERT INTO dbnow_gkg.tbl_stokloss 
+					(lokasi,lokasi_asli,KG,zone,SN,tgl_masuk,id_upload,tgl_cek)
+					VALUES ('$Lokasi','$lokasiAsli','$KGnow','$Zone','$Barcode',
+					'$tglMasuk','$rowd[id_upload]',GETDATE())");
 				}
+				
 				$sqlCek1=sqlsrv_query($con,"SELECT COUNT(*) as jml, sf.id_upload FROM dbnow_gkg.tbl_stokfull sf
 				LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
 				WHERE tu.status='Open' AND SN='$Barcode'");
