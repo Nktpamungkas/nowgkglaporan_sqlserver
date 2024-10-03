@@ -5,22 +5,25 @@ $Barcode	= substr($_POST['barcode'],-13);
 ?>
 
 <?php 
-	$sqlCek1=sqlsrv_query($con,"SELECT COUNT(*) as jml FROM	tbl_stokfull sf
-	LEFT JOIN tbl_upload tu ON tu.id=sf.id_upload  
+	$sqlCek1=sqlsrv_query($con,"SELECT COUNT(*) as jml FROM	dbnow_gkg.tbl_stokfull sf
+	LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
 	WHERE tu.status='Open' and sf.status='ok' and sf.zone='$Zone' AND sf.lokasi='$Lokasi'");
 
 	$ck1=sqlsrv_fetch_array($sqlCek1);
-	$sqlCek2=sqlsrv_query($con,"SELECT COUNT(*) as jml FROM	tbl_stokfull sf
-	LEFT JOIN tbl_upload tu ON tu.id=sf.id_upload  
+
+	$sqlCek2=sqlsrv_query($con,"SELECT COUNT(*) as jml FROM	dbnow_gkg.tbl_stokfull sf
+	LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
 	WHERE tu.status='Open' and sf.status='belum cek' and sf.zone='$Zone' AND sf.lokasi='$Lokasi'");
+
 	$ck2=sqlsrv_fetch_array($sqlCek2);
 
 	if($_POST['cek']=="Cek" or $_POST['cari']=="Cari")
 	{
 		//if (strlen($_POST['barcode'])==13){
-		$sqlCek=sqlsrv_query($con,"SELECT COUNT(*) as jml, sf.id_upload FROM tbl_stokfull sf
-		LEFT JOIN tbl_upload tu ON tu.id=sf.id_upload  
+		$sqlCek=sqlsrv_query($con,"SELECT COUNT(*) as jml, sf.id_upload FROM dbnow_gkg.tbl_stokfull sf
+		LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
 		WHERE tu.status='Open' AND zone='$Zone' AND lokasi='$Lokasi' AND SN='$Barcode'");
+
 		$ck=sqlsrv_fetch_array($sqlCek);
 
 		if($Zone=="" and $Lokasi=="")
@@ -37,21 +40,25 @@ $Barcode	= substr($_POST['barcode'],-13);
 		{
 			if($ck['jml']>0)
 			{		
-				$sqlData=sqlsrv_query($con,"UPDATE tbl_stokfull SET 
-					status='ok',
-					tgl_cek=now()
-					WHERE id_upload='$ck[id_upload]' AND zone='$Zone' AND lokasi='$Lokasi' AND SN='$Barcode'");
-				$sqlCek1=sqlsrv_query($con,"SELECT COUNT(*) as jml FROM	tbl_stokfull WHERE status='ok' and zone='$Zone' AND lokasi='$Lokasi'");
+				$sqlData=sqlsrv_query($con,"UPDATE dbnow_gkg.tbl_stokfull SET 
+				status='ok',
+				tgl_cek=GETDATE()
+				WHERE id_upload='$ck[id_upload]' AND zone='$Zone' AND lokasi='$Lokasi' AND SN='$Barcode'");
+
+				$sqlCek1=sqlsrv_query($con,"SELECT COUNT(*) as jml FROM	dbnow_gkg.tbl_stokfull WHERE status='ok' and zone='$Zone' AND lokasi='$Lokasi'");
 				$ck1=sqlsrv_fetch_array($sqlCek1);
-				$sqlCek2=sqlsrv_query($con,"SELECT COUNT(*) as jml FROM	tbl_stokfull WHERE status='belum cek' and zone='$Zone' AND lokasi='$Lokasi'");
+
+				$sqlCek2=sqlsrv_query($con,"SELECT COUNT(*) as jml FROM	dbnow_gkg.tbl_stokfull WHERE status='belum cek' and zone='$Zone' AND lokasi='$Lokasi'");
 				$ck2=sqlsrv_fetch_array($sqlCek2);
 			}
 			else
 			{
 				$sqlDB21 = " SELECT WHSLOCATIONWAREHOUSEZONECODE, WAREHOUSELOCATIONCODE, CREATIONDATETIME,BASEPRIMARYQUANTITYUNIT FROM 
 				BALANCE b WHERE (b.ITEMTYPECODE='KGF' OR b.ITEMTYPECODE='FKG') AND b.LOGICALWAREHOUSECODE='M021' AND b.ELEMENTSCODE='$Barcode' ";
+
 				$stmt1   = db2_exec($conn1,$sqlDB21, array('cursor'=>DB2_SCROLLABLE));
 				$rowdb21 = db2_fetch_assoc($stmt1);
+
 				$lokasiAsli=trim($rowdb21['WHSLOCATIONWAREHOUSEZONECODE'])."-".trim($rowdb21['WAREHOUSELOCATIONCODE']);
 				$tglMasuk=substr($rowdb21['CREATIONDATETIME'],0,10);
 				$KGnow=round($rowdb21['BASEPRIMARYQUANTITYUNIT'],2);
@@ -64,10 +71,12 @@ $Barcode	= substr($_POST['barcode'],-13);
 					}else{
 						$Where= " AND sf.`zone`='$Zone' AND sf.`lokasi`='$Lokasi' " ;
 					}
-					$sql=sqlsrv_query($con," SELECT sf.* FROM tbl_stokfull sf
-					LEFT JOIN tbl_upload tu ON tu.id=sf.id_upload  
+
+					$sql=sqlsrv_query($con," SELECT sf.* FROM dbnow_gkg.tbl_stokfull sf
+					LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
 					WHERE tu.status='Open' $Where ");
 					$rowd=sqlsrv_fetch_array($sql);
+
 					/*$sqlDataE=sqlsrv_query($con,"INSERT INTO tbl_stokloss SET 
 					lokasi='$Lokasi',
 					lokasi_asli='$lokasiAsli',
@@ -76,7 +85,7 @@ $Barcode	= substr($_POST['barcode'],-13);
 					SN='$Barcode',
 					tgl_masuk='$tglMasuk',
 					id_upload='$rowd[id_upload]',
-					tgl_cek=now()");*/
+					tgl_cek=GETDATE()");*/
 				}
 				else
 				{
@@ -86,11 +95,13 @@ $Barcode	= substr($_POST['barcode'],-13);
 					}else{
 						$Where= " AND sf.`zone`='$Zone' AND sf.`lokasi`='$Lokasi' " ;
 					}
-					$sql=sqlsrv_query($con," SELECT sf.* FROM tbl_stokfull sf
-					LEFT JOIN tbl_upload tu ON tu.id=sf.id_upload  
+					$sql=sqlsrv_query($con," SELECT sf.* FROM dbnow_gkg.tbl_stokfull sf
+					LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
 					WHERE tu.status='Open' $Where ");
 					$rowd=sqlsrv_fetch_array($sql);
-					$sqlDataE=sqlsrv_query($con,"INSERT INTO tbl_stokloss SET 
+
+					// Problem insert
+					$sqlDataE=sqlsrv_query($con,"INSERT INTO dbnow_gkg.tbl_stokloss SET 
 					lokasi='$Lokasi',
 					lokasi_asli='$lokasiAsli',
 					KG='$KGnow',
@@ -98,12 +109,13 @@ $Barcode	= substr($_POST['barcode'],-13);
 					SN='$Barcode',
 					tgl_masuk='$tglMasuk',
 					id_upload='$rowd[id_upload]',
-					tgl_cek=now()");
+					tgl_cek=GETDATE()");
 				}
-				$sqlCek1=sqlsrv_query($con,"SELECT COUNT(*) as jml, sf.id_upload FROM tbl_stokfull sf
-				LEFT JOIN tbl_upload tu ON tu.id=sf.id_upload  
+				$sqlCek1=sqlsrv_query($con,"SELECT COUNT(*) as jml, sf.id_upload FROM dbnow_gkg.tbl_stokfull sf
+				LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
 				WHERE tu.status='Open' AND SN='$Barcode'");
-				$ck1=sqlsrv_fetch_array($sqlCek1);		
+				$ck1=sqlsrv_fetch_array($sqlCek1);
+
 				if($ck1['jml']>0)
 				{	
 					/*$sqlDataE=sqlsrv_query($con,"INSERT INTO tbl_stokloss SET 
@@ -114,12 +126,13 @@ $Barcode	= substr($_POST['barcode'],-13);
 						SN='$Barcode',
 						tgl_masuk='$tglMasuk',
 						id_upload='$ck1[id_upload]',
-						tgl_cek=now()");*/
-					$sqlData1=sqlsrv_query($con,"UPDATE tbl_stokfull SET 
+						tgl_cek=GETDATE()");*/
+
+					$sqlData1=sqlsrv_query($con,"UPDATE dbnow_gkg.tbl_stokfull SET 
 						status='ok',
 						zone='$Zone',
 						lokasi='$Lokasi',
-						tgl_cek=now()
+						tgl_cek=GETDATE()
 						WHERE id_upload='$ck1[id_upload]' AND SN='$Barcode'");	
 				}
 			}
@@ -158,7 +171,7 @@ $Barcode	= substr($_POST['barcode'],-13);
                <label for="zone" class="col-md-1">Zone</label>               
                  <select class="form-control select2bs4" style="width: 100%;" name="zone">
 				   <option value="">Pilih</option>	 
-					<?php $sqlZ=sqlsrv_query($con," SELECT * FROM tbl_zone order by nama ASC"); 
+					<?php $sqlZ=sqlsrv_query($con," SELECT * FROM dbnow_gkg.tbl_zone order by nama ASC"); 
 					  while($rZ=sqlsrv_fetch_array($sqlZ)){
 					 ?>
                     <option value="<?php echo $rZ['nama'];?>" <?php if($rZ['nama']==$Zone){ echo "SELECTED"; }?>><?php echo $rZ['nama'];?></option>
@@ -169,7 +182,7 @@ $Barcode	= substr($_POST['barcode'],-13);
                     <label for="lokasi" class="col-md-1">Location</label>
 					<select class="form-control select2bs4" style="width: 100%;" name="lokasi">
                     <option value="">Pilih</option>	 
-					<?php $sqlL=sqlsrv_query($con," SELECT * FROM tbl_lokasi WHERE zone='$Zone' order by nama ASC"); 
+					<?php $sqlL=sqlsrv_query($con," SELECT * FROM dbnow_gkg.tbl_lokasi WHERE zone='$Zone' order by nama ASC"); 
 					  while($rL=sqlsrv_fetch_array($sqlL)){
 					 ?>
                     <option value="<?php echo $rL['nama'];?>" <?php if($rL['nama']==$Lokasi){ echo "SELECTED"; }?>><?php echo $rL['nama'];?></option>
@@ -223,29 +236,34 @@ $Barcode	= substr($_POST['barcode'],-13);
                     </tr>
                   </thead>
                   <tbody>
-				  <?php
+<?php
 	if( $Zone!="" and $Lokasi!=""){				  
-	$Where= " AND sf.`zone`='$Zone' AND sf.`lokasi`='$Lokasi' " ;
+		$Where= " AND sf.zone='$Zone' AND sf.lokasi='$Lokasi' " ;
 	}else{
-		$Where= " AND sf.`zone`='$Zone' AND sf.`lokasi`='$Lokasi' " ;
+		$Where= " AND sf.zone='$Zone' AND sf.lokasi='$Lokasi' " ;
 	}
+
 	if($Shift!=""){
 		$Shft=" AND a.shft='$Shift' ";
 	}else{
 		$Shft=" ";
-	}				  
-   $sql=sqlsrv_query($con," SELECT sf.* FROM tbl_stokfull sf
-		LEFT JOIN tbl_upload tu ON tu.id=sf.id_upload  
-		WHERE tu.status='Open' $Where ");
-   $no=1;   
-   $c=0;
-    while($rowd=sqlsrv_fetch_array($sql)){
+	}		
+
+	$sql=sqlsrv_query($con," SELECT sf.* FROM dbnow_gkg.tbl_stokfull sf
+	LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
+	WHERE tu.status='Open' $Where ");
+	
+	$no=1;   
+	$c=0;
+
+	while($rowd=sqlsrv_fetch_array($sql)){
+
 	$sqlDB22 = " SELECT WHSLOCATIONWAREHOUSEZONECODE, WAREHOUSELOCATIONCODE FROM 
 	BALANCE b WHERE (b.ITEMTYPECODE='KGF' or b.ITEMTYPECODE='FKG') AND b.ELEMENTSCODE='$rowd[SN]' ";
 	$stmt2   = db2_exec($conn1,$sqlDB22, array('cursor'=>DB2_SCROLLABLE));
 	$rowdb22 = db2_fetch_assoc($stmt2);
 	$lokasiBalance=trim($rowdb22['WHSLOCATIONWAREHOUSEZONECODE'])."-".trim($rowdb22['WAREHOUSELOCATIONCODE']);
-	   ?>
+?>
 	  <tr>
       <td style="text-align: center"><?php echo $rowd['SN']; ?></td>
       <td style="text-align: right"><?php echo $rowd['KG']; ?></td>
@@ -287,16 +305,18 @@ $Barcode	= substr($_POST['barcode'],-13);
 <?php
 	if( $Zone!="" and $Lokasi!="")
 	{				  
-		$Where= " AND `zone`='$Zone' AND `lokasi`='$Lokasi' " ;
+		$Where= " AND sl.zone='$Zone' AND sl.lokasi='$Lokasi' " ;
 	}
 	else
 	{
-		$Where= " AND `zone`='$Zone' AND `lokasi`='$Lokasi' " ;
+		$Where= " AND sl.zone='$Zone' AND sl.lokasi='$Lokasi' " ;
 	}	
 
-	$sql1=sqlsrv_query($con,"SELECT sl.*, count(SN) as jmlscn FROM tbl_stokloss sl
-	LEFT JOIN tbl_upload tu ON tu.id=sl.id_upload
-	WHERE tu.`status`='Open' $Where  group by sl.SN");
+	$sql1=sqlsrv_query($con,"SELECT sl.*, count(SN) as jmlscn FROM dbnow_gkg.tbl_stokloss sl
+	LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sl.id_upload
+	WHERE tu.status='Open' $Where group by sl.id, sl.SN, sl.KG, 
+	sl.zone, sl.lokasi, sl.status, sl.lokasi_asli,
+	sl.tgl_cek,sl.tgl_masuk,sl.id_upload");
 
 	$no=1;   
 	$c=0;
