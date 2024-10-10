@@ -23,11 +23,10 @@ $Zone		= isset($_POST['zone']) ? $_POST['zone'] : '';
                     <th style="text-align: center">Tgl Upload</th>
                     <th style="text-align: center">Nama File</th>
                     <th style="text-align: center">Lokasi</th>
-					<th style="text-align: center">Project</th>  
+					          <th style="text-align: center">Project</th>  
                     <th style="text-align: center">Data</th>
                     <th style="text-align: center">Belum Cek</th>
                     <th style="text-align: center">Sudah Cek</th>
-                    <th style="text-align: center">Tgl Close</th>
                     <th style="text-align: center">Status</th>
                     <th style="text-align: center">Upload</th>
                     <th style="text-align: center">Hapus</th>
@@ -37,32 +36,74 @@ $Zone		= isset($_POST['zone']) ? $_POST['zone'] : '';
                   <tbody>
 				  <?php
 					$no=1; 
-					$sql=mysqli_query($con,"SELECT * FROM tbl_upload ORDER BY id DESC");					  
-	  				while($rowd=mysqli_fetch_array($sql)){
-						$sql1=mysqli_query($con,"SELECT COUNT(*) AS JML, sum(if(`status`='belum cek',1,0)) as bcek,sum(if(`status`='ok',1,0)) as scek, group_concat(distinct  lokasi SEPARATOR ', ') as lokasi, group_concat(distinct  project SEPARATOR ', ') as project FROM tbl_stokfull WHERE id_upload='$rowd[id]'");					  
-	  					$rowd1=mysqli_fetch_array($sql1);
-						if($rowd['status']=="Open" and $rowd1['scek']==0){
-							$stts="<small class='badge badge-success '><i class='far fa-clock'></i> Open</small>";
-						}else if($rowd['status']=="Open" and $rowd1['scek']>0 and $rowd1['JML']>$rowd1['scek']){
-							$stts="<small class='badge badge-warning'><i class='far fa-clock'></i> Open, In Progress</small>";
-						}else{
-							$stts="<a href='#' id='".$rowd['id']."' class='show_editstatus'><small class='badge badge-danger'><i class='far fa-clock'></i> Closed</small></a>";
-						}
-		  		  ?>
-				  	<tr>
-                    <td style="text-align: center"><?php echo $no;?></td>
-                    <td style="text-align: center"><?php echo $rowd['tgl_upload'];?></td>
-                    <td style="text-align: center"><?php echo $rowd['nama_file'];?></td>
-                    <td style="text-align: left"><?php echo $rowd1['lokasi'];?></td>
-					<td style="text-align: left"><?php echo $rowd1['project'];?></td>	
-                    <td style="text-align: center"><?php echo $rowd1['JML'];?></td>
-                    <td style="text-align: center"><?php echo $rowd1['bcek'];?></td>
-                    <td style="text-align: center"><?php echo $rowd1['scek'];?></td>
-                    <td style="text-align: center"><?php echo $rowd['tgl_closed'];?></td>
-                    <td style="text-align: center"><?php echo $stts;?></td>
-                    <td style="text-align: center"><a href="UploadData-<?php echo $rowd['id'];?>" class="btn btn-xs btn-warning <?php if($rowd1['JML']>0){ echo "disabled";}?> " ><small class="fas fa-plus"> </small></a></td>
-                    <td style="text-align: center"><a href="#" class="btn btn-xs btn-danger <?php if($rowd1['JML']==0){ echo "disabled";}?>" onclick="confirm_delete('DelUpload-<?php echo $rowd['id'] ?>');" ><small class="fas fa-trash"> </small></a></td>
-                  </tr>	 
+					$sql=sqlsrv_query($con,"SELECT * FROM dbnow_gkg.tbl_upload ORDER BY id DESC");	
+
+	  				while($rowd=sqlsrv_fetch_array($sql)){
+
+                $sql1=sqlsrv_query($con,"SELECT 
+                COUNT(*) AS JML, 
+                SUM(CASE WHEN [status] = 'belum cek' THEN 1 ELSE 0 END) AS bcek, 
+                SUM(CASE WHEN [status] = 'ok' THEN 1 ELSE 0 END) AS scek
+                FROM 
+                dbnow_gkg.tbl_stokfull 
+                WHERE id_upload='$rowd[id]'
+                ");	
+
+                $rowd1=sqlsrv_fetch_array($sql1);
+
+                $sql_lokasi_project=sqlsrv_query($con,"SELECT lokasi,project
+                FROM 
+                dbnow_gkg.tbl_stokfull 
+                WHERE id_upload='$rowd[id]' GROUP BY lokasi,project
+                ");	
+
+                // Result Lokasi Dan Project
+                
+                $lokasiArray = [];
+                $projectArray = [];
+
+                $rowd_lokasi_project=sqlsrv_fetch_array($sql_lokasi_project);
+
+                while ($rowd_lokasi_project = sqlsrv_fetch_array($sql_lokasi_project, SQLSRV_FETCH_ASSOC)) {
+                    $lokasiArray[] = $rowd_lokasi_project['lokasi'];
+                    $projectArray[] = $rowd_lokasi_project['project'];
+                }
+
+                $lokasiResult = implode(", ", $lokasiArray);
+                $projectResult = implode(", ", $projectArray);
+
+                // End Result Lokasi Dan Project
+
+
+                if($rowd['status']=="Open" and $rowd1['scek']==0){
+                  $stts="<small class='badge badge-success '><i class='far fa-clock'></i> Open</small>";
+                }else if($rowd['status']=="Open" and $rowd1['scek']>0 and $rowd1['JML']>$rowd1['scek']){
+                  $stts="<small class='badge badge-warning'><i class='far fa-clock'></i> Open, In Progress</small>";
+                }else{
+                  $stts="<a href='#' id='".$rowd['id']."' class='show_editstatus'><small class='badge badge-danger'><i class='far fa-clock'></i> Closed</small></a>";
+                }
+                ?>
+                <tr>
+                        <td style="text-align: center"><?php echo $no;?></td>
+                        <td style="text-align: center"><?php echo convertDateTime($rowd['tgl_upload']);?></td>
+                        <td style="text-align: center"><?php echo $rowd['nama_file'];?></td>
+                        <td style="text-align: left"><?php echo $lokasiResult; ?></td>
+                        <td style="text-align: left"><?php echo $projectResult; ?></td>	
+                        <td style="text-align: center"><?php echo $rowd1['JML'];?></td>
+                        <td style="text-align: center"><?php echo $rowd1['bcek'];?></td>
+                        <td style="text-align: center"><?php echo $rowd1['scek'];?></td>
+
+                        <td style="text-align: center"><?php echo $stts;?></td>
+
+                        <td style="text-align: center">
+                          <a href="UploadData-<?php echo $rowd['id'];?>" class="btn btn-xs btn-warning <?php if($rowd1['JML']>0){ echo "disabled";}?> " >
+                          <small class="fas fa-plus"> </small></a>
+                        </td>
+                        <td style="text-align: center">
+                          <a href="#" class="btn btn-xs btn-danger <?php if($rowd1['JML']==0){ echo "disabled";}?>" onclick="confirm_delete('DelUpload-<?php echo $rowd['id'] ?>');" >
+                          <small class="fas fa-trash"> </small></a>
+                        </td>
+                </tr>	 
 				<?php
 						$no++;
 					} 
