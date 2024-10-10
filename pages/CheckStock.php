@@ -20,9 +20,10 @@ $Barcode	= substr($_POST['barcode'],-13);
 	if($_POST['cek']=="Cek" or $_POST['cari']=="Cari")
 	{
 		//if (strlen($_POST['barcode'])==13){
+
 		$sqlCek=sqlsrv_query($con,"SELECT COUNT(*) as jml, sf.id_upload FROM dbnow_gkg.tbl_stokfull sf
 		LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
-		WHERE tu.status='Open' AND zone='$Zone' AND lokasi='$Lokasi' AND SN='$Barcode'");
+		WHERE tu.status='Open' AND zone='$Zone' AND lokasi='$Lokasi' AND SN='$Barcode' GROUP BY sf.id_upload");
 
 		$ck=sqlsrv_fetch_array($sqlCek);
 
@@ -67,9 +68,9 @@ $Barcode	= substr($_POST['barcode'],-13);
 				{
 					echo"<script>alert('Data Roll ini dilokasi $lokasiAsli');</script>";
 					if( $Zone!="" and $Lokasi!=""){				  
-						$Where= " AND sf.`zone`='$Zone' AND sf.`lokasi`='$Lokasi' " ; 
+						$Where= " AND sf.zone='$Zone' AND sf.lokasi='$Lokasi' " ; 
 					}else{
-						$Where= " AND sf.`zone`='$Zone' AND sf.`lokasi`='$Lokasi' " ;
+						$Where= " AND sf.zone='$Zone' AND sf.lokasi='$Lokasi' " ;
 					}
 
 					$sql=sqlsrv_query($con," SELECT sf.* FROM dbnow_gkg.tbl_stokfull sf
@@ -91,9 +92,9 @@ $Barcode	= substr($_POST['barcode'],-13);
 				{
 					echo"<script>alert('SN tidak OK');</script>";
 					if( $Zone!="" and $Lokasi!=""){				  
-						$Where= " AND sf.`zone`='$Zone' AND sf.`lokasi`='$Lokasi' " ; 
+						$Where= " AND sf.zone='$Zone' AND sf.lokasi='$Lokasi' " ; 
 					}else{
-						$Where= " AND sf.`zone`='$Zone' AND sf.`lokasi`='$Lokasi' " ;
+						$Where= " AND sf.zone='$Zone' AND sf.lokasi='$Lokasi' " ;
 					}
 					$sql=sqlsrv_query($con," SELECT sf.* FROM dbnow_gkg.tbl_stokfull sf
 					LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
@@ -105,7 +106,7 @@ $Barcode	= substr($_POST['barcode'],-13);
 					VALUES ('$Lokasi','$lokasiAsli','$KGnow','$Zone','$Barcode',
 					'$tglMasuk','$rowd[id_upload]',GETDATE())");
 				}
-				
+
 				$sqlCek1=sqlsrv_query($con,"SELECT COUNT(*) as jml, sf.id_upload FROM dbnow_gkg.tbl_stokfull sf
 				LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
 				WHERE tu.status='Open' AND SN='$Barcode'");
@@ -350,7 +351,7 @@ $Barcode	= substr($_POST['barcode'],-13);
       <td style="text-align: center"><?php echo $rowd1['KG']; ?></td>
       <td style="text-align: center"><?php echo $rowd1['zone']."-".$rowd1['lokasi']; ?></td>
       <td style="text-align: center"><?php echo $rowd1['lokasi_asli']; ?></td>
-      <td style="text-align: center"><?php echo $tglmsk; ?></td>
+      <td style="text-align: center"><?php echo cek($tglmsk); ?></td>
       <td style="text-align: center"><small class='badge <?php if($rowd1['status']=="tidak ok"){ echo"badge-warning";}?>' ><i class='fas fa-exclamation-triangle text-default blink_me'></i> <?php echo $rowd1['status']; ?></small> <?php echo $ketSN.", ".$ketSCN; ?> </td>
       </tr>				  
 					  

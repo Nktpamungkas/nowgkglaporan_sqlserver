@@ -2,6 +2,7 @@
 session_start();
 //include config
 include"koneksi.php";
+include"utils/helper.php";
 ini_set("error_reporting", 1);
 
 //request page
