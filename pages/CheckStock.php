@@ -109,7 +109,8 @@ $Barcode	= substr($_POST['barcode'],-13);
 
 				$sqlCek1=sqlsrv_query($con,"SELECT COUNT(*) as jml, sf.id_upload FROM dbnow_gkg.tbl_stokfull sf
 				LEFT JOIN dbnow_gkg.tbl_upload tu ON tu.id=sf.id_upload  
-				WHERE tu.status='Open' AND SN='$Barcode'");
+				WHERE tu.status='Open' AND SN='$Barcode' GROUP BY sf.id_upload");
+
 				$ck1=sqlsrv_fetch_array($sqlCek1);
 
 				if($ck1['jml']>0)
