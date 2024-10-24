@@ -314,35 +314,35 @@ if ($_POST['cek'] == "Cek" or $_POST['cari'] == "Cari") {
 						$Where = " AND sl.zone='$Zone' AND sl.lokasi='$Lokasi' ";
 					}
 
-					$sql1 = sqlsrv_query($con, "    SELECT DISTINCT 
-    sl.SN,
-    sl.KG,
-    sl.zone,
-    sl.lokasi,
-    sl.status,
-    sl.lokasi_asli,
---    sl.tgl_cek,
-    sl.tgl_masuk,
-    sl.id_upload,
-    COUNT(sl.SN) AS jmlscn 
-FROM 
-    dbnow_gkg.tbl_stokloss sl
-LEFT JOIN 
-    dbnow_gkg.tbl_upload tu ON tu.id = sl.id_upload
-WHERE 
-    tu.status = 'Open' 
-    AND sl.zone = 'L2' 
-    AND sl.lokasi = 'B01AP1B'
-GROUP BY  
-    sl.SN, 
-    sl.KG, 
-    sl.zone, 
-    sl.lokasi, 
-    sl.status, 
-    sl.lokasi_asli, 
---    sl.tgl_cek, 
-    sl.tgl_masuk, 
-    sl.id_upload");
+					$sql1 = sqlsrv_query($con, "  SELECT DISTINCT 
+													sl.SN,
+													sl.KG,
+													sl.zone,
+													sl.lokasi,
+													sl.status,
+													sl.lokasi_asli,
+													STRING_AGG(CASE 
+														WHEN sl.tgl_masuk = '1900-01-01' THEN NULL 
+														ELSE sl.tgl_masuk 
+													END, ', ') AS tgl_masuk,  -- Menggabungkan tanggal dengan koma sebagai pemisah
+													sl.id_upload,
+													COUNT(sl.SN) AS jmlscn 
+												FROM 
+													dbnow_gkg.tbl_stokloss sl
+												LEFT JOIN 
+													dbnow_gkg.tbl_upload tu ON tu.id = sl.id_upload
+												WHERE 
+													tu.status = 'Open'
+													$Where
+												GROUP BY  
+													sl.SN, 
+													sl.KG, 
+													sl.zone, 
+													sl.lokasi, 
+													sl.status, 
+													sl.lokasi_asli, 
+													sl.id_upload
+												");
 
 					$no = 1;
 					$c = 0;
@@ -360,8 +360,8 @@ GROUP BY
 							$ketSCN = "";
 						}
 
-						if ($rowd1['tgl_masuk'] == "0000-00-00" or $rowd1['tgl_masuk'] == "") {
-							$tglmsk = "";
+						if ($rowd1['tgl_masuk'] == "0000-00-00" || $rowd1['tgl_masuk'] == "") {
+							$tglmsk = ""; // Anggap null
 						} else {
 							$tglmsk = $rowd1['tgl_masuk'];
 						}
@@ -372,11 +372,9 @@ GROUP BY
 							<td style="text-align: center"><?php echo $rowd1['zone'] . "-" . $rowd1['lokasi']; ?></td>
 							<td style="text-align: center"><?php echo $rowd1['lokasi_asli']; ?></td>
 							<td style="text-align: center"><?php echo cek($tglmsk); ?></td>
-							<td style="text-align: center"><small
-									class='badge <?php if ($rowd1['status'] == "tidak ok") {
-										echo "badge-warning";
-									} ?>'><i
-										class='fas fa-exclamation-triangle text-default blink_me'></i>
+							<td style="text-align: center"><small class='badge <?php if ($rowd1['status'] == "tidak ok") { 
+								echo "badge-warning";} ?>'>
+								<i class='fas fa-exclamation-triangle text-default blink_me'></i>
 									<?php echo $rowd1['status']; ?></small> <?php echo $ketSN . ", " . $ketSCN; ?> </td>
 						</tr>
 
