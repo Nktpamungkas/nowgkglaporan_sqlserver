@@ -1,4 +1,7 @@
 <?php
+
+include "../utils/helper.php";
+
 $Awal	= isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : '';
 $Akhir	= isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
 ?>
@@ -44,12 +47,12 @@ $Akhir	= isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
 	 
 $no=1;   
 $c=0;
-$sql = sqlsrv_query($con," SELECT * FROM dbnow_gkg.tblmasukkain WHERE tgl_tutup='$_GET[tgl]' ORDER BY id ASC");		  
+$sql = sqlsrv_query($con," SELECT * FROM dbnow_gkg.tblkeluarkain WHERE tgl_tutup='$_GET[tgl]' ORDER BY id ASC");		  
     while($r = sqlsrv_fetch_array($sql)){		
 ?>
 	  <tr>
 	  <td style="text-align: center"><?php echo $no;?></td>
-	  <td style="text-align: center"><?php echo $r['tglkeluar']; ?></td>
+	  <td style="text-align: center"><?php echo cek($r['tglkeluar']); ?></td>
 	  <td style="text-align: left"><?php echo $r['buyer']; ?></td>
 	  <td style="text-align: left"><?php echo $r['custumer']; ?></td>
 	  <td style="text-align: center"><?php echo $r['projectcode']; ?></td>
@@ -72,8 +75,8 @@ $sql = sqlsrv_query($con," SELECT * FROM dbnow_gkg.tblmasukkain WHERE tgl_tutup=
 	  				  
 	<?php 
 	 $no++; 
-	$totRol=$totRol+$r['qty'];
-	$totKG=$totKG+$r['berat'];	
+	@$totRol=$totRol+$r['qty'];
+	@$totKG=$totKG+$r['berat'];	
 	
 	} ?>
 				  </tbody>

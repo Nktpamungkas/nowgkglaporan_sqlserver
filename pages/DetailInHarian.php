@@ -1,4 +1,7 @@
 <?php
+
+include "../utils/helper.php";
+
 $Awal	= isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : '';
 $Akhir	= isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
 ?>
@@ -62,7 +65,7 @@ $sql = sqlsrv_query($con," SELECT * FROM dbnow_gkg.tblmasukkain WHERE tgl_tutup=
       <td style="text-align: left"><?php echo $r['buyer']; ?></td>
       <td style="text-align: left"><?php echo $r['customer']; ?></td>
       <td style="text-align: center"><?php echo $r['prod_order']; ?></td>
-      <td><?php echo cek($r['code']); ?></td> 
+      <td><?php echo $r['code']; ?></td> 
       <td style="text-align: left"><?php echo $r['projectcode']; ?></td>
       <td style="text-align: left"><?php echo $r['mesin_rajut']; ?></td>
       <td style="text-align: center"><?php echo $r['lot_benang']; ?></td>
@@ -85,8 +88,8 @@ $sql = sqlsrv_query($con," SELECT * FROM dbnow_gkg.tblmasukkain WHERE tgl_tutup=
 	  				  
 	<?php 
 	 $no++; 
-	$tMRol+=$r['qty'];
-	$tMKG +=$r['berat'];
+	@$tMRol+=$r['qty'];
+	@$tMKG +=$r['berat'];
 	} ?>
 				  </tbody>
                   <tfoot>
