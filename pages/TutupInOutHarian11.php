@@ -43,7 +43,7 @@ $sql = sqlsrv_query($con,"SELECT TOP 30
 ?>
 	  <tr>
 	  <td style="text-align: center"><?php echo $no;?></td>
-	  <td style="text-align: center"><a href="DetailInHarian-<?php echo $r['tgl_tutup'];?>" class="btn btn-info btn-xs" target="_blank"> <i class="fa fa-link"></i> Lihat Data</a></td>
+	  <td style="text-align: center"><a href="DetailInHarian11-<?php echo $r['tgl_tutup'];?>" class="btn btn-info btn-xs" target="_blank"> <i class="fa fa-link"></i> Lihat Data</a></td>
 	  <td style="text-align: center"><?php echo $r['tgl_tutup'];?></td>
       <td style="text-align: center"><?php echo $r['rol'];?></td>
       <td style="text-align: right"><?php echo number_format(round($r['kg'],2),2);?></td>

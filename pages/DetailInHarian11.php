@@ -1,4 +1,5 @@
 <?php
+include "../utils/helper.php";
 $Awal	= isset($_POST['tgl_awal']) ? $_POST['tgl_awal'] : '';
 $Akhir	= isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
 ?>
@@ -51,18 +52,18 @@ $Akhir	= isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
 	 
 $no=1;   
 $c=0;
-$sql = mysqli_query($con," SELECT * FROM tblmasukkain_11 WHERE tgl_tutup='$_GET[tgl]' ORDER BY id ASC");		  
-    while($r = mysqli_fetch_array($sql)){										   
+$sql = sqlsrv_query($con," SELECT * FROM dbnow_gkg.tblmasukkain_11 WHERE tgl_tutup='$_GET[tgl]' ORDER BY id ASC");		  
+    while($r = sqlsrv_fetch_array($sql)){										   
 			
 ?>
 	  <tr>
 	  <td style="text-align: center"><?php echo $no;?></td>
-	  <td style="text-align: center"><?php echo $r['tgl_masuk']; ?></td>
+	  <td style="text-align: center"><?php echo cek($r['tgl_masuk']); ?></td>
       <td style="text-align: center"><?php echo $r['no_bon']; ?></td>
       <td style="text-align: left"><?php echo $r['buyer']; ?></td>
       <td style="text-align: left"><?php echo $r['customer']; ?></td>
       <td style="text-align: center"><?php echo $r['prod_order']; ?></td>
-      <td><?php echo $r['code']; ?></td> 
+      <td><?php echo cek($r['code']); ?></td> 
       <td style="text-align: left"><?php echo $r['projectcode']; ?></td>
       <td style="text-align: left"><?php echo $r['mesin_rajut']; ?></td>
       <td style="text-align: center"><?php echo $r['lot_benang']; ?></td>
