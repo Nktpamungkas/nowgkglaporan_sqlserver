@@ -246,19 +246,17 @@ $sql = sqlsrv_query($con,"SELECT TOP 30
 </script>
 <?php	
 if(isset($_POST['submit'])){
-
-$cektgl=sqlsrv_query($con,"SELECT TOP 1
-											FORMAT(GETDATE(), 'yyyy-MM-dd') AS tgl, 
-											COUNT(tgl_tutup) AS ck, 
-											DATEPART(HOUR, GETDATE()) AS jam, 
-											FORMAT(GETDATE(), 'HH:mm') AS jam1 
-										FROM 
-											dbnow_gkg.tblmasukkain 
-										WHERE 
-											tgl_tutup = '$Awal' 
-										GROUP BY 
-											tgl_tutup;
-										");
+$cektgl=sqlsrv_query($con,"SELECT
+								CONVERT(VARCHAR, GETDATE(), 23) AS tgl,
+								COALESCE(COUNT(t.tgl_tutup), 0) AS ck,
+								FORMAT(GETDATE(), 'HH') AS jam,
+								FORMAT(GETDATE(), 'HH:mm') AS jam1
+							FROM
+								(SELECT '$Awal' AS tgl_tutup) AS target_date
+							LEFT JOIN
+								dbnow_gkg.tblmasukkain t ON t.tgl_tutup = target_date.tgl_tutup
+							GROUP BY
+								target_date.tgl_tutup");
 $dcek=sqlsrv_fetch_array($cektgl);
 $t1=strtotime($Awal);
 $t2=strtotime($dcek['tgl']);
