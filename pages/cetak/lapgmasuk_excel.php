@@ -15,12 +15,22 @@ ini_set("error_reporting", 1);
 include"../../koneksi.php"
 ?>
 
-           <div align="center"> <h1>LAPORAN HARIAN PEMASUKANAN KAIN GREIGE</h1></div>
-          <div align="Right"> NO. FORM:<br />
-          NO. REVISI:<br />
-          TGL Terbit:<br />
-          HALAMAN:
-          </div>
+<div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+    <!-- Logo -->
+    <div style="margin-right: 20px;">
+        <!-- <img src="images/logo.png" alt="Logo" style="height: 80px;"> -->
+    </div>
+
+    <!-- Judul -->
+    <div style="text-align: center;">
+        <h1 style="margin: 0;">LAPORAN HARIAN PEMASUKANAN KAIN GREIGE</h1>
+        <h3 style="margin: 5px 0 0 0;">
+            NO. FORM : FW - 19 - GKG - 02/07<br />
+            HALAMAN :
+        </h3>
+        <!-- <p>NO. REVISI:<br/>TGL Terbit:</p> -->
+    </div>
+</div>
 <div align="LEFT">TGL : <?php echo date($_GET['awal']); ?></div>
 <table width="125%" border="1" align="Center">
   <tr align="center">
@@ -244,6 +254,47 @@ $knitt1="ITTI";
 	<td ></td>
     <td ></td>
 	  </tr>
+
+       <tr>
+        <td colspan="17" style="border: none;">&nbsp;</td>
+        </tr>
+        <tr>
+        <td colspan="17" style="border: none;">&nbsp;</td>
+        </tr>
+        <tr>
+        <td colspan="17" style="border: none;">&nbsp;</td>
+    </tr>
+
+    <tr>
+    <td colspan="4"></td>
+    <td colspan="3" style="text-align: center; vertical-align: middle;">Dibuat Oleh :</td>
+    <td colspan="4" style="text-align: center; vertical-align: middle;">Diperiksa Oleh :</td>
+    <td colspan="6" style="text-align: center; vertical-align: middle;">Mengertahui :</td>
+    </tr>
+    <tr>
+    <td colspan="4" style="text-align: center; vertical-align: middle;">Nama</td>
+    <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="6" style="text-align: center; vertical-align: middle;"></td>
+    </tr>
+    <tr>
+    <td colspan="4" style="text-align: center; vertical-align: middle;">Jabatan</td>
+    <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="6" style="text-align: center; vertical-align: middle;"></td>
+    </tr>
+    <tr>
+    <td colspan="4" style="text-align: center; vertical-align: middle;">Tanggal</td>
+    <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="6" style="text-align: center; vertical-align: middle;"></td>
+    </tr>
+    <tr>
+    <td colspan="4" style="text-align: center; vertical-align: middle;">Tanda Tangan</td>
+    <td colspan="3" style="text-align: center; vertical-align: middle;"><br><br><br><br></td>
+    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="6" style="text-align: center; vertical-align: middle;"></td>
+    </tr>
 </table>
 
 
