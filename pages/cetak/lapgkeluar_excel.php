@@ -271,7 +271,7 @@ SELECT CASE WHEN PROJECTCODE <> '' THEN PROJECTCODE ELSE ORIGDLVSALORDLINESALORD
   <td colspan="4"></td>
   <td colspan="3" style="text-align: center; vertical-align: middle;">Dibuat Oleh :</td>
   <td colspan="5" style="text-align: center; vertical-align: middle;">Diperiksa Oleh :</td>
-  <td colspan="7" style="text-align: center; vertical-align: middle;">Mengertahui :</td>
+  <td colspan="7" style="text-align: center; vertical-align: middle;">Mengetahui :</td>
 </tr>
 <tr>
   <td colspan="4" style="text-align: center; vertical-align: middle;">Nama</td>
