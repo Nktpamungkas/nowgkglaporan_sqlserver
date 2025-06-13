@@ -5,7 +5,7 @@ $Akhir = isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
 <!-- Main content -->
       <div class="container-fluid">
 		<form role="form" method="post" enctype="multipart/form-data" name="form1">
-		<div class="card card-danger">
+		  <div class="card card-danger">
           <div class="card-header">
             <h3 class="card-title">Filter Data Kain Greige Keluar</h3>
 
@@ -33,29 +33,74 @@ $Akhir = isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
                  </div>
 			   </div>
             </div>
-			 <div class="form-group row">
-               <label for="tgl_akhir" class="col-md-1">Tgl Akhir</label>
-               <div class="col-md-2">
-                 <div class="input-group date" id="datepicker2" data-target-input="nearest">
-                    <div class="input-group-prepend" data-target="#datepicker2" data-toggle="datetimepicker">
-                      <span class="input-group-text btn-info">
-                        <i class="far fa-calendar-alt"></i>
-                      </span>
-                    </div>
-                    <input name="tgl_akhir" value="<?php echo $Akhir; ?>" type="text" class="form-control form-control-sm" id=""  autocomplete="off" required>
-                 </div>
-			   </div>
+			  <div class="form-group row">
+            <label for="tgl_akhir" class="col-md-1">Tgl Akhir</label>
+            <div class="col-md-2">
+              <div class="input-group date" id="datepicker2" data-target-input="nearest">
+                <div class="input-group-prepend" data-target="#datepicker2" data-toggle="datetimepicker">
+                  <span class="input-group-text btn-info">
+                    <i class="far fa-calendar-alt"></i>
+                  </span>
+                </div>
+                <input name="tgl_akhir" value="<?php echo $Akhir; ?>" type="text" class="form-control form-control-sm" id=""  autocomplete="off" required>
+              </div>
             </div>
-
-			  <button class="btn btn-info" type="submit">Cari Data</button>
-          </div>
-		  <!-- /.card-body -->
         </div>
+        
+      <!-- <button class="btn btn-info" type="submit">Cari Data</button> -->
+      <form method="POST">
+        <button type="submit" name="submit" class="btn btn-success">
+          <i class="icofont icofont-search-alt-1"></i> Cari data
+        </button>
+      </form>
+
+      <?php
+      include 'koneksi.php'; // koneksi ke SQL Server
+
+      $ipaddress = $_SERVER['REMOTE_ADDR'];
+
+      if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+          if (filter_var($ipaddress, FILTER_VALIDATE_IP)) {
+
+              // Siapkan parameter
+              $params = array($ipaddress);
+
+              // Hapus dari tabel kedua
+              $sql2 = "DELETE FROM dbnow_gkg.tbl_keluar_greige2 WHERE ID_ADDRESS = ?";
+              $stmt2 = sqlsrv_query($con, $sql2, $params);
+
+              if ($stmt2 === false) {
+                  echo "<div class='alert alert-danger'>Gagal menghapus dari tbl_keluar_greige2:</div>";
+                  echo "<pre>"; print_r(sqlsrv_errors()); echo "</pre>";
+              } else {
+                  sqlsrv_free_stmt($stmt2);
+              }
+
+              // Hapus dari tabel pertama
+              $sql1 = "DELETE FROM dbnow_gkg.tbl_keluar_greige WHERE ID_ADDRESS = ?";
+              $stmt1 = sqlsrv_query($con, $sql1, $params);
+
+              if ($stmt1 === false) {
+                  echo "<div class='alert alert-danger'>Gagal menghapus dari tbl_keluar_greige:</div>";
+                  echo "<pre>"; print_r(sqlsrv_errors()); echo "</pre>";
+              } else {
+                  sqlsrv_free_stmt($stmt1);
+              }
+
+          } else {
+              echo "<div class='alert alert-warning'>IP address tidak valid.</div>";
+          }
+      }
+      ?>
+
+      </div>
 		<?php if ($Awal != "" and $Akhir != "") {?>
 		<div class="card card-warning">
               <div class="card-header">
                 <h3 class="card-title">Detail Laporan Harian Bagi Kain Greige.</h3>
 				<a href="pages/cetak/lapgkeluar_excel.php?awal=<?php echo $Awal; ?>&akhir=<?php echo $Akhir; ?>" class="btn bg-blue float-right" target="_blank">Cetak Excel</a>
+                  <a href="pages/cetak/lapgkeluar_qty.php?awal=<?php echo $Awal;?>&akhir=<?php echo $Akhir;?>" class="btn bg-red float-right" style="margin-right: 10px;" target="_blank">Laporan Bulanan</a>   
+
           </div>
               <!-- /.card-header -->
               <div class="card-body">
@@ -254,15 +299,22 @@ SELECT CASE WHEN PROJECTCODE <> '' THEN PROJECTCODE ELSE ORIGDLVSALORDLINESALORD
         if ($rowdb22['LEGALNAME1'] == "") {$langganan = "";} else { $langganan = $rowdb22['LEGALNAME1'];}
         if ($rowdb22['ORDERPARTNERBRANDCODE'] == "") {$buyer = "";} else { $buyer = $rowdb22['ORDERPARTNERBRANDCODE'];}
 
+        $projectcode_ = ($rowdb21['PROJECTCODE'] != "") ? $rowdb21['PROJECTCODE'] : $rowdb21['ORIGDLVSALORDLINESALORDERCODE'];
+        $productiondemandcode = ($rowdb24['PRODUCTIONDEMANDCODE'] != "") ? $rowdb24['PRODUCTIONDEMANDCODE']: $rowdb21['PRODUCTIONDEMANDCODE'];
+        $projectawal = !empty($rowdb21['PROJAWAL']) ? $rowdb21['PROJAWAL'] :
+               (!empty($rowdb21['PROJAWAL1']) ? $rowdb21['PROJAWAL1'] :
+               (!empty($rowdb25['PROJECT']) ? $rowdb25['PROJECT'] :
+               $rowdb24['INTERNALREFERENCE']));
+
         ?>
 	  <tr>
 	  <td style="text-align: center"><?php echo $no; ?></td>
 	  <td style="text-align: center"><?php echo $rowdb21['TRANSACTIONDATE']; ?></td>
 	  <td style="text-align: left"><?php echo $buyer; ?></td>
 	  <td style="text-align: left"><?php echo $langganan; ?></td>
-	  <td style="text-align: center"><?php if ($rowdb21['PROJECTCODE'] != "") {echo $rowdb21['PROJECTCODE'];} else {echo $rowdb21['ORIGDLVSALORDLINESALORDERCODE'];}?></td>
+	  <td style="text-align: center"><?php echo $projectcode_?></td>
 	  <td style="text-align: center"><?php echo $rowdb21['ORDERCODE']; ?></td>
-	  <td><span style="text-align: center"><?php if ($rowdb24['PRODUCTIONDEMANDCODE'] != "") {echo $rowdb24['PRODUCTIONDEMANDCODE'];} else {echo $rowdb21['PRODUCTIONDEMANDCODE'];}?></span></td>
+	  <td><span style="text-align: center"><?php echo $productiondemandcode?></span></td>
       <td><?php echo $kdbenang; ?></td>
       <td style="text-align: center"><?php echo $rowdb24['DESCRIPTION']; ?></td>
       <td style="text-align: center"><?php echo $rowdb21['LOTCODE']; ?></td>
@@ -275,23 +327,74 @@ SELECT CASE WHEN PROJECTCODE <> '' THEN PROJECTCODE ELSE ORIGDLVSALORDLINESALORD
       <td style="text-align: center"><?php echo $rowdb21['QTY_DUS']; ?></td>
       <td style="text-align: right"><?php echo number_format(round($rowdb21['QTY_KG'], 2), 2); ?></td>
       <td style="text-align: center">&nbsp;</td>
-      <td style="text-align: center"><?php
-if ($rowdb21['PROJAWAL'] != "") {
-            echo $rowdb21['PROJAWAL'];
-        } else if ($rowdb21['PROJAWAL1'] != "") {
-            echo $rowdb21['PROJAWAL1'];
-        } else if ($rowdb25['PROJECT'] != "") {
-            echo $rowdb25['PROJECT'];
-        } else {
-            echo $rowdb24['INTERNALREFERENCE'];
-        }?></td>
+      <td style="text-align: center"><?php echo $projectawal?></td>
       <td style="text-align: center"><?php echo $rowdb21['CREATIONUSER']; ?></td>
       </tr>
 
 	<?php
-$no++;
+    $no++;
         $totRol = $totRol + $rowdb21['QTY_DUS'];
         $totKG = $totKG + $rowdb21['QTY_KG'];
+
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+include_once("koneksi.php"); // pastikan ini membuka koneksi sqlsrv, misal $conn
+
+$sql = "INSERT INTO dbnow_gkg.tbl_keluar_greige (
+    TRANSACTIONDATE,
+    BUYER, 
+    LANGGANAN,
+    PROJECTCODE,
+    ORDERCODE,
+    PRODUCTIONDEMANDCODE,
+    KODEBENANG,
+    DESCRIPTION_,
+    LOTCODE,
+    BENANG1,
+    BENANG2,
+    BENANG3,
+    BENANG4,
+    WARNA,
+    SUMMARIZEDDESCRIPTION,
+    QTY_DUS,
+    QTY_KG,
+    PROJAWAL,
+    CREATIONUSER,
+    ID_ADDRESS
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+$params = [
+    $rowdb21['TRANSACTIONDATE'],
+    $buyer,
+    $langganan,
+    $projectcode_,
+    $rowdb21['ORDERCODE'],
+    $productiondemandcode,
+    $kdbenang,
+    $rowdb24['DESCRIPTION'],
+    $rowdb21['LOTCODE'],
+    $a[0],
+    $a[1],
+    $a[2],
+    $a[3],
+    $rowdb24['WARNA'],
+    $rowdb21['SUMMARIZEDDESCRIPTION'],
+    $rowdb21['QTY_DUS'],
+    $rowdb21['QTY_KG'],
+    $projectawal,
+    $rowdb21['CREATIONUSER'],
+    $ipaddress
+];
+
+$result = sqlsrv_query($con, $sql, $params);
+
+if (!$result) {
+    die(print_r(sqlsrv_errors(), true));
+} 
+
+// echo 'REMOTE_ADDR: ' . $_SERVER['REMOTE_ADDR'] . '<br>';
+// else {
+//     echo "Insert success!";
+// }
 
     }?>
 				  </tbody>
@@ -441,7 +544,21 @@ SELECT CASE WHEN PROJECTCODE <> '' THEN PROJECTCODE ELSE ORIGDLVSALORDLINESALORD
         if ($rowdb22['LEGALNAME1'] == "") {$langganan = "";} else { $langganan = $rowdb22['LEGALNAME1'];}
         if ($rowdb22['ORDERPARTNERBRANDCODE'] == "") {$buyer = "";} else { $buyer = $rowdb22['ORDERPARTNERBRANDCODE'];}
 
-        ?>
+         $projectawal = !empty($rowdb21['PROJAWAL']) ? $rowdb21['PROJAWAL'] :
+               (!empty($rowdb21['PROJAWAL1']) ? $rowdb21['PROJAWAL1'] :
+               (!empty($rowdb25['PROJECT']) ? $rowdb25['PROJECT'] :
+               $rowdb24['INTERNALREFERENCE']));
+
+
+      $note = $rowdb21['NOTE'];
+
+      if ($rowdb21['PTG'] == "1") {
+          $note .= " Permintaan Potong";
+      } else if ($rowdb21['PTG'] == "2") {
+          $note .= " Tarikan Kain";
+      }
+
+      ?>
 	  <tr>
 	  <td style="text-align: center"><?php echo $no; ?></td>
 	  <td style="text-align: center"><?php echo $rowdb21['TRANSACTIONDATE']; ?></td>
@@ -456,11 +573,55 @@ SELECT CASE WHEN PROJECTCODE <> '' THEN PROJECTCODE ELSE ORIGDLVSALORDLINESALORD
       <td style="text-align: center"><?php if ($rowdb21['PROJAWAL'] != "") {echo $rowdb21['PROJAWAL'];} else if ($rowdb25['PROJECT'] != "") {echo $rowdb25['PROJECT'];} else {echo $rowdb24['INTERNALREFERENCE'];}?></td>
       <td style="text-align: center"><?php echo $rowdb21['CREATIONUSER']; ?></td>
       </tr>
-
+      
 	<?php
-$no++;
+        $no++;
         $totRol1 = $totRol1 + $rowdb21['JML'];
         $totKG1 = $totKG1 + $rowdb21['KG'];
+       
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+include_once("koneksi.php");
+
+$sql = "INSERT INTO dbnow_gkg.tbl_keluar_greige2 (
+    TRANSACTIONDATE,
+    BUYER, 
+    LANGGANAN,
+    PROJECTCODE,
+    ORDERCODE,
+    LOTCODE,
+    ROLL,
+    QTY_KG,
+    NOTE,
+    PROJAWAL,
+    CREATIONUSER,
+    ID_ADDRESS
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+$params = [
+    $rowdb21['TRANSACTIONDATE'],
+    $buyer,
+    $langganan,
+    $project,
+    $kdbenang,
+    $rowdb21['LOTCODE'],
+    $rowdb21['JML'],
+    $rowdb21['KG'],
+    $note,
+    $projectawal,
+    $rowdb21['CREATIONUSER'],
+    $ipaddress
+];
+
+$result = sqlsrv_query($con, $sql, $params);
+
+if (!$result) {
+    die(print_r(sqlsrv_errors(), true));
+} 
+
+// echo 'REMOTE_ADDR: ' . $_SERVER['REMOTE_ADDR'] . '<br>';
+// else {
+//     echo "Insert success!";
+// }
 
     }?>
 				  </tbody>

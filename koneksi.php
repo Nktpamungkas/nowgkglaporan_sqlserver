@@ -22,14 +22,13 @@ else{
     exit("DB2 Connection failed");
     }
 
-//$con=mysqli_connect("10.0.0.10","dit","4dm1n","db_dying");
+$congkg=mysqli_connect("10.0.0.10","dit","4dm1n","invgkg");
 //$cond=mysqli_connect("10.0.0.10","dit","4dm1n","db_qc");
 // $con=mysqli_connect("10.0.0.10","dit","4dm1n","dbnow_gkg");
-// if (mysqli_connect_errno()) {
-// printf("Connect failed: %s\n", mysqli_connect_error());
-// exit();
-// } 
-
+if (mysqli_connect_errno()) {
+printf("Connect failed: %s\n", mysqli_connect_error());
+exit();
+} 
 
 $hostSVR19 = "10.0.0.221";
 $usernameSVR19 = "sa";
