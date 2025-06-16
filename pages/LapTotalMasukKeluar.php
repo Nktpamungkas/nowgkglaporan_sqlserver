@@ -160,8 +160,109 @@ if($b=="12"){ $Nbln="Desember";}
 											ORDER BY 
 												tgl_tutup DESC;
  ");		  
-    $rT = sqlsrv_fetch_array($sqlT);		  
-	?>			<table id="example16" width="100%" class="table table-sm table-bordered table-striped" style="font-size: 11px; text-align: center;">
+    $rT = sqlsrv_fetch_array($sqlT);
+
+		$stokmati = sqlsrv_query($con, "WITH MaxTutup AS (
+				SELECT 
+					(SELECT MAX(tgl_tutup) 
+					FROM Stock_mati_gkg 
+					WHERE proj_awal LIKE '%/%' 
+					AND FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan') AS tgl_bulan_ini,
+					
+					(SELECT MAX(tgl_tutup) 
+					FROM Stock_mati_gkg 
+					WHERE proj_awal LIKE '%/%' 
+					AND FORMAT(tgl_tutup, 'yyyy-MM') = '$BlnLL') AS tgl_bulan_lalu
+			)
+			SELECT 
+				(SELECT SUM(kgs) 
+				FROM Stock_mati_gkg 
+				WHERE proj_awal LIKE '%/%' 
+				AND tgl_tutup = tgl_bulan_ini) AS total_bulan_ini,
+
+				(SELECT SUM(kgs) 
+				FROM Stock_mati_gkg 
+				WHERE proj_awal LIKE '%/%' 
+				AND tgl_tutup = tgl_bulan_lalu) AS total_bulan_lalu
+			FROM MaxTutup
+		");
+$stokmatiT = sqlsrv_fetch_array($stokmati);
+
+
+    $masuk = " SELECT 
+(
+    -- QTY KG
+    (
+        SELECT COALESCE(SUM(STOCKTRANSACTION.WEIGHTNET), 0)
+        FROM INTERNALDOCUMENT
+        LEFT JOIN INTERNALDOCUMENTLINE ON
+            INTERNALDOCUMENT.PROVISIONALCOUNTERCODE = INTERNALDOCUMENTLINE.INTDOCPROVISIONALCOUNTERCODE
+            AND INTERNALDOCUMENT.PROVISIONALCODE = INTERNALDOCUMENTLINE.INTDOCUMENTPROVISIONALCODE
+            AND INTERNALDOCUMENTLINE.DESTINATIONWAREHOUSECODE = 'M021'
+        LEFT JOIN STOCKTRANSACTION ON
+            INTERNALDOCUMENTLINE.INTDOCUMENTPROVISIONALCODE = STOCKTRANSACTION.ORDERCODE
+            AND INTERNALDOCUMENTLINE.ORDERLINE = STOCKTRANSACTION.ORDERLINE
+        WHERE
+            STOCKTRANSACTION.TEMPLATECODE = '204'
+            AND STOCKTRANSACTION.LOGICALWAREHOUSECODE = 'M021'
+            AND VARCHAR_FORMAT(STOCKTRANSACTION.TRANSACTIONDATE, 'YYYY-MM') = '$Bulan'
+            AND INTERNALDOCUMENTLINE.ORDERLINE IS NOT NULL
+    )
+    +
+    -- QTY NONFK
+    (
+        SELECT COALESCE(SUM(s.BASEPRIMARYQUANTITY), 0)
+        FROM STOCKTRANSACTION s
+        LEFT JOIN ADSTORAGE a ON a.UNIQUEID = s.ABSUNIQUEID AND a.NAMENAME = 'StatusRetur'
+        WHERE
+            VARCHAR_FORMAT(s.TRANSACTIONDATE, 'YYYY-MM') = '$Bulan'
+            AND s.ITEMTYPECODE = 'KGF'
+            AND s.LOGICALWAREHOUSECODE = 'M021'
+            AND s.TEMPLATECODE = 'OPN'
+            AND a.VALUESTRING = '1'
+    )
+    +
+    -- QTY FK
+    (
+        SELECT COALESCE(SUM(st.BASEPRIMARYQUANTITY), 0)
+        FROM INTERNALDOCUMENT
+        LEFT JOIN INTERNALDOCUMENTLINE ON
+            INTERNALDOCUMENT.PROVISIONALCOUNTERCODE = INTERNALDOCUMENTLINE.INTDOCPROVISIONALCOUNTERCODE
+            AND INTERNALDOCUMENT.PROVISIONALCODE = INTERNALDOCUMENTLINE.INTDOCUMENTPROVISIONALCODE
+        LEFT JOIN STOCKTRANSACTION st ON
+            INTERNALDOCUMENTLINE.INTDOCUMENTPROVISIONALCODE = st.ORDERCODE
+            AND INTERNALDOCUMENTLINE.ORDERLINE = st.ORDERLINE
+        WHERE
+            st.TEMPLATECODE = '204'
+            AND st.LOGICALWAREHOUSECODE = 'M021'
+            AND VARCHAR_FORMAT(st.TRANSACTIONDATE, 'YYYY-MM') = '$Bulan'
+            AND INTERNALDOCUMENTLINE.ORDERLINE IS NOT NULL
+            AND INTERNALDOCUMENTLINE.SUBCODE02 IN ('FKP', 'FKY', 'FJQ')
+    )
+    +
+    -- QTY CWD
+    (
+        SELECT COALESCE(SUM(s.BASEPRIMARYQUANTITY), 0)
+        FROM STOCKTRANSACTION s
+        LEFT JOIN ADSTORAGE a ON a.UNIQUEID = s.ABSUNIQUEID AND a.NAMENAME = 'StatusRetur'
+        WHERE 
+            VARCHAR_FORMAT(s.TRANSACTIONDATE, 'YYYY-MM') = '$Bulan'
+            AND s.ITEMTYPECODE = 'KGF'
+            AND s.LOGICALWAREHOUSECODE = 'M021'
+            AND s.TEMPLATECODE = 'OPN'
+            AND a.VALUESTRING = '2'
+            AND s.PROJECTCODE LIKE '%CWD%'
+    )
+) AS TOTAL_QTY_MASUK
+FROM SYSIBM.SYSDUMMY1;
+
+    ";
+
+    $stmtmasuk = db2_exec($conn1, $masuk, ['cursor' => DB2_SCROLLABLE]);
+	$datamasuk = db2_fetch_assoc($stmtmasuk);
+
+	?>			
+	<table id="example16" width="100%" class="table table-sm table-bordered table-striped" style="font-size: 11px; text-align: center;">
                   <thead>
                   <tr>
                     <th width="3%" rowspan="2" align="center" valign="middle">#</th>
@@ -179,31 +280,32 @@ if($b=="12"){ $Nbln="Desember";}
 	  <tr>
 	    <td>1</td>
 	  <td><strong>Stok Bulan <?php if($Bln2!="01"){echo namabln($BlnLalu)." ".$Thn2;}else{echo namabln($BlnLalu)." ".$Thn;} ?></strong></td>
-	  <td align="right"><?php echo number_format(round($r['kg'],2),2); ?></td>
-      <td>&nbsp;</td>
+	  <td align="right"></td>
+      <td><?php echo number_format(round($stokmatiT['total_bulan_lalu'],2),2); ?></td>
       <td align="right">&nbsp;</td>
       <td align="right"><?php echo number_format(round($r['kg'],2),2); ?></td>
       </tr>	  
 	 <tr>
 	   <td>2</td>
 	   <td><strong>Masuk Kain</strong></td>
-	    <td align="right"><?php echo number_format(round($rM['kg'],2),2); ?></td>
+		<td><?php echo number_format(round($datamasuk['TOTAL_QTY_MASUK'],2),2); ?></td>
+		</td>
 	    <td>&nbsp;</td>
 	    <td align="right">&nbsp;</td>
-	    <td align="right"><?php echo number_format(round($rM['kg'],2),2); ?></td>
+	    <td align="right"></td>
 	    </tr>
 	 <tr>
 	   <td>3</td>
 	   <td><strong>Keluar Kain</strong></td>
-	   <td align="right"><?php echo number_format(round($rK['kg'],2),2); ?></td>
+	   <td align="right"></td>
 	   <td>&nbsp;</td>
 	   <td align="right">&nbsp;</td>
-	   <td align="right"><?php echo number_format(round($rK['kg'],2),2); ?></td>
+	   <td align="right"></td>
 	   </tr>
 	 <tr>
 	   <td>4</td>
 	   <td><strong>Stok</strong></td>
-	   <td align="right"><?php echo number_format(round($r['kg'],2)+(round($rM['kg'],2)-round($rK['kg'],2)),2); ?></td>
+	   <td align="right"></td>
 	   <td>&nbsp;</td>
 	   <td align="right">&nbsp;</td>
 	   <td align="right"><?php echo number_format(round($r['kg'],2)+(round($rM['kg'],2)-round($rK['kg'],2)),2); ?></td>
@@ -211,8 +313,8 @@ if($b=="12"){ $Nbln="Desember";}
 	 <tr>
 	   <td>5</td>
 	   <td><strong>Stok Opname <?php echo namabln($Bln2)." ".$Thn2; ?></strong></td>
-	   <td align="right"><?php echo number_format(round($rT['kg'],2),2); ?></td>
-	   <td>&nbsp;</td>
+	   <td align="right"></td>
+	   <td><?php echo number_format(round($stokmatiT['total_bulan_ini'],2),2); ?></td>
 	   <td align="right">&nbsp;</td>
 	   <td align="right"><?php echo number_format(round($rT['kg'],2),2); ?></td>
 	   </tr>				
