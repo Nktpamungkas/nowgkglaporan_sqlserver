@@ -8,6 +8,8 @@ header("Expires: 0");
 <?php
 $Awal = isset($_GET['awal']) ? $_GET['awal'] : '';
 $Akhir = isset($_GET['akhir']) ? $_GET['akhir'] : '';
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+
 ?>
 <?php
 ini_set("error_reporting", 1);
@@ -82,7 +84,7 @@ include "../../koneksi.php";
           PROJAWAL
         FROM 
           dbnow_gkg.tbl_keluar_greige
-        WHERE TRANSACTIONDATE BETWEEN '$Awal' AND '$Akhir'
+        WHERE TRANSACTIONDATE BETWEEN '$Awal' AND '$Akhir' AND ID_ADDRESS = '$ipaddress'
       ";
 
       $stmt1 = sqlsrv_query($con, $sqlDB21);
