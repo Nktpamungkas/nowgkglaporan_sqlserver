@@ -39,7 +39,7 @@ include "../../koneksi.php";
   <tr align="center">
 
     <td rowspan="2" >No</td>
-    <td rowspan="2" >Tgl Keluar</td>
+    <!-- <td rowspan="2" >Tgl Keluar</td> -->
     <td rowspan="2" >Langganan</td>
     <td colspan="4" >Jenis Benang</td>
     <td rowspan="2" >Jenis Kain</td>
@@ -113,7 +113,6 @@ include "../../koneksi.php";
           echo "
           <tr>
               <td>$no</td>
-              <td>{$rowdb21['TRANSACTIONDATE']}</td>
               <td>{$rowdb21['LANGGANAN']}</td>
               <td>{$rowdb21['BENANG1']}</td>
               <td>{$rowdb21['BENANG2']}</td>
@@ -141,7 +140,7 @@ include "../../koneksi.php";
     ?>
 
     <tr align="right">
-      <td colspan="9"  ><b>Total</b></td>
+      <td colspan="8"  ><b>Total</b></td>
       <td ><b><?php echo number_format($totr, '2', '.', ','); ?></b></td>
       <td ><b><?php echo number_format($totqt, '2', '.', ','); ?></b></td>
       <td >&nbsp;</td>
@@ -157,31 +156,31 @@ include "../../koneksi.php";
   <td colspan="4"></td>
   <td colspan="3" style="text-align: center; vertical-align: middle;">Dibuat Oleh :</td>
   <td colspan="5" style="text-align: center; vertical-align: middle;">Diperiksa Oleh :</td>
-  <td colspan="7" style="text-align: center; vertical-align: middle;">Mengetahui :</td>
+  <td colspan="6" style="text-align: center; vertical-align: middle;">Mengetahui :</td>
 </tr>
 <tr>
   <td colspan="4" style="text-align: center; vertical-align: middle;">Nama</td>
   <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
   <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="7" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="6" style="text-align: center; vertical-align: middle;"></td>
 </tr>
 <tr>
   <td colspan="4" style="text-align: center; vertical-align: middle;">Jabatan</td>
   <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
   <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="7" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="6" style="text-align: center; vertical-align: middle;"></td>
 </tr>
 <tr>
   <td colspan="4" style="text-align: center; vertical-align: middle;">Tanggal</td>
   <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
   <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="7" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="6" style="text-align: center; vertical-align: middle;"></td>
 </tr>
 <tr>
   <td colspan="4" style="text-align: center; vertical-align: middle;">Tanda Tangan</td>
   <td colspan="3" style="text-align: center; vertical-align: middle;"><br><br><br><br></td>
   <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="7" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="6" style="text-align: center; vertical-align: middle;"></td>
 </tr>
 </table>
 
