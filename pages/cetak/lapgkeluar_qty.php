@@ -145,9 +145,9 @@
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
-                    <td></td>
+                    <td>$knitt1</td>
                     <td>" . ($rowdb21['nama_barang'] == 'BS-A' ? 'KAIN POTONGAN' : $rowdb21['nama_barang']) . "</td>
+                    <td></td>
                 </tr>"
             ;
            $no++;
@@ -217,7 +217,7 @@
                     <td>{$rowdb21['BENANG3']}</td>
                     <td>{$rowdb21['BENANG4']}</td>
                     <td>{$kodeBenang}</td>
-                    <td>" . number_format($rowdb21['ROLL'], 2, ',', '.') . "</td>
+                    <td>" . number_format($rowdb21['QTY_DUS'], 2, ',', '.') . "</td>
                     <td>" . number_format($rowdb21['QTY_KG'], 2, ',', '.') . "</td>
                     <td>{$rowdb21['WARNA']}</td>
                     <td>{$orderCode}</td>
@@ -295,7 +295,7 @@
 
           $no++;
           $totqt += $rowdb21['QTY_KG'];
-          $totr += $rowdb21['QTY_DUS'];
+          $totr += $rowdb21['ROLL'];
         }
     ?>
 
