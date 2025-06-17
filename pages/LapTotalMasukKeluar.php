@@ -140,8 +140,8 @@ if($b=="12"){ $Nbln="Desember";}
 												SUM(berat) AS kg 
 											FROM 
 												dbnow_gkg.tblkeluarkain 
-											WHERE 
-												FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan' 
+											WHERE format(tgl_tutup, 'yyyy-MM') = '$Bulan' 
+											AND not projectcode LIKE '%CWD%'
 											GROUP BY 
 												FORMAT(tgl_tutup, 'yyyy-MM');
 ");		  
@@ -162,18 +162,37 @@ if($b=="12"){ $Nbln="Desember";}
  ");		  
     $rT = sqlsrv_fetch_array($sqlT);
 
-	$sqlRMasuk = sqlsrv_query($con, " SELECT 
+	$sqlRMasuk = sqlsrv_query($con, " SELECT format(tgl_tutup, 'yyyy-MM')  as tgl_tutup, 
+													SUM(qty) AS rol, 
+													SUM(berat) AS kg 
+												FROM dbnow_gkg.tblmasukkain 
+												WHERE FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan'
+												AND no_bon IS NULL 
+												-- AND mesin_rajut = 'maklun' 
+												AND (
+													projectcode LIKE '%CWD%' 
+													OR projectcode IS NULL
+												)
+												AND (
+													mesin_rajut IS NULL 
+													OR mesin_rajut = 'retur'
+													)
+												GROUP BY format(tgl_tutup, 'yyyy-MM'); ");
+	$rRMasuk = sqlsrv_fetch_array($sqlRMasuk);
+
+	$sqlRkeluar = sqlsrv_query($con, " SELECT 
 											FORMAT(tgl_tutup, 'yyyy-MM') as tgl_tutup,
 											SUM(qty) AS rol,
 											SUM(berat) AS kg 
 										FROM 
-											dbnow_gkg.tblmasukkain 
+											dbnow_gkg.tblkeluarkain 
 										WHERE 
 											FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan' 
-											AND no_bon IS NULL 
+											AND demand IS NOT NULL 
+											AND projectcode LIKE '%CWD%'
 										GROUP BY 
 											FORMAT(tgl_tutup, 'yyyy-MM'); ");
-	$rRMasuk = sqlsrv_fetch_array($sqlRMasuk);
+	$rRkeluar = sqlsrv_fetch_array($sqlRkeluar);
 
 		$stokmati = sqlsrv_query($con, "WITH MaxTutup AS (
 				SELECT 
@@ -301,19 +320,20 @@ FROM SYSIBM.SYSDUMMY1;
 	 <tr>
 	   <td>2</td>
 	   <td><strong>Masuk Kain</strong></td>
-		<td><?php echo number_format(round($datamasuk['TOTAL_QTY_MASUK'],2),2); ?></td>
+		<td><?php echo number_format(round($datamasuk['TOTAL_QTY_MASUK'],2) - (round($rRMasuk['kg'], 2)),2); ?></td>
 		</td>
 	    <td>&nbsp;</td>
 	    <td align="center"><?php echo number_format(round($rRMasuk['kg'], 2), 2); ?></td>
-	    <td align="right"></td>
+	    <td align="right"><?php echo number_format(round($datamasuk['TOTAL_QTY_MASUK'], 2) + (round($rRMasuk['kg'], 2)), 2); ?></td>
+
 	    </tr>
 	 <tr>
 	   <td>3</td>
 	   <td><strong>Keluar Kain</strong></td>
 	   <td align="center"><?php echo number_format(round($rK['kg'],2),2); ?></td></td>
 	   <td>&nbsp;</td>
-	   <td align="right">&nbsp;</td>
-	   <td align="right"></td>
+	   <td align="center"><?php echo number_format(round($rRkeluar['kg'],2),2); ?></td>
+	   <td align="right"><?php echo number_format(round($rK['kg'], 2) + (round($rRkeluar['kg'], 2)), 2); ?></td>
 	   </tr>
 	 <tr>
 	   <td>4</td>
