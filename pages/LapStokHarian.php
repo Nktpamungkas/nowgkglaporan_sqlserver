@@ -85,7 +85,9 @@ $Lalu 		= $Bln2-1;
 		<div class="card card-warning">
               <div class="card-header">
                 <h3 class="card-title">Detail Laporan Harian Masuk Kain Greige</h3>
-				<!--<a href="pages/cetak/lapgmasuk_excel1.php?awal=<?php echo $Awal;?>&akhir=<?php echo $Akhir;?>" class="btn bg-blue float-right" target="_blank">Cetak Excel</a>-->  
+				<a href="pages/cetak/lapgharian_excel.php?awal=<?= $Bulan ?>&akhir=<?= $Bulan ?>" class="btn bg-blue float-right" target="_blank">Cetak Excel</a>
+
+
           </div>
               <!-- /.card-header -->
               <div class="card-body">
@@ -158,7 +160,15 @@ $Lalu 		= $Bln2-1;
 												FROM dbnow_gkg.tblmasukkain 
 												WHERE tgl_tutup = '$Thn2-$Bln2-$i'
 													AND no_bon IS NULL 
-													AND mesin_rajut = 'maklun' 
+													-- AND mesin_rajut = 'maklun' 
+													AND (
+														projectcode LIKE '%CWD%' 
+														OR projectcode IS NULL
+													)
+													AND (
+														mesin_rajut IS NULL 
+														OR mesin_rajut = 'retur'
+													)
 												GROUP BY tgl_tutup; ");	
 	$rMMasuk = sqlsrv_fetch_array($sqlMMasuk);
 
@@ -170,6 +180,16 @@ $Lalu 		= $Bln2-1;
 													AND demand IS NOT NULL 
 												GROUP BY tgl_tutup; ");		  
     $rKeluar = sqlsrv_fetch_array($sqlKeluar);
+
+	$sqlKeluarjasa = sqlsrv_query($con," SELECT tgl_tutup, 
+													SUM(qty) AS rol, 
+													SUM(berat) AS kg 
+												FROM dbnow_gkg.tblkeluarkain 
+												WHERE tgl_tutup = '$Thn2-$Bln2-$i' 
+													-- AND demand IS NOT NULL 
+													AND projectcode LIKE '%CWD%'
+												GROUP BY tgl_tutup; ");		  
+    $rKeluarj = sqlsrv_fetch_array($sqlKeluarjasa);
 
 	$sqlPotong = sqlsrv_query($con," SELECT tgl_tutup, 
 													SUM(qty) AS rol, 
@@ -212,7 +232,7 @@ $Lalu 		= $Bln2-1;
 	  <td align="right"><?php echo number_format(round($rMasuk['kg'],2),2); ?></td>
       <td align="right"><?php echo number_format(round($rMMasuk['kg'],2),2); ?></td>
       <td align="right"><?php echo number_format(round($rKeluar['kg'],2),2); ?></td>
-      <td>&nbsp;</td>
+      <td align="right"><?php echo number_format(round($rKeluarj['kg'],2),2); ?></td>
       <td align="right"><?php echo number_format(round($rRMasuk['kg'],2),2); ?></td>
       <td align="right"><?php echo number_format(round($rPotong['kg'],2),2); ?></td>
       <td align="right"><strong><?php echo number_format(round($sisa,3),3); ?></strong></td>
@@ -225,6 +245,7 @@ $Lalu 		= $Bln2-1;
 	$tM+=round($rMasuk['kg'],3);
 	$tN+=round($rMMasuk['kg'],3);
 	$tK+=round($rKeluar['kg'],3);
+	$tKJ+=round($rKeluarj['kg'],3);
 	$tR+=round($rRMasuk['kg'],3);
 	$tP+=round($rPotong['kg'],3);
 	} 
@@ -237,7 +258,7 @@ $Lalu 		= $Bln2-1;
 	    <td align="right"><strong><?php echo number_format(round($tM,2),2); ?></strong></td>
 	    <td align="right"><strong><?php echo number_format(round($tN,2),2); ?></strong></td>
 	    <td align="right"><strong><?php echo number_format(round($tK,2),2); ?></strong></td>
-	    <td>&nbsp;</td>
+	    <td align="right"><strong><?php echo number_format(round($tKJ,2),2); ?></strong></td>
 	    <td align="right"><strong><?php echo number_format(round($tR,2),2); ?></strong></td>
 	    <td align="right"><strong><?php echo number_format(round($tP,2),2); ?></strong></td>
 	    <td align="right"><strong><?php echo number_format(round($tS,3),3); ?></strong></td>
