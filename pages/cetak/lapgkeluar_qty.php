@@ -127,9 +127,10 @@
         }
 
         $no = 1;
-        $totqt = 0;
-        $totr = 0;
-
+        $totqty_kg = 0;
+        $totroll = 0;
+        $totstok = 0;
+        
         while ($rowdb21 = mysqli_fetch_assoc($stmtbs)) {
             $knitt1 = "ITTI";
             echo "
@@ -155,12 +156,12 @@
                 </tr>"
             ;
            $no++;
-           $totqty += $rowdb21['qty_roll'];
-           $totrll += $rowdb21['qty_kg'];
+           $totroll += $rowdb21['qty_roll'];
+           $totqty_kg += $rowdb21['qty_kg'];
         }
     ?>
     <?php 
-        $totstok= $totqty+$totrll;
+        $totstok += $totqty_kg;
     ?>
 
     <tr align="right">
