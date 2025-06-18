@@ -1,5 +1,5 @@
 <?php
-    $namaFile = 'greige_bulanan_keluar_qty.xls';
+    $namaFile = 'Laporan bulanan pembagian kain greige.xls';
     header("Content-type: application/octet-stream");
     header("Content-Disposition: attachment; filename=$namaFile");
     header("Pragma: no-cache");
@@ -70,31 +70,33 @@
 
         <!-- Judul -->
         <div style="text-align: center;">
-            <h3 style="margin: 0;"><strong>LAPORAN BULANAN PEMBAGIAN KAIN GREIGE (KELUAR)</strong></h3>
-            <h5 style="margin: 10px 0;"><strong>BULAN <?php echo $bulanTahun; ?></strong></h5>
+            <h3 style="margin: 0; text-decoration: underline;"><strong>LAPORAN BULANAN PEMBAGIAN KAIN GREIGE</strong></h3>
+            <h5 style="margin: 10px 0; color:red; text-decoration: underline;"><strong>KAIN GREIGE AMBIL PO SELESAI!!!</strong></h5>
             <h5 style="margin: 10px 0;"><strong>No Form : FW-19-GKG-13/03</strong></h5>
             <h5 style="margin: 10px 0;"><strong>Halaman :</strong></h5>
         </div>
     </div>
 <body>
 
-<!-- <div align="LEFT">TGL : <?php echo date($_GET['tanggal1']); ?></div> -->
+<div align="LEFT"><?php echo $bulanTahun; ?></div>
 
 <table width="125%" border="1" align="Center">
     <tr align="center">
-        <td rowspan="2" >No</td>
-        <td rowspan="2" >Langganan</td>
-        <td rowspan="2" >No Order</td>
-        <td colspan="4" >Jenis Benang</td>
-        <td rowspan="2" >Jenis Kain</td>
-        <td rowspan="2" >Roll</td>
-        <td rowspan="2" >Quantity (KG)</td>
-        <td rowspan="2" >Warna</td>
-        <td rowspan="2" >No Card</td>
-        <td rowspan="2" >No. Lot</td>
-        <td rowspan="2" >Knitt</td>
-        <td rowspan="2" >Knitt Order</td>
-        <td rowspan="2" >Ket</td>
+        <td rowspan="2">No</td>
+        <td rowspan="2">Langganan</td>
+        <td rowspan="2">No Order</td>
+        <td colspan="4">Jenis Benang</td>
+        <td rowspan="2">Jenis Kain</td>
+        <td rowspan="2">Roll</td>
+        <td rowspan="2">Quantity (KG)</td>
+        <td rowspan="2">Warna</td>
+        <td rowspan="2">No Card(Prod. Order)</td>
+        <td rowspan="2">Lot KK</td>
+        <td rowspan="2">No Lot Demand</td>
+        <td rowspan="2">Knitt</td>
+        <td rowspan="2">Knitt Order</td>
+        <td rowspan="2">Ket</td>
+        <td rowspan="2">Tgl</td>
     </tr>
     <tr align="center">
         <td >1</td>
@@ -116,7 +118,7 @@
             JOIN tbl_barang_bs tb ON tsd.barang_bs_id = tb.id
             WHERE DATE(tso.tanggal) BETWEEN '$Awal' AND '$Akhir'
             GROUP BY tso.id, DATE(tso.tanggal)
-            ORDER BY tso.id DESC"
+            ORDER BY tso.id ASC"
         ;
         $stmtbs = mysqli_query($congkg, $mysqlBS);
 
@@ -140,17 +142,18 @@
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td>" . number_format($rowdb21['qty_roll'], 2, ',', '.') . "</td>
+                    <td>{$rowdb21['qty_roll']}</td>
                     <td>" . number_format($rowdb21['qty_kg'], 2, ',', '.') . "</td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
                     <td>$knitt1</td>
                     <td>" . ($rowdb21['nama_barang'] == 'BS-A' ? 'KAIN POTONGAN' : $rowdb21['nama_barang']) . "</td>
                     <td></td>
+                    <td>{$rowdb21['tanggal']}</td>
                 </tr>"
             ;
-           $no++;
            $no++;
            $totqty += $rowdb21['qty_roll'];
            $totrll += $rowdb21['qty_kg'];
@@ -163,7 +166,7 @@
     <tr align="right">
         <td colspan="9" style="text-align: left;" ><b>Total</b></td>
         <td ><b><?php echo number_format($totstok, '2', '.', ','); ?></b></td>
-        <td colspan="6" >&nbsp;</td>
+        <td colspan="8" >&nbsp;</td>
     </tr>
 </table>
 
@@ -176,7 +179,7 @@
         $sqlDB21 = " SELECT  
             LANGGANAN, PROJECTCODE, KODEBENANG, UPPER(DESCRIPTION_) AS DESCRIPTION_, LOTCODE,
             BENANG1, BENANG2, BENANG3, BENANG4, WARNA, SUMMARIZEDDESCRIPTION, QTY_DUS,
-            QTY_KG, PROJAWAL, ORDERCODE, ID_ADDRESS
+            QTY_KG, PROJAWAL, ORDERCODE, ID_ADDRESS, TRANSACTIONDATE, PRODUCTIONDEMANDCODE
             FROM 
                 dbnow_gkg.tbl_keluar_greige
             WHERE 
@@ -184,7 +187,7 @@
             GROUP BY 
                 LANGGANAN, PROJECTCODE, KODEBENANG, UPPER(DESCRIPTION_), LOTCODE,
                 BENANG1, BENANG2, BENANG3, BENANG4, WARNA, SUMMARIZEDDESCRIPTION, QTY_DUS,
-                QTY_KG, PROJAWAL, ORDERCODE, ID_ADDRESS, TRANSACTIONDATE
+                QTY_KG, PROJAWAL, ORDERCODE, ID_ADDRESS, TRANSACTIONDATE, PRODUCTIONDEMANDCODE
             ORDER BY 
                 TRANSACTIONDATE ASC"
         ;
@@ -217,14 +220,16 @@
                     <td>{$rowdb21['BENANG3']}</td>
                     <td>{$rowdb21['BENANG4']}</td>
                     <td>{$kodeBenang}</td>
-                    <td>" . number_format($rowdb21['QTY_DUS'], 2, ',', '.') . "</td>
+                    <td>{$rowdb21['QTY_DUS']}</td>
                     <td>" . number_format($rowdb21['QTY_KG'], 2, ',', '.') . "</td>
                     <td>{$rowdb21['WARNA']}</td>
                     <td>{$orderCode}</td>
                     <td>{$descriptionFormatted}</td>
+                    <td>{$productionDemandCode}</td>
                     <td>{$knitt1}</td>
                     <td>{$lotCode}</td>
                     <td>{$rowdb21['PROJECTCODE']}</td>
+                    <td>{$rowdb21['TRANSACTIONDATE']}</td>
                 </tr>"
             ;
 
@@ -270,7 +275,7 @@
 
             $orderCode = "'" . $rowdb21['ORDERCODE'];
             $descriptionFormatted = "'" . $rowdb21['DESCRIPTION_'];
-            $productionDemandCode = "'" . $rowdb21['PRODUCTIONDEMANDCODE'];
+            // $productionDemandCode = "'" . $rowdb21['PRODUCTIONDEMANDCODE'];
             $lotCode = "'" . $rowdb21['LOTCODE'];
             echo "
                 <tr>
@@ -282,14 +287,16 @@
                     <td></td>
                     <td></td>
                     <td>{$rowdb21['ORDERCODE']}</td>
-                    <td>" . number_format($rowdb21['ROLL'], 2, ',', '.') . "</td>
+                    <td>{$rowdb21['ROLL']}</td>
                     <td>" . number_format($rowdb21['QTY_KG'], 2, ',', '.') . "</td>
                     <td></td>
+                    <td>'</td>
                     <td>'</td>
                     <td>'</td>
                     <td>{$knitt1}</td>
                     <td>{$lotCode}</td>
                     <td>{$rowdb21['NOTE']}</td>
+                    <td>{$rowdb21['TRANSACTIONDATE']}</td>
                 </tr>
             ";
 
@@ -306,7 +313,7 @@
     <tr align="right">
         <td colspan="9" style="text-align: left;"><b>Total</b></td>
         <td ><b><?php echo number_format($tot, '2', '.', ','); ?></b></td>
-        <td colspan="6" >&nbsp;</td>
+        <td colspan="8" >&nbsp;</td>
     </tr>
 </table>
 
@@ -328,32 +335,32 @@
 
 <table style="width: auto;" border="1">
     <tr>
-    <td colspan="4"></td>
-    <td colspan="4" style="text-align: center; vertical-align: middle;">Dibuat Oleh :</td>
+    <td colspan="5"></td>
+    <td colspan="5" style="text-align: center; vertical-align: middle;">Dibuat Oleh :</td>
     <td colspan="4" style="text-align: center; vertical-align: middle;">Diperiksa Oleh :</td>
     <td colspan="4" style="text-align: center; vertical-align: middle;">Mengetahui :</td>
     </tr>
     <tr>
-    <td colspan="4" style="text-align: center; vertical-align: middle;">Nama</td>
-    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
-    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
-    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
-    </tr>
-    <tr>
-    <td colspan="4" style="text-align: center; vertical-align: middle;">Jabatan</td>
-    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="5" style="text-align: center; vertical-align: middle;">Nama</td>
+    <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
     <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
     <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
     </tr>
     <tr>
-    <td colspan="4" style="text-align: center; vertical-align: middle;">Tanggal</td>
-    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="5" style="text-align: center; vertical-align: middle;">Jabatan</td>
+    <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
     <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
     <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
     </tr>
     <tr>
-    <td colspan="4" style="text-align: center; vertical-align: middle;">Tanda Tangan</td>
-    <td colspan="4" style="text-align: center; vertical-align: middle;"><br><br><br><br></td>
+    <td colspan="5" style="text-align: center; vertical-align: middle;">Tanggal</td>
+    <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
+    <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
+    </tr>
+    <tr>
+    <td colspan="5" style="text-align: center; vertical-align: middle;">Tanda Tangan</td>
+    <td colspan="5" style="text-align: center; vertical-align: middle;"><br><br><br><br></td>
     <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
     <td colspan="4" style="text-align: center; vertical-align: middle;"></td>
     </tr>
