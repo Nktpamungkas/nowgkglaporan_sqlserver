@@ -178,19 +178,17 @@
     <?php
         $no = 1;
         $sqlDB21 = " SELECT  
-            LANGGANAN, PROJECTCODE, KODEBENANG, UPPER(DESCRIPTION_) AS DESCRIPTION_, LOTCODE,
-            BENANG1, BENANG2, BENANG3, BENANG4, WARNA, SUMMARIZEDDESCRIPTION, QTY_DUS,
-            QTY_KG, PROJAWAL, ORDERCODE, ID_ADDRESS, TRANSACTIONDATE, PRODUCTIONDEMANDCODE
-            FROM 
-                dbnow_gkg.tbl_keluar_greige
-            WHERE 
-                TRANSACTIONDATE BETWEEN '$Awal' AND '$Akhir' AND LOTCODE LIKE '%/%' and ID_ADDRESS = '$ipaddress'
-            GROUP BY 
-                LANGGANAN, PROJECTCODE, KODEBENANG, UPPER(DESCRIPTION_), LOTCODE,
-                BENANG1, BENANG2, BENANG3, BENANG4, WARNA, SUMMARIZEDDESCRIPTION, QTY_DUS,
-                QTY_KG, PROJAWAL, ORDERCODE, ID_ADDRESS, TRANSACTIONDATE, PRODUCTIONDEMANDCODE
-            ORDER BY 
-                TRANSACTIONDATE ASC"
+                LANGGANAN, PROJECTCODE, UPPER(DESCRIPTION_) AS DESCRIPTION_, LOTCODE,
+                BENANG1, BENANG2, BENANG3, BENANG4, UPPER(WARNA), SUMMARIZEDDESCRIPTION, QTY_DUS,
+                QTY_KG, PROJAWAL, ID_ADDRESS
+                FROM 
+                    dbnow_gkg.tbl_keluar_greige
+                WHERE 
+                    TRANSACTIONDATE BETWEEN '$Awal' AND '$Akhir' AND LOTCODE LIKE '%/%' and ID_ADDRESS = '$ipaddress'
+                GROUP BY 
+                    LANGGANAN, PROJECTCODE, UPPER(DESCRIPTION_), LOTCODE,
+                    BENANG1, BENANG2, BENANG3, BENANG4, WARNA, SUMMARIZEDDESCRIPTION, QTY_DUS,
+                    QTY_KG, PROJAWAL, ID_ADDRESS"
         ;
         $stmt1 = sqlsrv_query($con, $sqlDB21);
 
