@@ -90,6 +90,8 @@ if($b=="12"){ $Nbln="Desember";}
 		  </div>	
 		  <!-- /.card-body -->          
         </div>  
+
+		
 		
 		<div class="card card-warning">
               <div class="card-header">
@@ -141,7 +143,7 @@ if($b=="12"){ $Nbln="Desember";}
 											FROM 
 												dbnow_gkg.tblkeluarkain 
 											WHERE format(tgl_tutup, 'yyyy-MM') = '$Bulan' 
-											AND not projectcode LIKE '%CWD%'
+											and demand IS NOT NULL
 											GROUP BY 
 												FORMAT(tgl_tutup, 'yyyy-MM');
 ");		  
@@ -220,6 +222,48 @@ if($b=="12"){ $Nbln="Desember";}
 		");
 $stokmatiT = sqlsrv_fetch_array($stokmati);
 
+			$mysqlBSMasuk = "SELECT 
+--             tsj.id,
+				DATE_FORMAT(tsj.tanggal, '%Y-%m') AS tanggal_bulan,
+				SUM(tsjd.qty_masuk) AS qty_kg_masuk,
+				COUNT(tsjd.id) AS qty_roll
+			, GROUP_CONCAT(DISTINCT tb.nama SEPARATOR ', ') AS nama_barang
+			FROM 
+				tbl_surat_jalan tsj 
+			LEFT JOIN 
+				tbl_surat_jalan_detail tsjd ON tsjd.surat_jalan_id = tsj.id 
+			JOIN 
+				tbl_barang_bs tb ON tsjd.barang_bs_id = tb.id
+			WHERE 
+				DATE(tsj.tanggal) BETWEEN '2025-04-01' AND '2025-04-30' 
+			GROUP BY 
+				DATE_FORMAT(tsj.tanggal, '%Y-%m')"
+			;
+			$stmtbsmasuk = mysqli_query($congkg, $mysqlBSMasuk);
+			$rowdb21_masuk = mysqli_fetch_assoc($stmtbsmasuk);
+
+$mysqlBS = " SELECT 
+				DATE_FORMAT(tso.tanggal, '%Y-%m') AS tanggal,
+				SUM(tsjd.qty_keluar_detail) AS qty_kg_keluar,
+				COUNT(tsjd.id) AS qty_roll,
+				GROUP_CONCAT(DISTINCT tb.nama ORDER BY tb.nama SEPARATOR ', ') AS nama_barang
+			FROM 
+				tbl_sj_out tso
+			JOIN 
+				tbl_sj_out_detail tsjd ON tso.id = tsjd.sj_out_id 
+			JOIN 
+				tbl_surat_jalan_detail tsd ON tsjd.detail_id_surat_jalan = tsd.id
+			JOIN 
+				tbl_barang_bs tb ON tsd.barang_bs_id = tb.id
+			WHERE 
+				DATE_FORMAT(tso.tanggal, '%Y-%m') = '$Bulan'
+			GROUP BY  
+				DATE_FORMAT(tso.tanggal, '%Y-%m')
+			ORDER BY  
+				DATE_FORMAT(tso.tanggal, '%Y-%m')
+			";
+		$stmtbs = mysqli_query($congkg, $mysqlBS);
+		$rowdb21 = mysqli_fetch_assoc($stmtbs);
 
     $masuk = " SELECT 
 (
@@ -318,27 +362,41 @@ FROM SYSIBM.SYSDUMMY1;
       <td align="right"><?php echo number_format(round($r['kg'],2),2); ?></td>
       </tr>	  
 	 <tr>
+		<?php
+			$stokTerima = round($datamasuk['TOTAL_QTY_MASUK'], 2) - round($rRMasuk['kg'], 2); // float
+			$Rkg = round($rRMasuk['kg'], 2); // float
+			$RBs = round($rowdb21_masuk['qty_kg_masuk'], 2); // float
+			$total = $stokTerima + $Rkg + $RBs;
+		?>
 	   <td>2</td>
 	   <td><strong>Masuk Kain</strong></td>
-		<td><?php echo number_format(round($datamasuk['TOTAL_QTY_MASUK'],2) - (round($rRMasuk['kg'], 2)),2); ?></td>
+		<td><?php echo number_format($stokTerima, 2) ?></td>
 		</td>
-	    <td>&nbsp;</td>
+		<td align="center">
+		<?php
+		echo isset($rowdb21_masuk['qty_kg_masuk']) ? number_format(round($rowdb21_masuk['qty_kg_masuk'], 2), 2) : '0.00';
+		?>
+		</td>
 	    <td align="center"><?php echo number_format(round($rRMasuk['kg'], 2), 2); ?></td>
-	    <td align="right"><?php echo number_format(round($datamasuk['TOTAL_QTY_MASUK'], 2) + (round($rRMasuk['kg'], 2)), 2); ?></td>
+	    <td align="right"><?php echo number_format($total, 2) ?></td>
 
 	    </tr>
 	 <tr>
 	   <td>3</td>
 	   <td><strong>Keluar Kain</strong></td>
-	   <td align="center"><?php echo number_format(round($rK['kg'],2),2); ?></td></td>
-	   <td>&nbsp;</td>
+	   <td align="center"><?php echo number_format(round($rK['kg'],2)- round($rRkeluar['kg'], 2),2); ?></td></td>
+	   <td align="center">
+		<?php
+			echo isset($rowdb21['qty_kg_keluar']) ? number_format(round($rowdb21['qty_kg_keluar'], 2), 2) : '0.00';
+			?>
+		</td>	   
 	   <td align="center"><?php echo number_format(round($rRkeluar['kg'],2),2); ?></td>
-	   <td align="right"><?php echo number_format(round($rK['kg'], 2) + (round($rRkeluar['kg'], 2)), 2); ?></td>
+	   <td align="right"><?php echo number_format(round($rK['kg'], 2) + (round($rRkeluar['kg'], 2)+ round($rowdb21['qty_kg_keluar'], 2)), 2); ?></td>
 	   </tr>
 	 <tr>
 	   <td>4</td>
 	   <td><strong>Stok</strong></td>
-	   <td align="center"><?php echo number_format(round($r['kg'], 2) + (round($rM['kg'], 2) - round($rK['kg'], 2)- round($stokmatiT['total_bulan_ini'], 2)), 2); ?></td>
+	   <td align="center"><?php echo number_format(round($r['kg'], 2) + (round($rM['kg'], 2) - round($rK['kg'], 2)- round($stokmatiT['total_bulan_ini'], 2)- round($rRkeluar['kg'], 2)), 2); ?></td>
 	   <td><?php echo number_format(round($stokmatiT['total_bulan_ini'],2),2); ?></td>
 	   <td align="center">&nbsp;</td>
 	   <td align="right"><?php echo number_format(round($r['kg'],2)+(round($rM['kg'],2)-round($rK['kg'],2)),2); ?></td>
@@ -346,7 +404,7 @@ FROM SYSIBM.SYSDUMMY1;
 	 <tr>
 	   <td>5</td>
 	   <td><strong>Stok Opname <?php echo namabln($Bln2)." ".$Thn2; ?></strong></td>
-	   <td align="center"><?php echo number_format(round($r['kg'], 2) + (round($rM['kg'], 2) - round($rK['kg'], 2) - round($stokmatiT['total_bulan_ini'], 2)), 2); ?></td>
+	   <td align="center"><?php echo number_format(round($r['kg'], 2) + (round($rM['kg'], 2) - round($rK['kg'], 2) - round($stokmatiT['total_bulan_ini'], 2)- round($rRkeluar['kg'], 2)), 2); ?></td>
 	   <td><?php echo number_format(round($stokmatiT['total_bulan_ini'],2),2); ?></td>
 	   <td align="center">&nbsp;</td>
 	   <td align="right"><?php echo number_format(round($rT['kg'],2),2); ?></td>
