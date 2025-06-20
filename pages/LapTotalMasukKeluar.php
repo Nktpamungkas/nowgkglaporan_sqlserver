@@ -224,6 +224,18 @@ if($b=="12"){ $Nbln="Desember";}
 		");
 $stokmatiT = sqlsrv_fetch_array($stokmati);
 
+$sqlKainMati2 = sqlsrv_query($con, " SELECT 
+		FORMAT(tgl_tutup, 'yyyy-MM') AS tgl_tutup, 
+		SUM(qty) AS rol, 
+		SUM(berat) AS kg 
+	FROM 
+		dbnow_gkg.tblkeluarkain 
+	WHERE format(tgl_tutup, 'yyyy-MM') = '$Bulan' 
+	 and demand IS NULL and lot like '%/%'
+	GROUP BY 
+		FORMAT(tgl_tutup, 'yyyy-MM') ");
+$rKainMati2 = sqlsrv_fetch_array($sqlKainMati2);
+
 			$mysqlBSMasuk = "SELECT 
 --             tsj.id,
 				DATE_FORMAT(tsj.tanggal, '%Y-%m') AS tanggal_bulan,
@@ -243,6 +255,8 @@ $stokmatiT = sqlsrv_fetch_array($stokmati);
 			;
 			$stmtbsmasuk = mysqli_query($congkg, $mysqlBSMasuk);
 			$rowdb21_masuk = mysqli_fetch_assoc($stmtbsmasuk);
+
+
 
 $mysqlBS = " SELECT 
 				DATE_FORMAT(tso.tanggal, '%Y-%m') AS tanggal,
@@ -267,9 +281,7 @@ $mysqlBS = " SELECT
 		$stmtbs = mysqli_query($congkg, $mysqlBS);
 		$rowdb21 = mysqli_fetch_assoc($stmtbs);
 
-		$keluarMati1 = "SELECT DISTINCT kg
-		FROM (
-			SELECT 
+		$keluarMati1 = " SELECT 
 				STOCKTRANSACTION.LOTCODE,
 				COUNT(STOCKTRANSACTION.BASEPRIMARYQUANTITY) AS QTY_DUS,
 				SUM(STOCKTRANSACTION.BASEPRIMARYQUANTITY) AS kg,
@@ -298,8 +310,7 @@ $mysqlBS = " SELECT
 			GROUP BY
 				STOCKTRANSACTION.LOTCODE,
 				STOCKTRANSACTION.TRANSACTIONDATE,
-				ITXVIEWHEADERKNTORDER.ORIGDLVSALORDLINESALORDERCODE
-		) hasil";
+				ITXVIEWHEADERKNTORDER.ORIGDLVSALORDLINESALORDERCODE ";
 
 $stmtkeluarMati1 = db2_exec($conn1, $keluarMati1, ['cursor' => DB2_SCROLLABLE]);
 $totdatakeluarMati1 = 0;
@@ -416,17 +427,19 @@ FROM SYSIBM.SYSDUMMY1;
 			$total_masuk = $stokTerima + $Rkg + $RBs;
 
 
-			$stokkeluar = round($rK['kg'], 2) - round($rRkeluar['kg'], 2);
-			$stokkeluar_akhir = $stokkeluar - $totdatakeluarMati1;
+			$stokkeluar = round($rK['kg'], 2) ;			
 			$Rkg_keluar = round($rRkeluar['kg'], 2);
 			$Rkg_mati_keluar = round($rowdb21['qty_kg_keluar'], 2);
-			$total_keluar = $stokkeluar + $Rkg_keluar + $Rkg_mati_keluar;
+			$keluarMati2 = round($rKainMati2['kg'], 2);;
+			$stokkeluar_akhir = $stokkeluar - $Rkg_keluar - $totdatakeluarMati1- $keluarMati2;
 
 			$total_stock = $stock_bln_sebelumnya + $stokTerima - $stokkeluar_akhir;
 
 			$stock_mati_bln_sekarang = round($stokmatiT['total_bulan_ini'], 2);
 
 			$total_stock_saat_ini = $total_stock + $stock_mati_bln_sekarang;
+
+			$totalKeluar_mati = $totdatakeluarMati1 + $keluarMati2 + $Rkg_mati_keluar;
 		?>
 	  <tr>
 	    <td>1</td>
@@ -457,7 +470,7 @@ FROM SYSIBM.SYSDUMMY1;
 	   <td align="center"><?php echo number_format($stokkeluar_akhir,2); ?></td></td>
 	   <td align="center">
 		<?php
-			echo isset($rowdb21['qty_kg_keluar']) ? number_format(round($rowdb21['qty_kg_keluar'], 2), 2) : '0.00';
+			echo number_format($totalKeluar_mati, 2) ;
 			?>
 		</td>	   
 	   <td align="center"><?php echo number_format(round($rRkeluar['kg'],2),2); ?></td>
