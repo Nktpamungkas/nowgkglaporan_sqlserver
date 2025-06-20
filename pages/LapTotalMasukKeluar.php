@@ -235,7 +235,7 @@ $stokmatiT = sqlsrv_fetch_array($stokmati);
 			JOIN 
 				tbl_barang_bs tb ON tsjd.barang_bs_id = tb.id
 			WHERE 
-				DATE(tsj.tanggal) BETWEEN '2025-04-01' AND '2025-04-30' 
+				DATE_FORMAT(tsj.tanggal, '%Y-%m') = '$Bulan'
 			GROUP BY 
 				DATE_FORMAT(tsj.tanggal, '%Y-%m')"
 			;
@@ -363,10 +363,25 @@ FROM SYSIBM.SYSDUMMY1;
       </tr>	  
 	 <tr>
 		<?php
+			$stock_bln_sebelumnya = round($r['kg'], 2) - round($stokmatiT['total_bulan_lalu'],2);
+
 			$stokTerima = round($datamasuk['TOTAL_QTY_MASUK'], 2) - round($rRMasuk['kg'], 2); // float
 			$Rkg = round($rRMasuk['kg'], 2); // float
 			$RBs = round($rowdb21_masuk['qty_kg_masuk'], 2); // float
-			$total = $stokTerima + $Rkg + $RBs;
+			$total_masuk = $stokTerima + $Rkg + $RBs;
+
+
+			$stokkeluar = round($rK['kg'], 2) - round($rRkeluar['kg'], 2);
+			$Rkg_keluar = round($rRkeluar['kg'], 2);
+			$Rkg_mati_keluar = round($rowdb21['qty_kg_keluar'], 2);
+			$total_keluar = $stokkeluar + $Rkg_keluar + $Rkg_mati_keluar;
+
+			$total_stock = $stock_bln_sebelumnya + $stokTerima - $stokkeluar;
+
+			$stock_mati_bln_sekarang = round($stokmatiT['total_bulan_ini'], 2);
+
+			$total_stock_saat_ini = $total_stock + $stock_mati_bln_sekarang;
+
 		?>
 	   <td>2</td>
 	   <td><strong>Masuk Kain</strong></td>
@@ -378,7 +393,7 @@ FROM SYSIBM.SYSDUMMY1;
 		?>
 		</td>
 	    <td align="center"><?php echo number_format(round($rRMasuk['kg'], 2), 2); ?></td>
-	    <td align="right"><?php echo number_format($total, 2) ?></td>
+	    <td align="right"><?php echo number_format($total_masuk, 2) ?></td>
 
 	    </tr>
 	 <tr>
@@ -391,23 +406,23 @@ FROM SYSIBM.SYSDUMMY1;
 			?>
 		</td>	   
 	   <td align="center"><?php echo number_format(round($rRkeluar['kg'],2),2); ?></td>
-	   <td align="right"><?php echo number_format(round($rK['kg'], 2) + (round($rRkeluar['kg'], 2)+ round($rowdb21['qty_kg_keluar'], 2)), 2); ?></td>
+	   <td align="right"><?php echo number_format($total_keluar, 2); ?></td>
 	   </tr>
 	 <tr>
 	   <td>4</td>
 	   <td><strong>Stok</strong></td>
-	   <td align="center"><?php echo number_format(round($r['kg'], 2) + (round($rM['kg'], 2) - round($rK['kg'], 2)- round($stokmatiT['total_bulan_ini'], 2)- round($rRkeluar['kg'], 2)), 2); ?></td>
+	   <td align="center"><?php echo number_format($total_stock, 2); ?></td>
 	   <td><?php echo number_format(round($stokmatiT['total_bulan_ini'],2),2); ?></td>
 	   <td align="center">&nbsp;</td>
-	   <td align="right"><?php echo number_format(round($r['kg'],2)+(round($rM['kg'],2)-round($rK['kg'],2)),2); ?></td>
+	   <td align="right"><?php echo number_format($total_stock_saat_ini,2); ?></td>
 	   </tr>
 	 <tr>
 	   <td>5</td>
 	   <td><strong>Stok Opname <?php echo namabln($Bln2)." ".$Thn2; ?></strong></td>
-	   <td align="center"><?php echo number_format(round($r['kg'], 2) + (round($rM['kg'], 2) - round($rK['kg'], 2) - round($stokmatiT['total_bulan_ini'], 2)- round($rRkeluar['kg'], 2)), 2); ?></td>
+	   <td align="center"><?php echo number_format($total_stock, 2); ?></td>
 	   <td><?php echo number_format(round($stokmatiT['total_bulan_ini'],2),2); ?></td>
 	   <td align="center">&nbsp;</td>
-	   <td align="right"><?php echo number_format(round($rT['kg'],2),2); ?></td>
+	   <td align="right"><?php echo number_format($total_stock_saat_ini,2); ?></td>
 	   </tr>				
 	</tbody>
                 </table>
