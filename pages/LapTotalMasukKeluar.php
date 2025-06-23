@@ -224,18 +224,6 @@ if($b=="12"){ $Nbln="Desember";}
 		");
 $stokmatiT = sqlsrv_fetch_array($stokmati);
 
-$sqlKainMati2 = sqlsrv_query($con, " SELECT 
-		FORMAT(tgl_tutup, 'yyyy-MM') AS tgl_tutup, 
-		SUM(qty) AS rol, 
-		SUM(berat) AS kg 
-	FROM 
-		dbnow_gkg.tblkeluarkain 
-	WHERE format(tgl_tutup, 'yyyy-MM') = '$Bulan' 
-	 and demand IS NULL and lot like '%/%'
-	GROUP BY 
-		FORMAT(tgl_tutup, 'yyyy-MM') ");
-$rKainMati2 = sqlsrv_fetch_array($sqlKainMati2);
-
 			$mysqlBSMasuk = "SELECT 
 --             tsj.id,
 				DATE_FORMAT(tsj.tanggal, '%Y-%m') AS tanggal_bulan,
@@ -255,8 +243,6 @@ $rKainMati2 = sqlsrv_fetch_array($sqlKainMati2);
 			;
 			$stmtbsmasuk = mysqli_query($congkg, $mysqlBSMasuk);
 			$rowdb21_masuk = mysqli_fetch_assoc($stmtbsmasuk);
-
-
 
 $mysqlBS = " SELECT 
 				DATE_FORMAT(tso.tanggal, '%Y-%m') AS tanggal,
@@ -281,54 +267,67 @@ $mysqlBS = " SELECT
 		$stmtbs = mysqli_query($congkg, $mysqlBS);
 		$rowdb21 = mysqli_fetch_assoc($stmtbs);
 
-		$keluarMati1 = " SELECT 
-				STOCKTRANSACTION.LOTCODE,
-				COUNT(STOCKTRANSACTION.BASEPRIMARYQUANTITY) AS QTY_DUS,
-				SUM(STOCKTRANSACTION.BASEPRIMARYQUANTITY) AS kg,
-				ITXVIEWHEADERKNTORDER.ORIGDLVSALORDLINESALORDERCODE,
-				STOCKTRANSACTION.TRANSACTIONDATE
-			FROM DB2ADMIN.STOCKTRANSACTION STOCKTRANSACTION
-			LEFT OUTER JOIN (
-				SELECT
-					ITXVIEWHEADERKNTORDER.PRODUCTIONORDERCODE,
-					LISTAGG(DISTINCT TRIM(ITXVIEWHEADERKNTORDER.ORIGDLVSALORDLINESALORDERCODE), ', ') AS ORIGDLVSALORDLINESALORDERCODE,
-					LISTAGG(DISTINCT TRIM(ITXVIEWHEADERKNTORDER.PRODUCTIONDEMANDCODE), ', ') AS PRODUCTIONDEMANDCODE,
-					LISTAGG(DISTINCT TRIM(ITXVIEWHEADERKNTORDER.PROJECTCODE), ', ') AS PROJECTCODE
-				FROM DB2ADMIN.ITXVIEWHEADERKNTORDER
-				GROUP BY ITXVIEWHEADERKNTORDER.PRODUCTIONORDERCODE
-			) ITXVIEWHEADERKNTORDER
-				ON ITXVIEWHEADERKNTORDER.PRODUCTIONORDERCODE = STOCKTRANSACTION.ORDERCODE
-			LEFT OUTER JOIN DB2ADMIN.FULLITEMKEYDECODER FULLITEMKEYDECODER
-				ON STOCKTRANSACTION.FULLITEMIDENTIFIER = FULLITEMKEYDECODER.IDENTIFIER
-			WHERE 
-				(STOCKTRANSACTION.ITEMTYPECODE = 'KGF' OR STOCKTRANSACTION.ITEMTYPECODE = 'FKG')
-				AND STOCKTRANSACTION.LOGICALWAREHOUSECODE = 'M021'
-				AND STOCKTRANSACTION.ONHANDUPDATE > 1
-				AND VARCHAR_FORMAT(STOCKTRANSACTION.TRANSACTIONDATE, 'YYYY-MM') = '$Bulan'
-				AND STOCKTRANSACTION.ORDERCODE IS NOT NULL
-				AND STOCKTRANSACTION.LOTCODE LIKE '%/%'
-			GROUP BY
-				STOCKTRANSACTION.LOTCODE,
-				STOCKTRANSACTION.TRANSACTIONDATE,
-				ITXVIEWHEADERKNTORDER.ORIGDLVSALORDLINESALORDERCODE ";
+			$sqlMatiKeluar = sqlsrv_query($con, " SELECT 
+					FORMAT(tgl_tutup, 'yyyy-MM') AS tgl_tutup, 
+					SUM(qty) AS rol, 
+					SUM(berat) AS kg 
+				FROM 
+					dbnow_gkg.tblkeluarkain 
+				WHERE format(tgl_tutup, 'yyyy-MM') = '$Bulan' 
+				 AND lot like '%/%'
+				GROUP BY 
+					FORMAT(tgl_tutup, 'yyyy-MM');
+			");
+			$rMatiKeluar = sqlsrv_fetch_array($sqlMatiKeluar);
 
-$stmtkeluarMati1 = db2_exec($conn1, $keluarMati1, ['cursor' => DB2_SCROLLABLE]);
-$totdatakeluarMati1 = 0;
+			// 		$keluarMati1 = " SELECT 
+// 				STOCKTRANSACTION.LOTCODE,
+// 				COUNT(STOCKTRANSACTION.BASEPRIMARYQUANTITY) AS QTY_DUS,
+// 				SUM(STOCKTRANSACTION.BASEPRIMARYQUANTITY) AS kg,
+// 				ITXVIEWHEADERKNTORDER.ORIGDLVSALORDLINESALORDERCODE,
+// 				STOCKTRANSACTION.TRANSACTIONDATE
+// 			FROM DB2ADMIN.STOCKTRANSACTION STOCKTRANSACTION
+// 			LEFT OUTER JOIN (
+// 				SELECT
+// 					ITXVIEWHEADERKNTORDER.PRODUCTIONORDERCODE,
+// 					LISTAGG(DISTINCT TRIM(ITXVIEWHEADERKNTORDER.ORIGDLVSALORDLINESALORDERCODE), ', ') AS ORIGDLVSALORDLINESALORDERCODE,
+// 					LISTAGG(DISTINCT TRIM(ITXVIEWHEADERKNTORDER.PRODUCTIONDEMANDCODE), ', ') AS PRODUCTIONDEMANDCODE,
+// 					LISTAGG(DISTINCT TRIM(ITXVIEWHEADERKNTORDER.PROJECTCODE), ', ') AS PROJECTCODE
+// 				FROM DB2ADMIN.ITXVIEWHEADERKNTORDER
+// 				GROUP BY ITXVIEWHEADERKNTORDER.PRODUCTIONORDERCODE
+// 			) ITXVIEWHEADERKNTORDER
+// 				ON ITXVIEWHEADERKNTORDER.PRODUCTIONORDERCODE = STOCKTRANSACTION.ORDERCODE
+// 			LEFT OUTER JOIN DB2ADMIN.FULLITEMKEYDECODER FULLITEMKEYDECODER
+// 				ON STOCKTRANSACTION.FULLITEMIDENTIFIER = FULLITEMKEYDECODER.IDENTIFIER
+// 			WHERE 
+// 				(STOCKTRANSACTION.ITEMTYPECODE = 'KGF' OR STOCKTRANSACTION.ITEMTYPECODE = 'FKG')
+// 				AND STOCKTRANSACTION.LOGICALWAREHOUSECODE = 'M021'
+// 				AND STOCKTRANSACTION.ONHANDUPDATE > 1
+// 				AND VARCHAR_FORMAT(STOCKTRANSACTION.TRANSACTIONDATE, 'YYYY-MM') = '$Bulan'
+// 				AND STOCKTRANSACTION.ORDERCODE IS NOT NULL
+// 				AND STOCKTRANSACTION.LOTCODE LIKE '%/%'
+// 			GROUP BY
+// 				STOCKTRANSACTION.LOTCODE,
+// 				STOCKTRANSACTION.TRANSACTIONDATE,
+// 				ITXVIEWHEADERKNTORDER.ORIGDLVSALORDLINESALORDERCODE ";
 
-// echo "<pre>";
-while ($rowmati = db2_fetch_assoc($stmtkeluarMati1)) {
-// print_r($rowmati);
+// $stmtkeluarMati1 = db2_exec($conn1, $keluarMati1, ['cursor' => DB2_SCROLLABLE]);
+// $totdatakeluarMati1 = 0;
 
-// Pastikan field 'KG' ada dan valid
-if (isset($rowmati['KG'])) {
-// Tambahkan ke total (konversi ke float dulu untuk memastikan penjumlahan numerik)
-$totdatakeluarMati1 += (float) $rowmati['KG'];
-}
-}
-// echo "</pre>";
+// // echo "<pre>";
+// while ($rowmati = db2_fetch_assoc($stmtkeluarMati1)) {
+// // print_r($rowmati);
 
-// Tampilkan total summary KG
-// echo "<b>Total KG: </b>" . number_format($totdatakeluarMati1, 3);
+// // Pastikan field 'KG' ada dan valid
+// if (isset($rowmati['KG'])) {
+// // Tambahkan ke total (konversi ke float dulu untuk memastikan penjumlahan numerik)
+// $totdatakeluarMati1 += (float) $rowmati['KG'];
+// }
+// }
+// // echo "</pre>";
+
+// // Tampilkan total summary KG
+// // echo "<b>Total KG: </b>" . number_format($totdatakeluarMati1, 3);
 
     $masuk = " SELECT 
 (
@@ -403,7 +402,7 @@ FROM SYSIBM.SYSDUMMY1;
 	$datamasuk = db2_fetch_assoc($stmtmasuk);
 
 	?>			
-	<table id="example16" width="100%" class="table table-sm table-bordered table-striped" style="font-size: 11px; text-align: center;">
+	<table id="example19" width="100%" class="table table-sm table-bordered table-striped" style="font-size: 11px; text-align: center;">
                   <thead>
                   <tr>
                     <th width="3%" rowspan="2" align="center" valign="middle">#</th>
@@ -427,19 +426,18 @@ FROM SYSIBM.SYSDUMMY1;
 			$total_masuk = $stokTerima + $Rkg + $RBs;
 
 
-			$stokkeluar = round($rK['kg'], 2) ;			
-			$Rkg_keluar = round($rRkeluar['kg'], 2);
+			$stokkeluar = round($rK['kg'], 2) - round($rRkeluar['kg'], 2);
+			$_qty_mati = round($rMatiKeluar['kg'], 2);
+			$stokkeluar_akhir = $stokkeluar - $_qty_mati;
+			$Rkg_keluar = round($rRkeluar['kg'], 2); //CWD
 			$Rkg_mati_keluar = round($rowdb21['qty_kg_keluar'], 2);
-			$keluarMati2 = round($rKainMati2['kg'], 2);;
-			$stokkeluar_akhir = $stokkeluar - $Rkg_keluar - $totdatakeluarMati1- $keluarMati2;
+			$total_keluar = $stokkeluar_akhir + $Rkg_mati_keluar;
 
 			$total_stock = $stock_bln_sebelumnya + $stokTerima - $stokkeluar_akhir;
 
 			$stock_mati_bln_sekarang = round($stokmatiT['total_bulan_ini'], 2);
 
 			$total_stock_saat_ini = $total_stock + $stock_mati_bln_sekarang;
-
-			$totalKeluar_mati = $totdatakeluarMati1 + $keluarMati2 + $Rkg_mati_keluar;
 		?>
 	  <tr>
 	    <td>1</td>
@@ -470,7 +468,7 @@ FROM SYSIBM.SYSDUMMY1;
 	   <td align="center"><?php echo number_format($stokkeluar_akhir,2); ?></td></td>
 	   <td align="center">
 		<?php
-			echo number_format($totalKeluar_mati, 2) ;
+			echo isset($rowdb21['qty_kg_keluar']) ? number_format(round($rowdb21['qty_kg_keluar'], 2), 2) : '0.00';
 			?>
 		</td>	   
 	   <td align="center"><?php echo number_format(round($rRkeluar['kg'],2),2); ?></td>
