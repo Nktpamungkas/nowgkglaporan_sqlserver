@@ -92,34 +92,33 @@ $total = 0;
 												tgl_tutup DESC");		  
     $r = sqlsrv_fetch_array($sql);
     
-    // $stokmati = sqlsrv_query($con, "WITH MaxTutup AS (
-	// 			SELECT 
-	// 				(SELECT MAX(tgl_tutup) 
-	// 				FROM Stock_mati_gkg 
-	// 				WHERE proj_awal LIKE '%/%' 
-	// 				AND FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan') AS tgl_bulan_ini,
+    $stokmati = sqlsrv_query($con, "WITH MaxTutup AS (
+				SELECT 
+					(SELECT MAX(tgl_tutup) 
+					FROM Stock_mati_gkg 
+					WHERE proj_awal LIKE '%/%' 
+					AND FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan') AS tgl_bulan_ini,
 					
-	// 				(SELECT MAX(tgl_tutup) 
-	// 				FROM Stock_mati_gkg 
-	// 				WHERE proj_awal LIKE '%/%' 
-	// 				AND FORMAT(tgl_tutup, 'yyyy-MM') = '$BlnLL') AS tgl_bulan_lalu
-	// 		)
-	// 		SELECT 
-	// 			(SELECT SUM(kgs) 
-	// 			FROM Stock_mati_gkg 
-	// 			WHERE proj_awal LIKE '%/%' 
-	// 			AND tgl_tutup = tgl_bulan_ini) AS total_bulan_ini,
+					(SELECT MAX(tgl_tutup) 
+					FROM Stock_mati_gkg 
+					WHERE proj_awal LIKE '%/%' 
+					AND FORMAT(tgl_tutup, 'yyyy-MM') = '$BlnLL') AS tgl_bulan_lalu
+			)
+			SELECT 
+				(SELECT SUM(kgs) 
+				FROM Stock_mati_gkg 
+				WHERE proj_awal LIKE '%/%' 
+				AND tgl_tutup = tgl_bulan_ini) AS total_bulan_ini,
 
-	// 			(SELECT SUM(kgs) 
-	// 			FROM Stock_mati_gkg 
-	// 			WHERE proj_awal LIKE '%/%' 
-	// 			AND tgl_tutup = tgl_bulan_lalu) AS total_bulan_lalu
-	// 		FROM MaxTutup
-	// 	");
-    // $stokmatiT = sqlsrv_fetch_array($stokmati);
+				(SELECT SUM(kgs) 
+				FROM Stock_mati_gkg 
+				WHERE proj_awal LIKE '%/%' 
+				AND tgl_tutup = tgl_bulan_lalu) AS total_bulan_lalu
+			FROM MaxTutup
+		");
+    $stokmatiT = sqlsrv_fetch_array($stokmati);
 
-
-// $stokAwal = round($r['kg'] ?? 0, 2) - round($stokmatiT['total_bulan_lalu'] ?? 0, 2);
+    $stokAwal = round($r['kg'] ?? 0, 2) - round($stokmatiT['total_bulan_lalu'] ?? 0, 2);
 ?>
 
 <!-- <div align="LEFT">TGL : <?php echo date($_GET['tanggal1']); ?></div> -->
@@ -127,11 +126,11 @@ $total = 0;
     <tr>
         <td colspan="3"><strong>SISA STOCK BULAN <?php if($Bln2!="01"){echo namabln($BlnLalu)." ".$Thn2;}else{echo namabln($BlnLalu)." ".$Thn;} ?></strong></td>
         <td><strong>KAIN I</strong></td>
-        <td align="right"><strong><?php echo number_format(round($r['kg'],3),3); ?></strong></td>
+        <td align="right"><strong><?php echo $stokAwal ?></strong></td>
         <td><strong>KAIN II</strong></td>
         <td></td>
         <td><strong>TOTAL</strong></td>
-        <td colspan="2"><strong><?php $total=$r['kg']+00.00; echo number_format(round($total,3),3);?></strong></td>
+        <td colspan="2"><strong><?php $stokAwal ?></strong></td>
     </tr>
 </table>
 <table></table>
@@ -430,7 +429,7 @@ $total = 0;
         $Tmat += $rMati;
         // $tP  += $r2;
         //  $Tbagi2 = ($rKeluar['kg'] ?? 0) - $Tbg2;
-        $tbulansekarang = $total + $m1 + $r1 - $Tbagi1 - $k2;
+        $tbulansekarang = $stokAwal + $m1 + $r1 - $Tbagi1 - $k2;
 
         if ($i == 1) {
             $sisa = $tbulansekarang;
@@ -465,7 +464,7 @@ $total = 0;
                 <td align="right"><strong></strong></td>
                 <td align="right"><strong></strong></td>
                 <td align="right"><strong></strong></td>
-                <?php $totalAll = ($total + $tM + $tR) - ($Tbg2 + $tKR); ?>
+                <?php $totalAll = ($stokAwal + $tM + $tR) - ($Tbg2 + $tKR); ?>
                 <td align="right"><strong><?= number_format($totalAll, 2) ?></strong></td>
             </tr>
             </tfoot>
