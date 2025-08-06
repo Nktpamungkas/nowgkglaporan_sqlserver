@@ -310,7 +310,11 @@ $total = 0;
                 STOCKTRANSACTION.ONHANDUPDATE > 1 AND
                 STOCKTRANSACTION.TRANSACTIONDATE = '$Thn2-$Bln2-$i' AND
                 STOCKTRANSACTION.ORDERCODE IS NOT NULL AND
-                STOCKTRANSACTION.LOTCODE LIKE '%/%'
+                (
+                    STOCKTRANSACTION.LOTCODE LIKE '%/19%' OR
+                    STOCKTRANSACTION.LOTCODE LIKE '%/20%' OR
+                    STOCKTRANSACTION.LOTCODE LIKE '%/21%'
+                )
             GROUP BY 
                 STOCKTRANSACTION.TRANSACTIONDATE,
                 STOCKTRANSACTION.LOTCODE
@@ -330,7 +334,11 @@ $total = 0;
                 s.TEMPLATECODE = '098' AND
                 (a.VALUESTRING IN ('1', '2', '3')) AND
                 s.TRANSACTIONDATE = '$Thn2-$Bln2-$i' AND
-                s.LOTCODE LIKE '%/%'
+                (
+                    s.LOTCODE LIKE '%/19%' OR
+                    s.LOTCODE LIKE '%/20%' OR
+                    s.LOTCODE LIKE '%/21%'
+                )
             GROUP BY 
                 s.TRANSACTIONDATE,
                 s.LOTCODE
@@ -470,7 +478,6 @@ $total = 0;
             </tfoot>
 
     </table>
-
     
 <table></table>
 <table></table>
