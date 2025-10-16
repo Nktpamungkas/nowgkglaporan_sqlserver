@@ -217,7 +217,8 @@ if($rowdb22['LEGALNAME1']==""){$langganan="";}else{$langganan=$rowdb22['LEGALNAM
 if($rowdb22['ORDERPARTNERBRANDCODE']==""){$buyer="";}else{$buyer=$rowdb22['ORDERPARTNERBRANDCODE'];}	
 if($rowdb25['VALUEDECIMAL']!=""){$lbr1=round($rowdb25['VALUEDECIMAL']);}
 if($rowdb26['VALUEDECIMAL']!=""){$gsm11=round($rowdb26['VALUEDECIMAL']);}
-if($rowdb21['SCHEDULEDRESOURCECODE']!=""){$noMC=$rowdb21['SCHEDULEDRESOURCECODE'];}else{$noMC=$rowdb27['NO_MESIN'];}		
+if($rowdb21['SCHEDULEDRESOURCECODE']!=""){$noMC=$rowdb21['SCHEDULEDRESOURCECODE'];}else{$noMC=$rowdb27['NO_MESIN'];}
+if($rowdb21['QTY_KG']>0){$qtyB=$rowdb21['QTY_KG'];}else{$qtyB=$rowdb21['QTY1_KG'];}			
 $knitt1="ITTI";		
   echo"<tr>
   	<td >$no</td>
@@ -232,12 +233,12 @@ $knitt1="ITTI";
 	<td  align=right>".$lbr1."</td>
 	<td  align=right>".$gsm11."</td>
 	<td  align=right>".$rowdb21['QTY_ROL']."</td>
-	<td  align=right>".number_format($rowdb21['QTY_KG'],'2','.',',')."</td>
+	<td  align=right>".number_format($qtyB,'2','.',',')."</td>
 	<td >$knitt1</td>
 	<td >".$rowdb21['PROJECTCODE']."</td>
 	<td >".$noMC."</td>
 	   </tr>";
-	$totqt=$totqt+$rowdb21['QTY_KG'];
+	$totqt=$totqt+$qtyB;
 	$totr=$totr+$rowdb21['QTY_ROL'];	
   	$no++;}
   ?>
