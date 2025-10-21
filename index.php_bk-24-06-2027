@@ -325,16 +325,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
       "scrollY": '150px',
 	  "buttons": ["copy", "excel", "pdf", "print", "colvis"]	
     }).buttons().container().appendTo('#example18_wrapper .col-md-6:eq(0)');  
-    $('#example19').DataTable({
-	  "paging": false,
-      "searching": true,
-      "ordering": true,
-      "info": true,
-      "responsive": true,
-	  "scrollX": true,
-      "scrollY": '450px',
-	  "buttons": []	
-    }).buttons().container().appendTo('#example16_wrapper .col-md-6:eq(0)');
   });
 </script>
 <script>

@@ -85,7 +85,7 @@ $Lalu 		= $Bln2-1;
 		<div class="card card-warning">
               <div class="card-header">
                 <h3 class="card-title">Detail Laporan Harian Masuk Kain Greige</h3>
-				<!--<a href="pages/cetak/lapgmasuk_excel1.php?awal=<?php echo $Awal;?>&akhir=<?php echo $Akhir;?>" class="btn bg-blue float-right" target="_blank">Cetak Excel</a>-->  
+				<a href="pages/cetak/lapgharian_excel.php?awal=<?php echo $Bulan;?>" class="btn bg-blue float-right" target="_blank">Cetak Excel</a>  
           </div>
               <!-- /.card-header -->
               <div class="card-body">
@@ -111,6 +111,7 @@ $Lalu 		= $Bln2-1;
                     <th colspan="2" valign="middle" style="text-align: center">Keluar</th>
                     <th width="10%" rowspan="2" valign="middle" style="text-align: center">Retur Produksi</th>
                     <th width="8%" rowspan="2" valign="middle" style="text-align: center">Permintaan Potong, Tarikan Kain dan Hapus Stok</th>
+                    <th width="8%" rowspan="2" valign="middle" style="text-align: center">Jual BS</th>
                     <th width="8%" rowspan="2" valign="middle" style="text-align: center">Sisa</th>
                     <th width="8%" rowspan="2" valign="middle" style="text-align: center">Status</th>
                     <th width="8%" rowspan="2" valign="middle" style="text-align: center">Selisih</th>
@@ -147,7 +148,7 @@ $Lalu 		= $Bln2-1;
 												WHERE 
 													tgl_tutup = '$Thn2-$Bln2-$i'
 													AND no_bon IS NULL 
-													AND mesin_rajut <> 'maklun' 
+													AND (mesin_rajut <> 'maklun' OR mesin_rajut is NULL) 
 												GROUP BY 
 													tgl_tutup; ");	
 	$rRMasuk = sqlsrv_fetch_array($sqlRMasuk);
@@ -179,11 +180,19 @@ $Lalu 		= $Bln2-1;
 													AND demand IS NULL 
 												GROUP BY tgl_tutup; ");		  
     $rPotong = sqlsrv_fetch_array($sqlPotong);
+	
+	$sqlJualBS = sqlsrv_query($con," SELECT tgl_keluar, 
+													SUM(qty) AS rol, 
+													SUM(berat) AS kg 
+												FROM dbnow_gkg.tbl_jual_bs 
+												WHERE tgl_keluar = '$Thn2-$Bln2-$i' 
+												GROUP BY tgl_keluar; ");		  
+    $rJualBS = sqlsrv_fetch_array($sqlJualBS);
 
 	if($i=="1"){
-	$sisa+=$total+((round($rMasuk['kg'],3)+round($rRMasuk['kg'],3))-(round($rKeluar['kg'],3)+round($rPotong['kg'],3)));	
+	$sisa+=$total+((round($rMasuk['kg'],3)+round($rRMasuk['kg'],3))-(round($rKeluar['kg'],3)+round($rPotong['kg'],3)+round($rJualBS['kg'],3)));	
 	}else{
-	$sisa+=((round($rMasuk['kg'],3)+round($rMMasuk['kg'],3)+round($rRMasuk['kg'],3))-(round($rKeluar['kg'],3)+round($rPotong['kg'],3)));
+	$sisa+=((round($rMasuk['kg'],3)+round($rMMasuk['kg'],3)+round($rRMasuk['kg'],3))-(round($rKeluar['kg'],3)+round($rPotong['kg'],3)+round($rJualBS['kg'],3)));
 	}
 	$sqlOP = sqlsrv_query($con," SELECT
 													tgl_tutup,
@@ -215,6 +224,7 @@ $Lalu 		= $Bln2-1;
       <td>&nbsp;</td>
       <td align="right"><?php echo number_format(round($rRMasuk['kg'],2),2); ?></td>
       <td align="right"><?php echo number_format(round($rPotong['kg'],2),2); ?></td>
+      <td align="right"><?php echo number_format(round($rJualBS['kg'],2),2); ?></td>
       <td align="right"><strong><?php echo number_format(round($sisa,3),3); ?></strong></td>
       <td align="right"><strong><?php echo $sts; ?></strong></td>
       <td align="right"><strong><?php echo number_format(round($sisa,3)-round($rOP['kg'],3),3); ?></strong></td>
@@ -240,6 +250,7 @@ $Lalu 		= $Bln2-1;
 	    <td>&nbsp;</td>
 	    <td align="right"><strong><?php echo number_format(round($tR,2),2); ?></strong></td>
 	    <td align="right"><strong><?php echo number_format(round($tP,2),2); ?></strong></td>
+	    <td align="right">&nbsp;</td>
 	    <td align="right"><strong><?php echo number_format(round($tS,3),3); ?></strong></td>
 	    <td align="right">&nbsp;</td>
 	    <td align="right">&nbsp;</td>

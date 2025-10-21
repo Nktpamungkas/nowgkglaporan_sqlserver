@@ -1,8 +1,21 @@
 <?php
-$Thn2			= isset($_POST['thn']) ? $_POST['thn'] : '';
-$Bln2			= isset($_POST['bln']) ? $_POST['bln'] : '';
-$Dept			= isset($_POST['dept']) ? $_POST['dept'] : '';
+include "./../../koneksi.php";
+
+// Ambil parameter tanggal dari URL
+$awalParam  = $_GET['awal']  ?? '';
+$Bln2  = (new DateTime($awalParam))->format('m');
+$Thn2  = (new DateTime($awalParam))->format('Y');
+
 $Bulan			= $Thn2."-".$Bln2;
+$namaFile = "Laporan Total Masuk Keluar Kain gudang-{$Bulan}.xls";
+
+header("Content-type: application/vnd.ms-excel; charset=UTF-8");
+header("Content-Disposition: attachment; filename=\"$namaFile\"");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// $bulanTahun = strtoupper(date("F Y", strtotime($awalParam)));
+$d = cal_days_in_month(CAL_GREGORIAN, $Bln2, $Thn2);
 if($Thn2!="" and $Bln2!=""){
 $Lalu 		= $Bln2-1;	
 	if($Lalu=="0"){
@@ -27,90 +40,55 @@ if($b=="11"){ $Nbln="November";}
 if($b=="12"){ $Nbln="Desember";}	
 	return $Nbln;
 }
+
+$total = 0;
+
+
+
 ?>
-<!-- Main content -->
-      <div class="container-fluid">
-		<form role="form" method="post" enctype="multipart/form-data" name="form1">  
-		<div class="card card-success">
-          <div class="card-header">
-            <h3 class="card-title">Filter Per Bulan</h3>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<body>
 
-            <div class="card-tools">
-              <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                <i class="fas fa-minus"></i>
-              </button>
-              <button type="button" class="btn btn-tool" data-card-widget="remove">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </div>
-          <!-- /.card-header -->		  
-          <div class="card-body">
-             <div class="form-group row">            
-			<div class="col-sm-1">
-                	<select name="thn" class="form-control form-control-sm  select2"> 
-                	<option value="">Pilih Tahun</option>
-        <?php
-                $thn_skr = date('Y');
-                for ($x = $thn_skr; $x >= 2022; $x--) {
-                ?>
-        <option value="<?php echo $x ?>" <?php if($Thn2!=""){if($Thn2==$x){echo "SELECTED";}}else{if($x==$thn_skr){echo "SELECTED";}} ?>><?php echo $x ?></option>
-        <?php
-                }
-   ?>
-                	</select>
-                	</div>
-		       	<div class="col-sm-2">
-                	<select name="bln" class="form-control form-control-sm  select2"> 
-                	<option value="">Pilih Bulan</option>
-					<option value="01" <?php if($Bln2=="01"){ echo "SELECTED";}?>>Januari</option>
-					<option value="02" <?php if($Bln2=="02"){ echo "SELECTED";}?>>Febuari</option>
-					<option value="03" <?php if($Bln2=="03"){ echo "SELECTED";}?>>Maret</option>
-					<option value="04" <?php if($Bln2=="04"){ echo "SELECTED";}?>>April</option>
-					<option value="05" <?php if($Bln2=="05"){ echo "SELECTED";}?>>Mei</option>
-					<option value="06" <?php if($Bln2=="06"){ echo "SELECTED";}?>>Juni</option>
-					<option value="07" <?php if($Bln2=="07"){ echo "SELECTED";}?>>Juli</option>
-					<option value="08" <?php if($Bln2=="08"){ echo "SELECTED";}?>>Agustus</option>
-					<option value="09" <?php if($Bln2=="09"){ echo "SELECTED";}?>>September</option>
-					<option value="10" <?php if($Bln2=="10"){ echo "SELECTED";}?>>Oktober</option>
-					<option value="11" <?php if($Bln2=="11"){ echo "SELECTED";}?>>November</option>
-					<option value="12" <?php if($Bln2=="12"){ echo "SELECTED";}?>>Desember</option>	
-                	</select>
-                	</div>		
-				 <!-- /.input group -->
-			
-              	  
-          </div>
-			  
-				 
-			 
-          </div>		  
-		  <div class="card-footer"> 
-			  <button class="btn btn-info" type="submit">Cari Data</button>
-		  </div>	
-		  <!-- /.card-body -->          
-        </div>  
+    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+        <!-- Logo (optional) -->
+        <!--
+        <div style="margin-right: 20px;">
+            <img src="dist/img/indo.png" alt="Logo" style="height: 80px;">
+        </div>
+        -->
 
-		
-		
-		<div class="card card-warning">
-              <div class="card-header">
-                <h3 class="card-title">Detail Laporan Harian Masuk Kain Greige</h3>
-				<!--<a href="pages/cetak/lapgmasuk_excel1.php?awal=<?php echo $Awal;?>&akhir=<?php echo $Akhir;?>" class="btn bg-blue float-right" target="_blank">Cetak Excel</a>--> 
-				<a href="pages/cetak/lapgtotal_masuk_excel.php?awal=<?php echo $Bulan; ?>" class="btn bg-blue float-right"
-					target="_blank">Cetak Excel</a>
-          </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-			<?php
-	if($Bln2!="01"){
-		if(strlen($BlnLalu)==1){$bl0="0".$BlnLalu;}else{$bl0=$BlnLalu;}
-		$BlnLL=$Thn2."-".$bl0;
-	}else{
-		if(strlen($BlnLalu)==1){$bl0="0".$BlnLalu;}else{$bl0=$BlnLalu;}
-		$BlnLL=$Thn."-".$bl0;
-	}			  
-	$sql = sqlsrv_query($con," SELECT TOP 1 
+        <!-- Judul -->
+        <div style="text-align: center;">
+            <h3 style="margin: 0;"><strong> LAPORAN TOTAL MASUK / KELUAR STOCK KAIN GREIGE</strong></h3>
+            <!-- <h5 style="margin: 10px 0;"><strong>BULAN <?php if($Bln2!="01"){echo namabln($Bln2)." ".$Thn2;}else{echo namabln($Bln2)." ".$Thn;} ?></strong></h5> -->
+            <h5 style="margin: 10px 0;"><strong>No Form : FW-19-GKG-12/04</strong></h5>
+            <h5 style="margin: 10px 0;"><strong>Halaman :</strong></h5>
+        </div>
+    </div>
+<body>
+        
+<table></table>
+<?php
+if ($Bln2 != "01") {
+    if (strlen($BlnLalu) == 1) {
+        $bl0 = "0" . $BlnLalu;
+    } else {
+        $bl0 = $BlnLalu;
+    }
+    $BlnLL = $Thn2 . "-" . $bl0;
+} else {
+    if (strlen($BlnLalu) == 1) {
+        $bl0 = "0" . $BlnLalu;
+    } else {
+        $bl0 = $BlnLalu;
+    }
+    $BlnLL = $Thn . "-" . $bl0;
+}
+$sql = sqlsrv_query($con, " SELECT TOP 1 
 												tgl_tutup, 
 												SUM(rol) AS rol, 
 												SUM(weight) AS kg 
@@ -122,10 +100,10 @@ if($b=="12"){ $Nbln="Desember";}
 												tgl_tutup 
 											ORDER BY 
 												tgl_tutup DESC;
- ");		  
-    $r = sqlsrv_fetch_array($sql);
+ ");
+$r = sqlsrv_fetch_array($sql);
 
-	$sqlM = sqlsrv_query($con," SELECT 
+$sqlM = sqlsrv_query($con, " SELECT 
 												FORMAT(tgl_tutup, 'yyyy-MM') AS tgl_tutup, 
 												SUM(qty) AS rol, 
 												SUM(berat) AS kg 
@@ -135,10 +113,10 @@ if($b=="12"){ $Nbln="Desember";}
 												FORMAT(tgl_tutup, 'yyyy-MM') = '$Bulan' 
 											GROUP BY 
 												FORMAT(tgl_tutup, 'yyyy-MM');
- ");		  
-    $rM = sqlsrv_fetch_array($sqlM);
+ ");
+$rM = sqlsrv_fetch_array($sqlM);
 
-	$sqlK = sqlsrv_query($con," SELECT 
+$sqlK = sqlsrv_query($con, " SELECT 
 												FORMAT(tgl_tutup, 'yyyy-MM') AS tgl_tutup, 
 												SUM(qty) AS rol, 
 												SUM(berat) AS kg 
@@ -148,10 +126,10 @@ if($b=="12"){ $Nbln="Desember";}
 											-- and demand IS NOT NULL
 											GROUP BY 
 												FORMAT(tgl_tutup, 'yyyy-MM');
-");		  
-    $rK = sqlsrv_fetch_array($sqlK);	
+");
+$rK = sqlsrv_fetch_array($sqlK);
 
-	$sqlT = sqlsrv_query($con," SELECT TOP 1 
+$sqlT = sqlsrv_query($con, " SELECT TOP 1 
 												tgl_tutup, 
 												SUM(rol) AS rol, 
 												SUM(weight) AS kg 
@@ -163,10 +141,10 @@ if($b=="12"){ $Nbln="Desember";}
 												tgl_tutup 
 											ORDER BY 
 												tgl_tutup DESC;
- ");		  
-    $rT = sqlsrv_fetch_array($sqlT);
+ ");
+$rT = sqlsrv_fetch_array($sqlT);
 
-	$sqlRMasuk = sqlsrv_query($con, " SELECT format(tgl_tutup, 'yyyy-MM')  as tgl_tutup, 
+$sqlRMasuk = sqlsrv_query($con, " SELECT format(tgl_tutup, 'yyyy-MM')  as tgl_tutup, 
 													SUM(qty) AS rol, 
 													SUM(berat) AS kg 
 												FROM dbnow_gkg.tblmasukkain 
@@ -182,9 +160,9 @@ if($b=="12"){ $Nbln="Desember";}
 													OR mesin_rajut = 'retur'
 													)
 												GROUP BY format(tgl_tutup, 'yyyy-MM'); ");
-	$rRMasuk = sqlsrv_fetch_array($sqlRMasuk);
+$rRMasuk = sqlsrv_fetch_array($sqlRMasuk);
 
-	$sqlRkeluar = sqlsrv_query($con, " SELECT 
+$sqlRkeluar = sqlsrv_query($con, " SELECT 
 											FORMAT(tgl_tutup, 'yyyy-MM') as tgl_tutup,
 											SUM(qty) AS rol,
 											SUM(berat) AS kg 
@@ -196,9 +174,9 @@ if($b=="12"){ $Nbln="Desember";}
 											AND projectcode LIKE '%CWD%'
 										GROUP BY 
 											FORMAT(tgl_tutup, 'yyyy-MM'); ");
-	$rRkeluar = sqlsrv_fetch_array($sqlRkeluar);
+$rRkeluar = sqlsrv_fetch_array($sqlRkeluar);
 
-		$stokmati = sqlsrv_query($con, "WITH MaxTutup AS (
+$stokmati = sqlsrv_query($con, "WITH MaxTutup AS (
 				SELECT 
 					(SELECT MAX(tgl_tutup) 
 					FROM Stock_mati_gkg 
@@ -224,7 +202,7 @@ if($b=="12"){ $Nbln="Desember";}
 		");
 $stokmatiT = sqlsrv_fetch_array($stokmati);
 
-			$mysqlBSMasuk = "SELECT 
+$mysqlBSMasuk = "SELECT 
 --             tsj.id,
 				DATE_FORMAT(tsj.tanggal, '%Y-%m') AS tanggal_bulan,
 				SUM(tsjd.qty_masuk) AS qty_kg_masuk,
@@ -240,9 +218,9 @@ $stokmatiT = sqlsrv_fetch_array($stokmati);
 				DATE_FORMAT(tsj.tanggal, '%Y-%m') = '$Bulan'
 			GROUP BY 
 				DATE_FORMAT(tsj.tanggal, '%Y-%m')"
-			;
-			$stmtbsmasuk = mysqli_query($congkg, $mysqlBSMasuk);
-			$rowdb21_masuk = mysqli_fetch_assoc($stmtbsmasuk);
+;
+$stmtbsmasuk = mysqli_query($congkg, $mysqlBSMasuk);
+$rowdb21_masuk = mysqli_fetch_assoc($stmtbsmasuk);
 
 $mysqlBS = " SELECT 
 				DATE_FORMAT(tso.tanggal, '%Y-%m') AS tanggal,
@@ -264,10 +242,10 @@ $mysqlBS = " SELECT
 			ORDER BY  
 				DATE_FORMAT(tso.tanggal, '%Y-%m')
 			";
-		$stmtbs = mysqli_query($congkg, $mysqlBS);
-		$rowdb21 = mysqli_fetch_assoc($stmtbs);
+$stmtbs = mysqli_query($congkg, $mysqlBS);
+$rowdb21 = mysqli_fetch_assoc($stmtbs);
 
-			$sqlMatiKeluar = sqlsrv_query($con, " SELECT 
+$sqlMatiKeluar = sqlsrv_query($con, " SELECT 
 					FORMAT(tgl_tutup, 'yyyy-MM') AS tgl_tutup, 
 					SUM(qty) AS rol, 
 					SUM(berat) AS kg 
@@ -278,9 +256,9 @@ $mysqlBS = " SELECT
 				GROUP BY 
 					FORMAT(tgl_tutup, 'yyyy-MM');
 			");
-			$rMatiKeluar = sqlsrv_fetch_array($sqlMatiKeluar);
+$rMatiKeluar = sqlsrv_fetch_array($sqlMatiKeluar);
 
-			// 		$keluarMati1 = " SELECT 
+// 		$keluarMati1 = " SELECT 
 // 				STOCKTRANSACTION.LOTCODE,
 // 				COUNT(STOCKTRANSACTION.BASEPRIMARYQUANTITY) AS QTY_DUS,
 // 				SUM(STOCKTRANSACTION.BASEPRIMARYQUANTITY) AS kg,
@@ -329,7 +307,7 @@ $mysqlBS = " SELECT
 // // Tampilkan total summary KG
 // // echo "<b>Total KG: </b>" . number_format($totdatakeluarMati1, 3);
 
-    $masuk = " SELECT 
+$masuk = " SELECT 
 (
     -- QTY KG
     (
@@ -398,127 +376,150 @@ FROM SYSIBM.SYSDUMMY1;
 
     ";
 
-    $stmtmasuk = db2_exec($conn1, $masuk, ['cursor' => DB2_SCROLLABLE]);
-	$datamasuk = db2_fetch_assoc($stmtmasuk);
+$stmtmasuk = db2_exec($conn1, $masuk, ['cursor' => DB2_SCROLLABLE]);
+$datamasuk = db2_fetch_assoc($stmtmasuk);
 
-	?>			
-	<table id="example19" width="100%" class="table table-sm table-bordered table-striped" style="font-size: 11px; text-align: center;">
-                  <thead>
-                  <tr>
-                    <th width="3%" rowspan="2" align="center" valign="middle">#</th>
-                    <th width="16%" rowspan="2" align="center" valign="middle"><strong>Bulan <?php echo namabln($Bln2)." ".$Thn2; ?></strong></th>
-                    <th colspan="2" valign="middle" style="text-align: center">Kain I</th>
-                    <th width="18%" rowspan="2" valign="middle" style="text-align: center">Kain II</th>
-                    <th width="16%" rowspan="2" valign="middle" style="text-align: center">Total</th>
-                    </tr>
-                  <tr>
-                    <th width="22%" valign="middle" style="text-align: center">Stok Proses</th>
-                    <th width="25%" valign="middle" style="text-align: center">Stok Mati</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-		<?php
-			$stock_bln_sebelumnya = round($r['kg'], 2) - round($stokmatiT['total_bulan_lalu'], 2);
+?>	
 
-			$stokTerima = round($datamasuk['TOTAL_QTY_MASUK'], 2) - round($rRMasuk['kg'], 2); // float
-			$Rkg = round($rRMasuk['kg'], 2); // float
-			$RBs = round($rowdb21_masuk['qty_kg_masuk'], 2); // float
-			$total_masuk = $stokTerima + $Rkg + $RBs;
+<!-- <div align="LEFT">TGL : <?php echo date($_GET['tanggal1']); ?></div> -->
+<table width="125%" border="1" align="Center">
+<tr>
+    <th width="3%" rowspan="2" align="center" valign="middle">No.</th>
+    <th width="25%" rowspan="2" colspan="2"><strong>Bulan <?php echo namabln($Bln2) . " " . $Thn2; ?></strong></th>
+    <th colspan="2" valign="middle" colspan="4" style="text-align: center">Kain I</th>
+    <th width="36%" rowspan="2" valign="middle" style="text-align: center">Kain II</th>
+    <th width="32%" rowspan="2" colspan="2" valign="middle" style="text-align: center">Total</th>
+    </tr>
+    <tr>
+        <th width="22%" colspan="2" valign="middle" style="text-align: center">Stok Proses</th>
+        <th width="25%" colspan="2" valign="middle" style="text-align: center">Stok Mati</th>
+    </tr>
+</table>
+<table width="125%" border="1" align="center">
+    <?php
+   $stock_bln_sebelumnya = round($r['kg'], 2) - round($stokmatiT['total_bulan_lalu'], 2);
+
+   $stokTerima = round($datamasuk['TOTAL_QTY_MASUK'], 2) - round($rRMasuk['kg'], 2); // float
+   $Rkg = round($rRMasuk['kg'], 2); // float
+   $RBs = round($rowdb21_masuk['qty_kg_masuk'], 2); // float
+   $total_masuk = $stokTerima + $Rkg + $RBs;
 
 
-			$stokkeluar = round($rK['kg'], 2) - round($rRkeluar['kg'], 2);
-			$_qty_mati = round($rMatiKeluar['kg'], 2);
-			$stokkeluar_akhir = $stokkeluar - $_qty_mati;
-			$Rkg_keluar = round($rRkeluar['kg'], 2); //CWD
-			$Rkg_mati_keluar = round($rowdb21['qty_kg_keluar'], 2);
-			$total_keluar = $stokkeluar_akhir + $Rkg_mati_keluar;
+   $stokkeluar = round($rK['kg'], 2) - round($rRkeluar['kg'], 2);
+   $_qty_mati = round($rMatiKeluar['kg'], 2);
+   $stokkeluar_akhir = $stokkeluar - $_qty_mati;
+   $Rkg_keluar = round($rRkeluar['kg'], 2); //CWD
+   $Rkg_mati_keluar = round($rowdb21['qty_kg_keluar'], 2);
+   $total_keluar = $stokkeluar_akhir + $Rkg_mati_keluar;
 
-			$total_stock = $stock_bln_sebelumnya + $stokTerima - $stokkeluar_akhir;
+   $total_stock = $stock_bln_sebelumnya + $stokTerima - $stokkeluar_akhir;
 
-			$stock_mati_bln_sekarang = round($stokmatiT['total_bulan_ini'], 2);
+   $stock_mati_bln_sekarang = round($stokmatiT['total_bulan_ini'], 2);
 
-			$total_stock_saat_ini = $total_stock + $stock_mati_bln_sekarang;
-		?>
-	  <tr>
-	    <td>1</td>
-		<td><strong>Stok Bulan <?php if($Bln2!="01"){echo namabln($BlnLalu)." ".$Thn2;}else{echo namabln($BlnLalu)." ".$Thn;} ?></strong></td>
-		<td align="center"><?php echo number_format(round($r['kg'], 2) - round($stokmatiT['total_bulan_lalu'],2), 2); ?></td>
-		<td><?php echo number_format(round($stokmatiT['total_bulan_lalu'],2),2); ?></td>
-		<td align="center">&nbsp;</td>
-		<td align="right"><?php echo number_format(round($r['kg'],2),2); ?></td>
-      </tr>	  
-	 <tr>
-		
-	   <td>2</td>
-	   <td><strong>Masuk Kain</strong></td>
-		<td><?php echo number_format($stokTerima, 2) ?></td>
-		</td>
-		<td align="center">
-		<?php
-		echo isset($rowdb21_masuk['qty_kg_masuk']) ? number_format(round($rowdb21_masuk['qty_kg_masuk'], 2), 2) : '0.00';
-		?>
-		</td>
-	    <td align="center"><?php echo number_format(round($rRMasuk['kg'], 2), 2); ?></td>
-	    <td align="right"><?php echo number_format($total_masuk, 2) ?></td>
+   $total_stock_saat_ini = $total_stock + $stock_mati_bln_sekarang;
+    ?>
 
-	    </tr>
-	 <tr>
-	   <td>3</td>
-	   <td><strong>Keluar Kain</strong></td>
-	   <td align="center"><?php echo number_format($stokkeluar_akhir,2); ?></td></td>
-	   <td align="center">
-		<?php
-			echo isset($rowdb21['qty_kg_keluar']) ? number_format(round($rowdb21['qty_kg_keluar'], 2), 2) : '0.00';
-			?>
-		</td>	   
-	   <td align="center"><?php echo number_format(round($rRkeluar['kg'],2),2); ?></td>
-	   <td align="right"><?php echo number_format($total_keluar, 2); ?></td>
-	   </tr>
-	 <tr>
-	   <td>4</td>
-	   <td><strong>Stok</strong></td>
-	   <td align="center"><?php echo number_format($total_stock, 2); ?></td>
-	   <td><?php echo number_format(round($stokmatiT['total_bulan_ini'],2),2); ?></td>
-	   <td align="center">&nbsp;</td>
-	   <td align="right"><?php echo number_format($total_stock_saat_ini,2); ?></td>
-	   </tr>
-	 <tr>
-	   <td>5</td>
-	   <td><strong>Stok Opname <?php echo namabln($Bln2)." ".$Thn2; ?></strong></td>
-	   <td align="center"><?php echo number_format($total_stock, 2); ?></td>
-	   <td><?php echo number_format(round($stokmatiT['total_bulan_ini'],2),2); ?></td>
-	   <td align="center">&nbsp;</td>
-	   <td align="right"><?php echo number_format($total_stock_saat_ini,2); ?></td>
-	   </tr>				
-	</tbody>
-                </table>
-              </div>
-              <!-- /.card-body -->
-            </div> 
-	</form>		
-      </div><!-- /.container-fluid -->
-    <!-- /.content -->
-<!-- jQuery -->
-<script src="plugins/jquery/jquery.min.js"></script>
-<!-- SweetAlert2 -->
-<script src="plugins/sweetalert2/sweetalert2.min.js"></script>
-<!-- Toastr -->
-<script src="plugins/toastr/toastr.min.js"></script>	
-<!-- AdminLTE App -->
-<script src="dist/js/adminlte.min.js"></script>
+    <tr>
+        <td>1</td>
+        <td colspan="2"><strong>Stok Bulan
+                <?php echo ($Bln2 != "01") ? namabln($BlnLalu) . " " . $Thn2 : namabln($BlnLalu) . " " . $Thn; ?>
+            </strong></td>
+        <td align='center' colspan="2"><?php echo number_format($stock_bln_sebelumnya, 2); ?></td>
+        <td align='center' colspan="2"><?php echo number_format(round($stokmatiT['total_bulan_lalu'], 2), 2); ?></td>
+        <td align='center'>&nbsp;</td>
+        <td align='right' colspan="2"><strong><?php echo number_format(round($r['kg'], 2), 2); ?></strong></td>
+    </tr>
 
-<script>
-	$(function () {
-		//Datepicker
-    $('#datepicker').datetimepicker({
-      format: 'YYYY-MM-DD'
-    });
-    $('#datepicker1').datetimepicker({
-      format: 'YYYY-MM-DD'
-    });
-    $('#datepicker2').datetimepicker({
-      format: 'YYYY-MM-DD'
-    });
-	
-});		
-</script>
+    <tr>
+        <td>2</td>
+        <td colspan="2"><strong>Masuk Kain</strong></td>
+        <td align="center" colspan="2"><?php echo number_format($stokTerima, 2); ?></td>
+        <td align='center' colspan="2">
+            <?php echo isset($rowdb21_masuk['qty_kg_masuk']) ? number_format($RBs, 2) : '0.00'; ?>
+        </td>
+        <td align="center"><?php echo number_format($Rkg, 2); ?></td>
+        <td align="right" colspan="2"><strong><?php echo number_format($total_masuk, 2); ?></strong></td>
+    </tr>
+
+    <tr>
+        <td>3</td>
+        <td colspan="2"><strong>Keluar Kain</strong></td>
+        <td align="center" colspan="2" ><?php echo number_format($stokkeluar_akhir, 2); ?></td>
+        <td align='center' colspan="2">
+        <?php
+        echo isset($rowdb21['qty_kg_keluar']) ? number_format(round($rowdb21['qty_kg_keluar'], 2), 2) : '0.00';
+        ?>  
+       
+        </td>
+        <td align="center"><?php echo number_format($Rkg_keluar, 2); ?></td>
+        <td align="right" colspan="2"><strong><?php echo number_format($total_keluar, 2); ?></strong></td>
+    </tr>
+
+    <tr>
+        <td>4</td>
+        <td colspan="2"><strong>Stok</strong></td>
+        <td align="center" colspan="2"><?php echo number_format($total_stock, 2); ?></td>
+        <td align='center' colspan="2"><?php echo number_format($stock_mati_bln_sekarang, 2); ?></td>
+        <td align="center">&nbsp;</td>
+        <td align="right" colspan="2"><strong><?php echo number_format($total_stock_saat_ini, 2); ?></strong></td>
+    </tr>
+
+    <tr>
+        <td rowspan="2" style="vertical-align: middle; text-align: center;">5</td>
+        <td align='center' colspan="2"><strong>Stok Opname</strong></td>
+        <td align='center' colspan="2">&nbsp;</td>
+        <td align='center' colspan="2">&nbsp;</td>
+        <td align="center">&nbsp;</td>
+        <td align="right" colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td align="center" colspan="2"><strong>Bulan <?php echo namabln($Bln2) . " " . $Thn2; ?></strong></td>
+        <td align='center' colspan="2"><strong><?php echo number_format($total_stock, 2); ?></strong></td>
+        <td align='center' colspan="2"><strong><?php echo number_format($stock_mati_bln_sekarang, 2); ?></strong></td>
+        <td align="center">&nbsp;</td>
+        <td align="right" colspan="2"><strong><?php echo number_format($total_stock_saat_ini, 2); ?></strong></td>
+    </tr>
+</table>
+
+
+    
+<table></table>
+<table></table>
+
+<table style="width: auto;" border="1">
+     <tr>
+  <td colspan="3"></td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;">Dibuat Oleh :</td>
+  <td colspan="3" style="text-align: center; vertical-align: middle;">Diperiksa Oleh :</td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;">Mengetahui :</td>
+</tr>
+<tr>
+  <td colspan="3" style="text-align: center; vertical-align: middle;">Nama</td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;"></td>
+</tr>
+<tr>
+  <td colspan="3" style="text-align: center; vertical-align: middle;">Jabatan</td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;"></td>
+</tr>
+<tr>
+  <td colspan="3" style="text-align: center; vertical-align: middle;">Tanggal</td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;"></td>
+</tr>
+<tr>
+  <td colspan="3" style="text-align: center; vertical-align: middle;">Tanda Tangan</td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;"><br><br><br><br></td>
+  <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
+  <td colspan="2" style="text-align: center; vertical-align: middle;"></td>
+</tr>
+</table>
+
+</table>
+
+</body>
+</html>

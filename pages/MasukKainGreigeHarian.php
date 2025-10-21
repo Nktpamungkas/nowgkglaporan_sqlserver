@@ -55,7 +55,8 @@ $Akhir	= isset($_POST['tgl_akhir']) ? $_POST['tgl_akhir'] : '';
 		<div class="card card-warning">
               <div class="card-header">
                 <h3 class="card-title">Detail Laporan Harian Masuk Kain Greige</h3>
-				<a href="pages/cetak/lapgmasuk_excel.php?awal=<?php echo $Awal;?>&akhir=<?php echo $Akhir;?>" class="btn bg-blue float-right" target="_blank">Cetak Excel</a>  
+				          <a href="pages/cetak/lapgmasuk_excel.php?awal=<?php echo $Awal;?>&akhir=<?php echo $Akhir;?>" class="btn bg-blue float-right" target="_blank">Cetak Excel</a>  
+                  <a href="pages/cetak/lapgmasuk_qty.php?awal=<?php echo $Awal;?>&akhir=<?php echo $Akhir;?>" class="btn bg-red float-right" style="margin-right: 10px;" target="_blank">Greige Qty</a>   
           </div>
               <!-- /.card-header -->
               <div class="card-body">				  
@@ -381,6 +382,7 @@ if($rowdb21['QTY_KG']>0){$qtyB=$rowdb21['QTY_KG'];}else{$qtyB=$rowdb21['QTY1_KG'
 		<div class="card card-primary">
               <div class="card-header">
                 <h3 class="card-title">Detail Laporan Retur Produksi</h3>				 
+                  <a href="pages/cetak/lapReturUlang_excel.php?awal=<?php echo $Awal;?>&akhir=<?php echo $Akhir;?>" class="btn bg-red float-right" target="_blank">Cetak Excel</a>
           </div>
               <!-- /.card-header -->
               <div class="card-body">
@@ -600,6 +602,7 @@ if($rowdb22R1['ORDERPARTNERBRANDCODE']==""){$buyer="";}else{$buyer=$rowdb22R1['O
 		<div class="card card-primary">
               <div class="card-header">
                 <h3 class="card-title">Detail Laporan Retur Untuk Bagi Ulang</h3>				 
+                  <a href="pages/cetak/lapBagiUlang_excel.php?awal=<?php echo $Awal;?>&akhir=<?php echo $Akhir;?>" class="btn bg-red float-right" target="_blank">Cetak Excel</a>  
           </div>
               <!-- /.card-header -->
               <div class="card-body">
