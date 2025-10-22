@@ -39,13 +39,7 @@ function cek_tanggal($ins_tgl)
 
 <body>
     <?php
-    if (!empty($Awal) && !empty($Akhir)) {
-        // ubah format tanggal ke dd/mm/YYYY
-        $tglAwal  = date('d/m/Y', strtotime($Awal));
-        $tglAkhir = date('d/m/Y', strtotime($Akhir));
-        // $bulanTahun = $tglAwal . ' - ' . $tglAkhir;
-        $bulanTahun = $tglAwal;
-    } else if (!empty($Awal)) {
+    if (!empty($Awal)) {
         $timestamp = strtotime($Awal);
         $bulanTahun = date('F Y', $timestamp);
         $bulanIndonesia = [
