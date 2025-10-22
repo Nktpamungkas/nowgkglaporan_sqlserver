@@ -256,8 +256,11 @@ function cek_tanggal($ins_tgl)
             FROM 
                 dbnow_gkg.tbl_keluar_greige2
             WHERE 
-                TRANSACTIONDATE BETWEEN '$Awal' AND '$Akhir' AND LOTCODE LIKE '%/%' and ID_ADDRESS = '$ipaddress' 
-        ";
+                TRANSACTIONDATE BETWEEN '$Awal' AND '$Akhir' AND (
+                LOTCODE LIKE '%/19' OR
+                LOTCODE LIKE '%/20' OR
+                LOTCODE LIKE '%/21'
+            ) and ID_ADDRESS = '$ipaddress'";
             $stmt1 = sqlsrv_query($con, $sqlDB21);
 
             if ($stmt1 === false) {
