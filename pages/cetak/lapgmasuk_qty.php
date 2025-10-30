@@ -82,8 +82,7 @@ $Akhir	= isset($_GET['akhir']) ? $_GET['akhir'] : '';
 <!-- <div align="LEFT">TGL : <?php echo date($_GET['tanggal1']); ?></div> -->
 
 <?php
-    $sqlGabungan = "
-        SELECT
+    $sqlGabungan = "SELECT
             T.TRANSACTIONDATE,
             SUM(T.QTY_NONFK) AS QTY_KG,
             SUM(T.QTY_FK) AS QTY_FK
@@ -151,8 +150,7 @@ $Akhir	= isset($_GET['akhir']) ? $_GET['akhir'] : '';
     $stmt = db2_exec($conn1, $sqlGabungan, ['cursor' => DB2_SCROLLABLE]);
 
     // Query CWD
-    $sqlCWD = "
-        SELECT 
+    $sqlCWD = "SELECT 
             CAST(s.TRANSACTIONDATE AS DATE) AS TRANSACTIONDATE,
             SUM(s.BASEPRIMARYQUANTITY) AS QTY_CWD
         FROM STOCKTRANSACTION s
@@ -255,9 +253,47 @@ $Akhir	= isset($_GET['akhir']) ? $_GET['akhir'] : '';
         </tr>
     </tbody>
 </table>
-
 <table></table>
-<table><div>ket: Tidak tagih : </div></table>
+
+<?php
+    $sql = "SELECT
+        SUM(s.BASEPRIMARYQUANTITY) AS RETURN_PRODUKSI
+        FROM STOCKTRANSACTION s
+        LEFT JOIN ADSTORAGE a ON
+            a.UNIQUEID = s.ABSUNIQUEID
+            AND a.NAMENAME = 'StatusRetur'
+        WHERE
+            s.TRANSACTIONDATE BETWEEN ? AND ?
+            AND s.ITEMTYPECODE = 'KGF'
+            AND s.LOGICALWAREHOUSECODE = 'M021'
+            AND s.TEMPLATECODE = 'OPN'
+            AND a.VALUESTRING IN ('1','2')
+            AND s.LOTCODE NOT LIKE ?
+            AND s.LOTCODE NOT LIKE ?
+            AND s.LOTCODE NOT LIKE ?
+            AND (s.PROJECTCODE NOT LIKE ? OR s.PROJECTCODE IS NULL)
+    ";
+
+    $stmt = db2_prepare($conn1, $sql);
+    if (!$stmt) {
+        echo "Query prepare error: " . db2_stmt_errormsg();
+        return;
+    }
+
+    $params = [$Awal, $Akhir, '%19%', '%/20', '%/21', '%CWD%'];
+    if (!db2_execute($stmt, $params)) {
+        echo "Query execute error: " . db2_stmt_errormsg($stmt);
+        return;
+    }
+
+    echo "<tr><th>Retur Produksi : </th></tr>";
+    while ($row = db2_fetch_assoc($stmt)) {
+        echo "<td style=\"text-align: right;\">" . number_format((float)$row['RETURN_PRODUKSI'], 2, '.', ',') . "</td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+?>
+
 <table></table>
 
 <table style="width: auto;" border="1">
