@@ -237,8 +237,9 @@ $Lalu 		= $Bln2-1;
 	$tK+=round($rKeluar['kg'],3);
 	$tR+=round($rRMasuk['kg'],3);
 	$tP+=round($rPotong['kg'],3);
+	$tBS+=round($rJualBS['kg'],3);
 	} 
-	$tS=($total+$tM+$tR+$tN)-($tK+$tP+$tH);
+	$tS=($total+$tM+$tR+$tN)-($tK+$tP+$tH+$tBS);
 					  ?>
 				  </tbody>
                   <tfoot>
@@ -250,7 +251,7 @@ $Lalu 		= $Bln2-1;
 	    <td>&nbsp;</td>
 	    <td align="right"><strong><?php echo number_format(round($tR,2),2); ?></strong></td>
 	    <td align="right"><strong><?php echo number_format(round($tP,2),2); ?></strong></td>
-	    <td align="right">&nbsp;</td>
+	    <td align="right"><strong><?php echo number_format(round($tBS,2),2); ?></strong></td>
 	    <td align="right"><strong><?php echo number_format(round($tS,3),3); ?></strong></td>
 	    <td align="right">&nbsp;</td>
 	    <td align="right">&nbsp;</td>
