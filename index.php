@@ -104,15 +104,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
               <li><a href="TutupHarian" class="dropdown-item">Tutup Transaksi Harian</a></li>
 			  <li><a href="TutupInOutHarian" class="dropdown-item">Tutup Transaksi In-Out Harian</a></li>
-			  <li><a href="TutupHarian11" class="dropdown-item">Tutup Transaksi Harian (Jam 11)</a></li>
-			  <li><a href="TutupInOutHarian11" class="dropdown-item">Tutup Transaksi In-Out Harian (Jam 11)</a></li>	
+<!--			  <li><a href="TutupHarian11" class="dropdown-item">Tutup Transaksi Harian (Jam 11)</a></li>-->
+<!--			  <li><a href="TutupInOutHarian11" class="dropdown-item">Tutup Transaksi In-Out Harian (Jam 11)</a></li>	-->
 			</ul>
           </li>	
 		  <li class="nav-item dropdown">
             <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Laporan Stok</a>
             <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">              
 			  <li><a href="LapStokHarian" class="dropdown-item">Lap Stok Harian</a></li>
-			  <li><a href="LapStokHarian11" class="dropdown-item">Lap Stok Harian (Jam 11)</a></li>	
+<!--			  <li><a href="LapStokHarian11" class="dropdown-item">Lap Stok Harian (Jam 11)</a></li>	-->
 			  <li><a href="LapStokBulanan" class="dropdown-item">Lap Stok Bulanan</a></li>	
 			  <li><a href="LapTotalMasukKeluar" class="dropdown-item">Lap Total Masuk dan Keluar</a></li>
 			  <li><a href="LapBulananBagiKain" class="dropdown-item">Lap Bulanan Pembagian Kain</a></li>
