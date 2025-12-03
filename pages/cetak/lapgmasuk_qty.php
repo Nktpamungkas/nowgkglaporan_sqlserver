@@ -280,7 +280,7 @@ $Akhir	= isset($_GET['akhir']) ? $_GET['akhir'] : '';
         return;
     }
 
-    $params = [$Awal, $Akhir, '%19%', '%/20', '%/21', '%CWD%'];
+    $params = [$Awal, $Akhir, '%/19%', '%/20', '%/21', '%CWD%'];
     if (!db2_execute($stmt, $params)) {
         echo "Query execute error: " . db2_stmt_errormsg($stmt);
         return;
