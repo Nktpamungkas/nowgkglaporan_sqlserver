@@ -107,23 +107,47 @@ function cek_tanggal($ins_tgl)
             </tr>
 
             <?php
-            $mysqlBS = "SELECT 
-            tso.id,
-            DATE(tso.tanggal) AS tanggal,
-            SUM(tsjd.qty_keluar_detail) AS qty_kg,
-            COUNT(tsjd.id) AS qty_roll,
-            GROUP_CONCAT(DISTINCT tb.nama SEPARATOR ', ') AS nama_barang
-            FROM tbl_sj_out tso
-            JOIN tbl_sj_out_detail tsjd ON tso.id = tsjd.sj_out_id 
-            JOIN tbl_surat_jalan_detail tsd ON tsjd.detail_id_surat_jalan = tsd.id
-            JOIN tbl_barang_bs tb ON tsd.barang_bs_id = tb.id
-            WHERE DATE(tso.tanggal) BETWEEN '$Awal' AND '$Akhir'
-            GROUP BY tso.id, DATE(tso.tanggal)
-            ORDER BY tso.id ASC";
-            $stmtbs = mysqli_query($congkg, $mysqlBS);
+            $mysqlBS = " SELECT 
+                            tso.id,
+                            CAST(tso.tanggal AS DATE) AS tanggal,
+                            SUM(tsjd.qty_keluar_detail) AS qty_kg,
+                            COUNT(tsjd.id) AS qty_roll,
+                            (
+                                SELECT STRING_AGG(nama_barang, ', ') 
+                                    WITHIN GROUP (ORDER BY nama_barang)
+                                FROM (
+                                    SELECT DISTINCT tb2.nama AS nama_barang
+                                    FROM invgkg.invgkg.tbl_sj_out_detail tsjd2
+                                    JOIN invgkg.invgkg.tbl_surat_jalan_detail tsd2 
+                                        ON tsjd2.detail_id_surat_jalan = tsd2.id
+                                    JOIN invgkg.invgkg.tbl_barang_bs tb2 
+                                        ON tsd2.barang_bs_id = tb2.id
+                                    WHERE tsjd2.sj_out_id = tso.id
+                                ) AS distinct_list
+                            ) AS nama_barang
+                        FROM 
+                            invgkg.invgkg.tbl_sj_out tso
+                        JOIN 
+                            invgkg.invgkg.tbl_sj_out_detail tsjd 
+                                ON tso.id = tsjd.sj_out_id
+                        JOIN 
+                            invgkg.invgkg.tbl_surat_jalan_detail tsd 
+                                ON tsjd.detail_id_surat_jalan = tsd.id
+                        JOIN 
+                            invgkg.invgkg.tbl_barang_bs tb 
+                                ON tsd.barang_bs_id = tb.id
+                        WHERE 
+                            CAST(tso.tanggal AS DATE) BETWEEN  '$Awal' AND '$Akhir'
+                        GROUP BY 
+                            tso.id, CAST(tso.tanggal AS DATE)
+                        ORDER BY 
+                            tso.id ASC
+            ";
+
+            $stmtbs = sqlsrv_query($congkg, $mysqlBS);
 
             if ($stmtbs === false) {
-                die('Query Error: ' . mysqli_error($congkg));
+                die(print_r(sqlsrv_errors(), true));
             }
 
             $no = 1;
@@ -131,7 +155,7 @@ function cek_tanggal($ins_tgl)
             $totroll = 0;
             $totstok = 0;
 
-            while ($rowdb21 = mysqli_fetch_assoc($stmtbs)) {
+            while ($rowdb21 = sqlsrv_fetch_array($stmtbs, SQLSRV_FETCH_ASSOC)) {
                 $knitt1 = "ITTI";
                 echo "
                 <tr>

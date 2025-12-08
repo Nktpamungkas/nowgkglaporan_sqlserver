@@ -223,49 +223,77 @@ if($b=="12"){ $Nbln="Desember";}
 			FROM MaxTutup
 		");
 $stokmatiT = sqlsrv_fetch_array($stokmati);
+			$mysqlBSMasuk = " SELECT  
+								FORMAT(tsj.tanggal, 'yyyy-MM') AS tanggal_bulan,
+								SUM(tsjd.qty_masuk) AS qty_kg_masuk,
+								COUNT(tsjd.id) AS qty_roll,
+								(
+									SELECT STRING_AGG(nama_barang, ', ') WITHIN GROUP (ORDER BY nama_barang)
+									FROM (
+										SELECT DISTINCT tb.nama AS nama_barang
+										FROM invgkg.invgkg.tbl_surat_jalan_detail tsjd2
+										JOIN invgkg.invgkg.tbl_barang_bs tb ON tsjd2.barang_bs_id = tb.id
+										WHERE tsjd2.surat_jalan_id IN (
+											SELECT tj.id 
+											FROM invgkg.invgkg.tbl_surat_jalan tj
+											WHERE FORMAT(tj.tanggal,'yyyy-MM') = FORMAT(tsj.tanggal,'yyyy-MM')
+										)
+									) AS distinct_nama
+								) AS nama_barang
+							FROM 
+								invgkg.invgkg.tbl_surat_jalan tsj
+							LEFT JOIN 
+								invgkg.invgkg.tbl_surat_jalan_detail tsjd ON tsjd.surat_jalan_id = tsj.id
+							WHERE 
+								FORMAT(tsj.tanggal, 'yyyy-MM') = '$Bulan'
+							GROUP BY 
+								FORMAT(tsj.tanggal, 'yyyy-MM')
+							";
 
-			$mysqlBSMasuk = "SELECT 
---             tsj.id,
-				DATE_FORMAT(tsj.tanggal, '%Y-%m') AS tanggal_bulan,
-				SUM(tsjd.qty_masuk) AS qty_kg_masuk,
-				COUNT(tsjd.id) AS qty_roll
-			, GROUP_CONCAT(DISTINCT tb.nama SEPARATOR ', ') AS nama_barang
-			FROM 
-				tbl_surat_jalan tsj 
-			LEFT JOIN 
-				tbl_surat_jalan_detail tsjd ON tsjd.surat_jalan_id = tsj.id 
-			JOIN 
-				tbl_barang_bs tb ON tsjd.barang_bs_id = tb.id
-			WHERE 
-				DATE_FORMAT(tsj.tanggal, '%Y-%m') = '$Bulan'
-			GROUP BY 
-				DATE_FORMAT(tsj.tanggal, '%Y-%m')"
-			;
-			$stmtbsmasuk = mysqli_query($congkg, $mysqlBSMasuk);
-			$rowdb21_masuk = mysqli_fetch_assoc($stmtbsmasuk);
+			$stmtbsmasuk = sqlsrv_query($congkg, $mysqlBSMasuk);
+			if ($stmtbsmasuk === false) {
+				echo "<pre>";
+				print_r(sqlsrv_errors());
+				echo "</pre>";
+				exit;
+			}
 
-$mysqlBS = " SELECT 
-				DATE_FORMAT(tso.tanggal, '%Y-%m') AS tanggal,
-				SUM(tsjd.qty_keluar_detail) AS qty_kg_keluar,
-				COUNT(tsjd.id) AS qty_roll,
-				GROUP_CONCAT(DISTINCT tb.nama ORDER BY tb.nama SEPARATOR ', ') AS nama_barang
-			FROM 
-				tbl_sj_out tso
-			JOIN 
-				tbl_sj_out_detail tsjd ON tso.id = tsjd.sj_out_id 
-			JOIN 
-				tbl_surat_jalan_detail tsd ON tsjd.detail_id_surat_jalan = tsd.id
-			JOIN 
-				tbl_barang_bs tb ON tsd.barang_bs_id = tb.id
-			WHERE 
-				DATE_FORMAT(tso.tanggal, '%Y-%m') = '$Bulan'
-			GROUP BY  
-				DATE_FORMAT(tso.tanggal, '%Y-%m')
-			ORDER BY  
-				DATE_FORMAT(tso.tanggal, '%Y-%m')
+			$rowdb21_masuk = sqlsrv_fetch_array($stmtbsmasuk, SQLSRV_FETCH_ASSOC);
+
+			$mysqlBS = "SELECT  
+						FORMAT(tso.tanggal, 'yyyy-MM') AS tanggal,
+						SUM(tsjd.qty_keluar_detail) AS qty_kg_keluar,
+						COUNT(tsjd.id) AS qty_roll,
+						(
+							SELECT STRING_AGG(nama_barang, ', ') WITHIN GROUP (ORDER BY nama_barang)
+							FROM (
+								SELECT DISTINCT tb2.nama AS nama_barang
+								FROM invgkg.invgkg.tbl_sj_out tso2
+								JOIN invgkg.invgkg.tbl_sj_out_detail tsjd2 ON tso2.id = tsjd2.sj_out_id
+								JOIN invgkg.invgkg.tbl_surat_jalan_detail tsd2 ON tsjd2.detail_id_surat_jalan = tsd2.id
+								JOIN invgkg.invgkg.tbl_barang_bs tb2 ON tsd2.barang_bs_id = tb2.id
+								WHERE FORMAT(tso2.tanggal, 'yyyy-MM') = FORMAT(tso.tanggal, 'yyyy-MM')
+							) AS distinct_nama
+						) AS nama_barang
+					FROM 
+						invgkg.invgkg.tbl_sj_out tso
+					JOIN 
+						invgkg.invgkg.tbl_sj_out_detail tsjd ON tso.id = tsjd.sj_out_id
+					JOIN 
+						invgkg.invgkg.tbl_surat_jalan_detail tsd ON tsjd.detail_id_surat_jalan = tsd.id
+					JOIN 
+						invgkg.invgkg.tbl_barang_bs tb ON tsd.barang_bs_id = tb.id
+					WHERE 
+						FORMAT(tso.tanggal, 'yyyy-MM') = '$Bulan'
+					GROUP BY  
+						FORMAT(tso.tanggal, 'yyyy-MM')
+					ORDER BY  
+						FORMAT(tso.tanggal, 'yyyy-MM')
 			";
-		$stmtbs = mysqli_query($congkg, $mysqlBS);
-		$rowdb21 = mysqli_fetch_assoc($stmtbs);
+
+			$stmtbs = sqlsrv_query($congkg, $mysqlBS);
+			$rowdb21 = sqlsrv_fetch_array($stmtbs, SQLSRV_FETCH_ASSOC);
+
 
 			$sqlMatiKeluar = sqlsrv_query($con, " SELECT 
 					FORMAT(tgl_tutup, 'yyyy-MM') AS tgl_tutup, 
@@ -273,7 +301,7 @@ $mysqlBS = " SELECT
 					SUM(berat) AS kg 
 				FROM 
 					dbnow_gkg.tblkeluarkain 
-				WHERE format(tgl_tutup, 'yyyy-MM') = '$Bulan' 
+				WHERE format(tgl_tutup, 'yyyy-MM') = '$Bulan'
 				 AND lot like '%/%'
 				GROUP BY 
 					FORMAT(tgl_tutup, 'yyyy-MM');
