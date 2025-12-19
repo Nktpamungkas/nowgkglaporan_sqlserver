@@ -22,7 +22,6 @@ else{
     exit("DB2 Connection failed");
     }
 
-<<<<<<< HEAD
 $congkg=mysqli_connect("10.0.0.10","dit","4dm1n","invgkg");
 //$cond=mysqli_connect("10.0.0.10","dit","4dm1n","db_qc");
 // $con=mysqli_connect("10.0.0.10","dit","4dm1n","dbnow_gkg");
@@ -30,15 +29,6 @@ if (mysqli_connect_errno()) {
 printf("Connect failed: %s\n", mysqli_connect_error());
 exit();
 } 
-=======
-// $congkg=mysqli_connect("10.0.0.10","dit","4dm1n","invgkg");
-//$cond=mysqli_connect("10.0.0.10","dit","4dm1n","db_qc");
-// $con=mysqli_connect("10.0.0.10","dit","4dm1n","dbnow_gkg");
-// if (mysqli_connect_errno()) {
-// printf("Connect failed: %s\n", mysqli_connect_error());
-// exit();
-// } 
->>>>>>> 51559d40cb6a90a39e5fccdab605063203282931
 
 $hostSVR19 = "10.0.0.221";
 $usernameSVR19 = "sa";
