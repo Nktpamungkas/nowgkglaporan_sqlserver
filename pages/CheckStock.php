@@ -153,7 +153,8 @@ if ($_POST['cek'] == "Cek" or $_POST['cari'] == "Cari") {
 			<div class="card-body">
 				<div class="form-group row">
 					<label for="zone" class="col-md-1">Zone</label>
-					<select class="form-control select2bs4" style="width: 100%;" name="zone">
+					<div class="input-group input-group-sm">
+					<select class="form-control select2bs4" style="width: 80%;" name="zone">
 						<option value="">Pilih</option>
 						<?php $sqlZ = sqlsrv_query($con, " SELECT * FROM dbnow_gkg.tbl_zone order by nama ASC");
 						while ($rZ = sqlsrv_fetch_array($sqlZ)) {
@@ -165,10 +166,15 @@ if ($_POST['cek'] == "Cek" or $_POST['cari'] == "Cari") {
 							</option>
 						<?php } ?>
 					</select>
+					<span class="input-group-append">
+						<button type="button" class="btn btn-warning btn-flat" data-toggle="modal" data-target="#DataZone"><i class="fa fa-plus"></i> </button>
+				  </span>
+				 </div>
 				</div>
 				<div class="form-group row">
 					<label for="lokasi" class="col-md-1">Location</label>
-					<select class="form-control select2bs4" style="width: 100%;" name="lokasi">
+					<div class="input-group input-group-sm">
+					<select class="form-control select2bs4" style="width: 80%;" name="lokasi">
 						<option value="">Pilih</option>
 						<?php $sqlL = sqlsrv_query($con, " SELECT * FROM dbnow_gkg.tbl_lokasi WHERE zone='$Zone' order by nama ASC");
 						while ($rL = sqlsrv_fetch_array($sqlL)) {
@@ -180,6 +186,10 @@ if ($_POST['cek'] == "Cek" or $_POST['cari'] == "Cari") {
 							</option>
 						<?php } ?>
 					</select>
+					<span class="input-group-append">
+                   	  	<button type="button" class="btn btn-warning btn-flat" data-toggle="modal" data-target="#DataLokasi"><i class="fa fa-plus"></i> </button>
+               		</span>
+				  </div>
 				</div>
 				<button class="btn btn-info" type="submit" value="Cari" name="cari">Cari Data</button>
 			</div>
@@ -387,8 +397,110 @@ if ($_POST['cek'] == "Cek" or $_POST['cari'] == "Cari") {
 		</div><!-- /.card-body -->
 	</div><!-- /.container-fluid -->
 </div><!-- /.content -->
+<div class="modal fade" id="DataZone">
+	<div class="modal-dialog">
+		<form class="form-horizontal" name="modal_popup" data-toggle="validator" method="post" action="" enctype="multipart/form-data">
+			<div class="modal-content">            
+				<div class="modal-header">
+					<h4 class="modal-title">Input Data Zone</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+					<span aria-hidden="true">&times;</span>
+				</div>
+				<div class="modal-body">
+					<input type="hidden" id="id" name="id">
+					<div class="form-group">
+					<label for="zone1" class="col-md-3 control-label">Zone</label>
+					<div class="col-md-12">
+					<input type="text" class="form-control" id="zone1" name="zone1" maxlength="3" required>
+					<span class="help-block with-errors"></span>
+					</div>
+					</div>				  
+				</div>
+				<div class="modal-footer justify-content-between">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<input type="submit" value="Save changes" name="simpan_zone" class="btn btn-primary" >
+					</div>	  
+			</div>
+		</form>				
+	</div>
+</div>
+<div class="modal fade" id="DataLokasi">
+    <div class="modal-dialog">
+		<form class="form-horizontal" name="modal_popup" data-toggle="validator" method="post" action="" enctype="multipart/form-data">
+			<div class="modal-content">            
+				<div class="modal-header">
+					<h4 class="modal-title">Input Data Lokasi</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+					<span aria-hidden="true">&times;</span>
+				</div>
+				<div class="modal-body">
+					<input type="hidden" id="id" name="id">
+					<div class="form-group">
+						<label for="zone" class="col-md-3 control-label">Zone</label>
+						<div class="col-md-12">                 
+							<select class="form-control select2bs4" name="zone2" required>
+								<option value="">Pilih</option>	 
+								<?php $sqlZ=sqlsrv_query($con, " SELECT * FROM dbnow_gkg.dbnow_gkg.tbl_zone ORDER BY nama ASC"); 
+								while($rZ=sqlsrv_fetch_array($sqlZ)){
+								?>
+								<option value="<?php echo $rZ['nama'];?>"><?php echo $rZ['nama'];?></option>
+								<?php  } ?>
+							</select>			  
+							<span class="help-block with-errors"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="lokasi1" class="col-md-3 control-label">Lokasi</label>
+						<div class="col-md-12">
+							<input type="text" class="form-control" id="lokasi1" name="lokasi1" maxlength="10" required>
+							<span class="help-block with-errors"></span>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer justify-content-between">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<input type="submit" value="Save changes" name="simpan_lokasi" class="btn btn-primary" >
+				</div>	  
+			</div>
+		</form>				
+    </div>
+</div>
+<?php 
+if ($_POST['simpan_zone'] == "Save changes") {
+    $zone1 = strtoupper($_POST['zone1']);
 
+    // Query pakai sintaks SQL Server + parameterized query
+    $sql = "INSERT INTO dbnow_gkg.dbnow_gkg.tbl_zone (nama) VALUES (?)";
+    $params = array($zone1);
 
+    $sqlData1 = sqlsrv_query($con, $sql, $params);
+
+    if ($sqlData1) {
+        echo "<script>window.location='CheckStock';</script>";
+    } else {
+        // tampilkan error jika gagal
+        die(print_r(sqlsrv_errors(), true));
+    }
+}
+
+if ($_POST['simpan_lokasi'] == "Save changes") {
+    $zone2   = strtoupper($_POST['zone2']);
+    $lokasi2 = strtoupper($_POST['lokasi1']);
+
+    // Gunakan sintaks SQL Server dan parameter binding
+    $sql = "INSERT INTO dbnow_gkg.dbnow_gkg.tbl_lokasi (nama, zone) VALUES (?, ?)";
+    $params = array($lokasi2, $zone2);
+
+    $sqlData1 = sqlsrv_query($con, $sql, $params);
+
+    if ($sqlData1) {
+        echo "<script>window.location='CheckStock';</script>";
+    } else {
+        // tampilkan error detail jika gagal
+        die(print_r(sqlsrv_errors(), true));
+    }
+}
+?>
 <script>
 	$(function () {
 		//Datepicker

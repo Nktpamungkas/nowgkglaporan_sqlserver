@@ -15,28 +15,18 @@ ini_set("error_reporting", 1);
 include"../../koneksi.php"
 ?>
 
-<div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-    <!-- Logo -->
-    <div style="margin-right: 20px;">
-        <!-- <img src="images/logo.png" alt="Logo" style="height: 80px;"> -->
-    </div>
-
-    <!-- Judul -->
-    <div style="text-align: center;">
-        <h1 style="margin: 0;">LAPORAN HARIAN PEMASUKANAN KAIN GREIGE</h1>
-        <h3 style="margin: 5px 0 0 0;">
-            NO. FORM : FW - 19 - GKG - 02/07<br />
-            HALAMAN :
-        </h3>
-        <!-- <p>NO. REVISI:<br/>TGL Terbit:</p> -->
-    </div>
-</div>
+           <div align="center"> <h1>LAPORAN HARIAN PEMASUKANAN KAIN GREIGE</h1></div>
+          <div align="Right"> NO. FORM:<br />
+          NO. REVISI:<br />
+          TGL Terbit:<br />
+          HALAMAN:
+          </div>
 <div align="LEFT">TGL : <?php echo date($_GET['awal']); ?></div>
 <table width="125%" border="1" align="Center">
   <tr align="center">
 
     <td rowspan="2" >No</td>
-    <!-- <td rowspan="2" >Tgl</td> -->
+    <td rowspan="2" >Tgl</td>
     <td rowspan="2" >Langganan</td>
     <td rowspan="2" >No SJ</td>
     <td colspan="4" >Jenis Benang</td>
@@ -217,11 +207,11 @@ if($rowdb22['LEGALNAME1']==""){$langganan="";}else{$langganan=$rowdb22['LEGALNAM
 if($rowdb22['ORDERPARTNERBRANDCODE']==""){$buyer="";}else{$buyer=$rowdb22['ORDERPARTNERBRANDCODE'];}	
 if($rowdb25['VALUEDECIMAL']!=""){$lbr1=round($rowdb25['VALUEDECIMAL']);}
 if($rowdb26['VALUEDECIMAL']!=""){$gsm11=round($rowdb26['VALUEDECIMAL']);}
-if($rowdb21['SCHEDULEDRESOURCECODE']!=""){$noMC=$rowdb21['SCHEDULEDRESOURCECODE'];}else{$noMC=$rowdb27['NO_MESIN'];}
-if($rowdb21['QTY_KG']>0){$qtyB=$rowdb21['QTY_KG'];}else{$qtyB=$rowdb21['QTY1_KG'];}			
+if($rowdb21['SCHEDULEDRESOURCECODE']!=""){$noMC=$rowdb21['SCHEDULEDRESOURCECODE'];}else{$noMC=$rowdb27['NO_MESIN'];}		
 $knitt1="ITTI";		
   echo"<tr>
   	<td >$no</td>
+	<td >".$rowdb21['TRANSACTIONDATE']."</td>
     <td >$langganan</td>
     <td >$bon</td>
     <td >".$a[0]."</td>
@@ -233,62 +223,27 @@ $knitt1="ITTI";
 	<td  align=right>".$lbr1."</td>
 	<td  align=right>".$gsm11."</td>
 	<td  align=right>".$rowdb21['QTY_ROL']."</td>
-	<td  align=right>".number_format($qtyB,'2','.',',')."</td>
+	<td  align=right>".number_format($rowdb21['QTY_KG'],'2','.',',')."</td>
 	<td >$knitt1</td>
 	<td >".$rowdb21['PROJECTCODE']."</td>
 	<td >".$noMC."</td>
 	   </tr>";
-	$totqt=$totqt+$qtyB;
+	$totqt=$totqt+$rowdb21['QTY_KG'];
 	$totr=$totr+$rowdb21['QTY_ROL'];	
   	$no++;}
   ?>
   <tr align="right">
-  	<td colspan="9"  ><b>Total</b></td>
+  	<td colspan="8"  ><b>Total</b></td>
+    <td ></td>
+    <td ></td>
+	<td ></td>
+	<td ></td>
 	<td > <b><?php echo $totr; ?></b></td>
 	<td > <b><?php echo number_format($totqt,'2','.',','); ?></b></td>
 	<td ></td>
-    <td ></td>
-    <td ></td>
-    <td ></td>
+	<td ></td>
     <td ></td>
 	  </tr>
-
-</table>
-
-<table></table>
-<table></table>
-
-<table style="width: auto;" border="1">
-     <tr>
-  <td colspan="3"></td>
-  <td colspan="3" style="text-align: center; vertical-align: middle;">Dibuat Oleh :</td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;">Diperiksa Oleh :</td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;">Mengetahui :</td>
-</tr>
-<tr>
-  <td colspan="3" style="text-align: center; vertical-align: middle;">Nama</td>
-  <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-</tr>
-<tr>
-  <td colspan="3" style="text-align: center; vertical-align: middle;">Jabatan</td>
-  <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-</tr>
-<tr>
-  <td colspan="3" style="text-align: center; vertical-align: middle;">Tanggal</td>
-  <td colspan="3" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-</tr>
-<tr>
-  <td colspan="3" style="text-align: center; vertical-align: middle;">Tanda Tangan</td>
-  <td colspan="3" style="text-align: center; vertical-align: middle;"><br><br><br><br></td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-  <td colspan="5" style="text-align: center; vertical-align: middle;"></td>
-</tr>
 </table>
 
 
