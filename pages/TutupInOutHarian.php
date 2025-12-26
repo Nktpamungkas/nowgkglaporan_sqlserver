@@ -325,7 +325,9 @@ ITXVIEWLAPMASUKGREIGE.USERPRIMARYUOMCODE,STOCKTRANSACTION.PROJECTCODE,STOCKTRANS
        ITXVIEWLAPMASUKGREIGE.ITEMDESCRIPTION,ITXVIEWLAPMASUKGREIGE.LOTCODE,STOCKTRANSACTION.TRANSACTIONDATE,
 	   ITXVIEWLAPMASUKGREIGE.SUBCODE01,ITXVIEWLAPMASUKGREIGE.SUBCODE02,
        ITXVIEWLAPMASUKGREIGE.SUBCODE03,ITXVIEWLAPMASUKGREIGE.SUBCODE04 ";
-	$stmt1M   = db2_exec($conn1,$sqlDB21M, array('cursor'=>DB2_SCROLLABLE));
+//	$stmt1M   = db2_exec($conn1,$sqlDB21M, array('cursor'=>DB2_SCROLLABLE));
+	$stmt1M   = db2_prepare($conn1,$sqlDB21M);
+				db2_execute($stmt1M);
 	//}				  
     while($rowdb21M = db2_fetch_assoc($stmt1M)){
 $sqlDB22M = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE, SALESORDER.ORDPRNCUSTOMERSUPPLIERCODE,
@@ -333,7 +335,9 @@ $sqlDB22M = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE, SALESORDER.O
 		FROM DB2ADMIN.SALESORDER SALESORDER LEFT OUTER JOIN DB2ADMIN.ITXVIEWAKJ 
        	ITXVIEWAKJ ON SALESORDER.CODE=ITXVIEWAKJ.CODE
 		WHERE SALESORDER.CODE='".trim($rowdb21M['PROJECTCODE'])."' ";
-$stmt2M   = db2_exec($conn1,$sqlDB22M, array('cursor'=>DB2_SCROLLABLE));
+//$stmt2M   = db2_exec($conn1,$sqlDB22M, array('cursor'=>DB2_SCROLLABLE));
+$stmt2M   = db2_exec($conn1,$sqlDB22M);
+		db2_execute($stmt2M);
 $rowdb22M = db2_fetch_assoc($stmt2M);		
 $sqlDB23M = " SELECT p.SUBCODE01,p.SUBCODE02,p.SUBCODE03,p.SUBCODE04,p.SUBCODE05,p.SUBCODE06,p.SUBCODE07, p.LONGDESCRIPTION FROM (
 SELECT p2.ITEMTYPEAFICODE,p2.SUBCODE01,p2.SUBCODE02,p2.SUBCODE03,p2.SUBCODE04,
@@ -353,7 +357,9 @@ p.SUBCODE01,p.SUBCODE02,
 p.SUBCODE03,p.SUBCODE04,
 p.SUBCODE05,p.SUBCODE06,
 p.SUBCODE07,p.LONGDESCRIPTION ";
-$stmt3M   = db2_exec($conn1,$sqlDB23M, array('cursor'=>DB2_SCROLLABLE));
+//$stmt3M   = db2_exec($conn1,$sqlDB23M, array('cursor'=>DB2_SCROLLABLE));
+$stmt3M   = db2_prepare($conn1,$sqlDB23M);
+		db2_execute($stmt3M);
 $aiM=0;
 $aM[0]="";
 $aM[1]="";
@@ -388,7 +394,9 @@ WHERE b.ITEMTYPECODE ='KGF'  AND b.LOGICALWAREHOUSECODE ='M021' ) AS STKBLANCE O
 WHERE STOCKTRANSACTION.ORDERCODE ='$rowdb21M[PROVISIONALCODE]'  and STOCKTRANSACTION.ORDERLINE ='$rowdb21M[ORDERLINE]' AND
 STOCKTRANSACTION.LOGICALWAREHOUSECODE ='M021' 
 AND NOT ITXVIEWLAPMASUKGREIGE.ORDERLINE IS NULL) AS BLKOKASI ";
-$stmt4M   = db2_exec($conn1,$sqlDB24M, array('cursor'=>DB2_SCROLLABLE));					  
+//$stmt4M   = db2_exec($conn1,$sqlDB24M, array('cursor'=>DB2_SCROLLABLE));					  
+$stmt4M   = db2_prepare($conn1,$sqlDB24M);
+		db2_execute($stmt4M);
 $rowdb24M = db2_fetch_assoc($stmt4M);	
 
 $sqlDB25M = " SELECT
@@ -410,7 +418,9 @@ WHERE
 	QUALITYDOCLINE.CHARACTERISTICCODE = 'LEBAR1' AND
 	QUALITYDOCUMENTITEMTYPEAFICODE ='KGF' AND
 	QUALITYDOCLINE.QUALITYDOCPRODUCTIONORDERCODE='$rowdb21M[EXTERNALREFERENCE]' ";
-$stmt5M   = db2_exec($conn1,$sqlDB25M, array('cursor'=>DB2_SCROLLABLE));
+//$stmt5M   = db2_exec($conn1,$sqlDB25M, array('cursor'=>DB2_SCROLLABLE));
+$stmt5M   = db2_prepare($conn1,$sqlDB25M);
+		db2_execute($stmt5M);
 $rowdb25M = db2_fetch_assoc($stmt5M);
 		
 $sqlDB26M = " SELECT
@@ -432,7 +442,9 @@ WHERE
 	QUALITYDOCLINE.CHARACTERISTICCODE = 'LEBAR1' AND
 	QUALITYDOCUMENTITEMTYPEAFICODE ='KGF' AND
 	QUALITYDOCLINE.QUALITYDOCPRODUCTIONORDERCODE='$rowdb21M[EXTERNALREFERENCE]' ";
-$stmt6M   = db2_exec($conn1,$sqlDB26M, array('cursor'=>DB2_SCROLLABLE));
+//$stmt6M   = db2_exec($conn1,$sqlDB26M, array('cursor'=>DB2_SCROLLABLE));
+$stmt6M   = db2_prepare($conn1,$sqlDB26M);
+db2_execute($stmt6M);
 $rowdb26M = db2_fetch_assoc($stmt6M);			
 		
 $sqlDB27M = " 
@@ -442,7 +454,9 @@ LEFT OUTER JOIN ADSTORAGE ad ON ad.UNIQUEID = pd.ABSUNIQUEID AND ad.NAMENAME ='M
 WHERE  pd.CODE ='$rowdb21M[LOTCODE]'
 GROUP BY ad.VALUESTRING
 ";
-$stmt7M   = db2_exec($conn1,$sqlDB27M, array('cursor'=>DB2_SCROLLABLE));					  
+//$stmt7M   = db2_exec($conn1,$sqlDB27M, array('cursor'=>DB2_SCROLLABLE));					  
+$stmt7M   = db2_prepare($conn1,$sqlDB27M);	
+		db2_execute($stmt7M);
 $rowdb27M = db2_fetch_assoc($stmt7M);	
 $sqlDB28M = " SELECT a.VALUEDECIMAL  FROM PRODUCT p 
 LEFT OUTER JOIN ADSTORAGE a  ON a.UNIQUEID = p.ABSUNIQUEID 
@@ -452,7 +466,9 @@ p.SUBCODE03='$rowdb21M[SUBCODE03]' AND
 p.SUBCODE04='$rowdb21M[SUBCODE04]' AND
 a.NAMENAME ='Width' AND
 p.ITEMTYPECODE ='KFF'  ";
-$stmt8M   = db2_exec($conn1,$sqlDB28M, array('cursor'=>DB2_SCROLLABLE));
+//$stmt8M   = db2_exec($conn1,$sqlDB28M, array('cursor'=>DB2_SCROLLABLE));
+$stmt8M   = db2_prepare($conn1,$sqlDB28M);
+		db2_execute($stmt8M);
 $rowdb28M = db2_fetch_assoc($stmt8M);	
 $sqlDB29M = " SELECT a.VALUEDECIMAL  FROM PRODUCT p 
 LEFT OUTER JOIN ADSTORAGE a  ON a.UNIQUEID = p.ABSUNIQUEID 
@@ -462,7 +478,9 @@ p.SUBCODE03='$rowdb21M[SUBCODE03]' AND
 p.SUBCODE04='$rowdb21M[SUBCODE04]' AND
 a.NAMENAME ='GSM' AND
 p.ITEMTYPECODE ='KFF'  ";
-$stmt9M   = db2_exec($conn1,$sqlDB29M, array('cursor'=>DB2_SCROLLABLE));
+//$stmt9M   = db2_exec($conn1,$sqlDB29M, array('cursor'=>DB2_SCROLLABLE));
+$stmt9M   = db2_prepare($conn1,$sqlDB29M);
+		db2_execute($stmt9M);
 $rowdb29M = db2_fetch_assoc($stmt9M);
 $sqlDB30M = " 
 SELECT e.WIDTHGROSS AS LEBAR1,a.VALUEDECIMAL AS GSM1,s.ORDERCODE,s.ORDERLINE  FROM ELEMENTSINSPECTION e 
@@ -471,7 +489,9 @@ LEFT OUTER JOIN STOCKTRANSACTION s ON s.ITEMELEMENTCODE =e.ELEMENTCODE
 WHERE s.ORDERCODE='".$rowdb21M['PROVISIONALCODE']."' AND s.ORDERLINE='".$rowdb21M['ORDERLINE']."'
 GROUP BY s.ORDERCODE,s.ORDERLINE,e.WIDTHGROSS,a.VALUEDECIMAL
 ";
-$stmt10M   = db2_exec($conn1,$sqlDB30M, array('cursor'=>DB2_SCROLLABLE));					  
+//$stmt10M   = db2_exec($conn1,$sqlDB30M, array('cursor'=>DB2_SCROLLABLE));					  
+$stmt10M   = db2_prepare($conn1,$sqlDB30M);
+		db2_execute($stmt10M);
 $rowdb30M = db2_fetch_assoc($stmt10M);		
 if($rowdb22M['LEGALNAME1']==""){$langgananM="";}else{$langgananM=$rowdb22M['LEGALNAME1'];}
 if($rowdb22M['ORDERPARTNERBRANDCODE']==""){$buyerM="";}else{$buyerM=$rowdb22M['ORDERPARTNERBRANDCODE'];}
@@ -593,7 +613,9 @@ $sqlDB21RM = "SELECT
 				f.SUMMARIZEDDESCRIPTION,
 				s.CREATIONUSER,
 				a1.VALUESTRING";
-		$stmt1RM   = db2_exec($conn1, $sqlDB21RM, array('cursor' => DB2_SCROLLABLE));
+//		$stmt1RM   = db2_exec($conn1, $sqlDB21RM, array('cursor' => DB2_SCROLLABLE));
+		$stmt1RM   = db2_prepare($conn1, $sqlDB21RM);
+				db2_execute($stmt1RM);
 		while ($rowdb21RM = db2_fetch_assoc($stmt1RM)) {
 			$itemcRM = trim($rowdb21RM['DECOSUBCODE02']) . "" . trim($rowdb21RM['DECOSUBCODE03']) . " " . trim($rowdb21RM['DECOSUBCODE04']);
 
@@ -611,7 +633,9 @@ $sqlDB21RM = "SELECT
 								SALESORDER.CODE = ITXVIEWAKJ.CODE
 							WHERE
 								SALESORDER.CODE = '" . trim($rowdb21RM[' PROJECTCODE']) . "'";
-			$stmt2R1M   = db2_exec($conn1, $sqlDB22R1M, array('cursor' => DB2_SCROLLABLE));
+//			$stmt2R1M   = db2_exec($conn1, $sqlDB22R1M, array('cursor' => DB2_SCROLLABLE));
+			$stmt2R1M   = db2_prepare($conn1, $sqlDB22R1M);
+			db2_execute($stmt2R1M);
 			$rowdb22R1M = db2_fetch_assoc($stmt2R1M);
 
 			$sqlDB22RM = "SELECT
@@ -643,7 +667,9 @@ $sqlDB21RM = "SELECT
 							LEFT OUTER JOIN DB2ADMIN.BALANCE BALANCE ON BALANCE.ELEMENTSCODE = STOCKTRANSACTION.ITEMELEMENTCODE 
 						GROUP BY
 							BALANCE.LOTCODE";
-			$stmt2RM   = db2_exec($conn1, $sqlDB22RM, array('cursor' => DB2_SCROLLABLE));
+//			$stmt2RM   = db2_exec($conn1, $sqlDB22RM, array('cursor' => DB2_SCROLLABLE));
+			$stmt2RM   = db2_prepare($conn1, $sqlDB22RM);
+			db2_execute($stmt2RM);
 			$rowdb22RM = db2_fetch_assoc($stmt2RM);
 			$sqlDB23RM = " SELECT p.SUBCODE01,p.SUBCODE02,p.SUBCODE03,p.SUBCODE04,p.SUBCODE05,p.SUBCODE06,p.SUBCODE07, p.LONGDESCRIPTION FROM (
 							SELECT p2.ITEMTYPEAFICODE,p2.SUBCODE01,p2.SUBCODE02,p2.SUBCODE03,p2.SUBCODE04,
@@ -663,7 +689,9 @@ $sqlDB21RM = "SELECT
 							p.SUBCODE03,p.SUBCODE04,
 							p.SUBCODE05,p.SUBCODE06,
 							p.SUBCODE07,p.LONGDESCRIPTION ";
-			$stmt3RM   = db2_exec($conn1, $sqlDB23RM, array('cursor' => DB2_SCROLLABLE));
+//			$stmt3RM   = db2_exec($conn1, $sqlDB23RM, array('cursor' => DB2_SCROLLABLE));
+			$stmt3RM   = db2_exec($conn1, $sqlDB23RM);
+			db2_execute($stmt3RM);
 			$aiRM = 0;
 			$aRM[0] = "";
 			$aRM[1] = "";
@@ -682,7 +710,9 @@ $sqlDB21RM = "SELECT
 							p.SUBCODE04='" . trim($rowdb21RM['DECOSUBCODE04']) . "' AND
 							a.NAMENAME ='Width' AND
 							p.ITEMTYPECODE ='KFF'  ";
-			$stmt8RM   = db2_exec($conn1, $sqlDB28RM, array('cursor' => DB2_SCROLLABLE));
+//			$stmt8RM   = db2_exec($conn1, $sqlDB28RM, array('cursor' => DB2_SCROLLABLE));
+			$stmt8RM   = db2_prepare($conn1, $sqlDB28RM);
+			db2_execute($stmt8RM);
 			$rowdb28RM = db2_fetch_assoc($stmt8RM);
 			$sqlDB29RM = " SELECT a.VALUEDECIMAL  FROM PRODUCT p 
 							LEFT OUTER JOIN ADSTORAGE a  ON a.UNIQUEID = p.ABSUNIQUEID 
@@ -692,7 +722,9 @@ $sqlDB21RM = "SELECT
 							p.SUBCODE04='" . trim($rowdb21RM['DECOSUBCODE04']) . "' AND
 							a.NAMENAME ='GSM' AND
 							p.ITEMTYPECODE ='KFF'  ";
-			$stmt9RM   = db2_exec($conn1, $sqlDB29RM, array('cursor' => DB2_SCROLLABLE));
+//			$stmt9RM   = db2_exec($conn1, $sqlDB29RM, array('cursor' => DB2_SCROLLABLE));
+			$stmt9RM   = db2_prepare($conn1, $sqlDB29RM);
+			db2_execute($stmt9RM);
 			$rowdb29RM = db2_fetch_assoc($stmt9RM);
 			if ($rowdb22R1M['LEGALNAME1'] == "") {
 				$langgananRM = "";
@@ -771,7 +803,9 @@ s.TRANSACTIONDATE,s.DECOSUBCODE01,s.DECOSUBCODE02,
 s.DECOSUBCODE03, s.DECOSUBCODE04,
 s.WHSLOCATIONWAREHOUSEZONECODE,
 s.WAREHOUSELOCATIONCODE, s.LOTCODE, f.SUMMARIZEDDESCRIPTION, s.CREATIONUSER,a1.VALUESTRING";
-	$stmt1RMBU   = db2_exec($conn1,$sqlDB21RMBU, array('cursor'=>DB2_SCROLLABLE)); 
+//	$stmt1RMBU   = db2_exec($conn1,$sqlDB21RMBU, array('cursor'=>DB2_SCROLLABLE)); 
+	$stmt1RMBU   = db2_prepare($conn1,$sqlDB21RMBU); 
+				db2_execute($stmt1RMBU);
     while($rowdb21RMBU = db2_fetch_assoc($stmt1RMBU)){ 
 $itemcRMBU=trim($rowdb21RMBU['DECOSUBCODE02'])."".trim($rowdb21RMBU['DECOSUBCODE03'])." ".trim($rowdb21RMBU['DECOSUBCODE04']);
 		
@@ -780,7 +814,9 @@ $sqlDB22R1MBU = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE, SALESORD
 		FROM DB2ADMIN.SALESORDER SALESORDER LEFT OUTER JOIN DB2ADMIN.ITXVIEWAKJ 
        	ITXVIEWAKJ ON SALESORDER.CODE=ITXVIEWAKJ.CODE
 		WHERE SALESORDER.CODE='".trim($rowdb21RMBU['PROJECTCODE'])."' ";
-$stmt2R1MBU   = db2_exec($conn1,$sqlDB22R1MBU, array('cursor'=>DB2_SCROLLABLE));
+//$stmt2R1MBU   = db2_exec($conn1,$sqlDB22R1MBU, array('cursor'=>DB2_SCROLLABLE));
+$stmt2R1MBU   = db2_prepare($conn1,$sqlDB22R1MBU);
+		db2_execute($stmt2R1MBU);
 $rowdb22R1MBU = db2_fetch_assoc($stmt2R1MBU);
 		
 $sqlDB22RMBU = " SELECT LISTAGG(DISTINCT  TRIM(BALANCE.WAREHOUSELOCATIONCODE),', ') AS WAREHOUSELOCATIONCODE, COUNT(BALANCE.BASEPRIMARYQUANTITYUNIT) AS ROL,SUM(BALANCE.BASEPRIMARYQUANTITYUNIT) AS BERAT,BALANCE.LOTCODE  
@@ -798,7 +834,9 @@ s.ITEMELEMENTCODE
 		) STOCKTRANSACTION LEFT OUTER JOIN 
 		DB2ADMIN.BALANCE BALANCE ON BALANCE.ELEMENTSCODE =STOCKTRANSACTION.ITEMELEMENTCODE  
 		GROUP BY BALANCE.LOTCODE ";					  
-		$stmt2RMBU   = db2_exec($conn1,$sqlDB22RMBU, array('cursor'=>DB2_SCROLLABLE));	
+//		$stmt2RMBU   = db2_exec($conn1,$sqlDB22RMBU, array('cursor'=>DB2_SCROLLABLE));	
+		$stmt2RMBU   = db2_prepare($conn1,$sqlDB22RMBU);
+		db2_execute($stmt2RMBU);
 		$rowdb22RMBU = db2_fetch_assoc($stmt2RMBU);
 $sqlDB23RMBU = " SELECT p.SUBCODE01,p.SUBCODE02,p.SUBCODE03,p.SUBCODE04,p.SUBCODE05,p.SUBCODE06,p.SUBCODE07, p.LONGDESCRIPTION FROM (
 SELECT p2.ITEMTYPEAFICODE,p2.SUBCODE01,p2.SUBCODE02,p2.SUBCODE03,p2.SUBCODE04,
@@ -818,7 +856,9 @@ p.SUBCODE01,p.SUBCODE02,
 p.SUBCODE03,p.SUBCODE04,
 p.SUBCODE05,p.SUBCODE06,
 p.SUBCODE07,p.LONGDESCRIPTION ";
-$stmt3RMBU   = db2_exec($conn1,$sqlDB23RMBU, array('cursor'=>DB2_SCROLLABLE));
+//$stmt3RMBU   = db2_exec($conn1,$sqlDB23RMBU, array('cursor'=>DB2_SCROLLABLE));
+$stmt3RMBU   = db2_prepare($conn1,$sqlDB23RMBU);
+		db2_execute($stmt3RMBU);
 $aiRMBU=0;
 $aRMBU[0]="";
 $aRMBU[1]="";
@@ -837,7 +877,9 @@ p.SUBCODE03='".trim($rowdb21RMBU['DECOSUBCODE03'])."' AND
 p.SUBCODE04='".trim($rowdb21RMBU['DECOSUBCODE04'])."' AND
 a.NAMENAME ='Width' AND
 p.ITEMTYPECODE ='KFF'  ";
-$stmt8RMBU   = db2_exec($conn1,$sqlDB28RMBU, array('cursor'=>DB2_SCROLLABLE));
+//$stmt8RMBU   = db2_exec($conn1,$sqlDB28RMBU, array('cursor'=>DB2_SCROLLABLE));
+$stmt8RMBU   = db2_prepare($conn1,$sqlDB28RMBU);
+		db2_execute($stmt8RMBU);
 $rowdb28RMBU = db2_fetch_assoc($stmt8RMBU);	
 $sqlDB29RMBU = " SELECT a.VALUEDECIMAL  FROM PRODUCT p 
 LEFT OUTER JOIN ADSTORAGE a  ON a.UNIQUEID = p.ABSUNIQUEID 
@@ -847,7 +889,9 @@ p.SUBCODE03='".trim($rowdb21RMBU['DECOSUBCODE03'])."' AND
 p.SUBCODE04='".trim($rowdb21RMBU['DECOSUBCODE04'])."' AND
 a.NAMENAME ='GSM' AND
 p.ITEMTYPECODE ='KFF'  ";
-$stmt9RMBU   = db2_exec($conn1,$sqlDB29RMBU, array('cursor'=>DB2_SCROLLABLE));
+//$stmt9RMBU   = db2_exec($conn1,$sqlDB29RMBU, array('cursor'=>DB2_SCROLLABLE));
+$stmt9RMBU   = db2_prepare($conn1,$sqlDB29RMBU);
+		db2_execute($stmt9RMBU);
 $rowdb29RMBU = db2_fetch_assoc($stmt9RMBU);		
 if($rowdb22R1MBU['LEGALNAME1']==""){$langgananRMBU="";}else{$langgananRMBU=$rowdb22R1MBU['LEGALNAME1'];}
 if($rowdb22R1MBU['ORDERPARTNERBRANDCODE']==""){$buyerRMBU="";}else{$buyerRMBU=$rowdb22R1MBU['ORDERPARTNERBRANDCODE'];}
@@ -919,7 +963,9 @@ s.TRANSACTIONDATE,s.DECOSUBCODE01,s.DECOSUBCODE02,
 s.DECOSUBCODE03, s.DECOSUBCODE04,
 s.WHSLOCATIONWAREHOUSEZONECODE,
 s.WAREHOUSELOCATIONCODE, s.LOTCODE, f.SUMMARIZEDDESCRIPTION, s.CREATIONUSER,a1.VALUESTRING";
-	$stmt1FM   = db2_exec($conn1,$sqlDB21FM, array('cursor'=>DB2_SCROLLABLE)); 
+//	$stmt1FM   = db2_exec($conn1,$sqlDB21FM, array('cursor'=>DB2_SCROLLABLE)); 
+	$stmt1FM   = db2_prepare($conn1,$sqlDB21FM); 
+				db2_execute($stmt1FM);
     while($rowdb21FM = db2_fetch_assoc($stmt1FM)){ 
 $itemcFM=trim($rowdb21FM['DECOSUBCODE02'])."".trim($rowdb21FM['DECOSUBCODE03'])." ".trim($rowdb21FM['DECOSUBCODE04']);
 		
@@ -928,7 +974,9 @@ $sqlDB22F1M = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE, SALESORDER
 		FROM DB2ADMIN.SALESORDER SALESORDER LEFT OUTER JOIN DB2ADMIN.ITXVIEWAKJ 
        	ITXVIEWAKJ ON SALESORDER.CODE=ITXVIEWAKJ.CODE
 		WHERE SALESORDER.CODE='".trim($rowdb21FM['PROJECTCODE'])."' ";
-$stmt2F1M   = db2_exec($conn1,$sqlDB22F1M, array('cursor'=>DB2_SCROLLABLE));
+//$stmt2F1M   = db2_exec($conn1,$sqlDB22F1M, array('cursor'=>DB2_SCROLLABLE));
+$stmt2F1M   = db2_prepare($conn1,$sqlDB22F1M);
+		db2_execute($stmt2F1M);
 $rowdb22F1M = db2_fetch_assoc($stmt2F1M);
 		
 $sqlDB22FM = " SELECT LISTAGG(DISTINCT  TRIM(BALANCE.WAREHOUSELOCATIONCODE),', ') AS WAREHOUSELOCATIONCODE, COUNT(BALANCE.BASEPRIMARYQUANTITYUNIT) AS ROL,SUM(BALANCE.BASEPRIMARYQUANTITYUNIT) AS BERAT,BALANCE.LOTCODE  
@@ -946,7 +994,9 @@ s.ITEMELEMENTCODE
 		) STOCKTRANSACTION LEFT OUTER JOIN 
 		DB2ADMIN.BALANCE BALANCE ON BALANCE.ELEMENTSCODE =STOCKTRANSACTION.ITEMELEMENTCODE  
 		GROUP BY BALANCE.LOTCODE ";					  
-		$stmt2FM   = db2_exec($conn1,$sqlDB22FM, array('cursor'=>DB2_SCROLLABLE));	
+//		$stmt2FM   = db2_exec($conn1,$sqlDB22FM, array('cursor'=>DB2_SCROLLABLE));	
+		$stmt2FM   = db2_prepare($conn1,$sqlDB22FM);
+		db2_execute($stmt2FM);
 		$rowdb22FM = db2_fetch_assoc($stmt2FM);
 $sqlDB23FM = " SELECT p.SUBCODE01,p.SUBCODE02,p.SUBCODE03,p.SUBCODE04,p.SUBCODE05,p.SUBCODE06,p.SUBCODE07, p.LONGDESCRIPTION FROM (
 SELECT p2.ITEMTYPEAFICODE,p2.SUBCODE01,p2.SUBCODE02,p2.SUBCODE03,p2.SUBCODE04,
@@ -966,7 +1016,9 @@ p.SUBCODE01,p.SUBCODE02,
 p.SUBCODE03,p.SUBCODE04,
 p.SUBCODE05,p.SUBCODE06,
 p.SUBCODE07,p.LONGDESCRIPTION ";
-$stmt3FM   = db2_exec($conn1,$sqlDB23FM, array('cursor'=>DB2_SCROLLABLE));
+//$stmt3FM   = db2_exec($conn1,$sqlDB23FM, array('cursor'=>DB2_SCROLLABLE));
+$stmt3FM   = db2_prepare($conn1,$sqlDB23FM);
+		db2_execute($stmt3FM);
 $aiFM=0;
 $aFM[0]="";
 $aFM[1]="";
@@ -985,7 +1037,9 @@ p.SUBCODE03='".trim($rowdb21FM['DECOSUBCODE03'])."' AND
 p.SUBCODE04='".trim($rowdb21FM['DECOSUBCODE04'])."' AND
 a.NAMENAME ='Width' AND
 p.ITEMTYPECODE ='FKF'  ";
-$stmt8FM   = db2_exec($conn1,$sqlDB28FM, array('cursor'=>DB2_SCROLLABLE));
+//$stmt8FM   = db2_exec($conn1,$sqlDB28FM, array('cursor'=>DB2_SCROLLABLE));
+$stmt8FM   = db2_prepare($conn1,$sqlDB28FM);
+		db2_execute($stmt8FM);
 $rowdb28FM = db2_fetch_assoc($stmt8FM);	
 $sqlDB29FM = " SELECT a.VALUEDECIMAL  FROM PRODUCT p 
 LEFT OUTER JOIN ADSTORAGE a  ON a.UNIQUEID = p.ABSUNIQUEID 
@@ -995,7 +1049,9 @@ p.SUBCODE03='".trim($rowdb21FM['DECOSUBCODE03'])."' AND
 p.SUBCODE04='".trim($rowdb21FM['DECOSUBCODE04'])."' AND
 a.NAMENAME ='GSM' AND
 p.ITEMTYPECODE ='FKF'  ";
-$stmt9FM   = db2_exec($conn1,$sqlDB29FM, array('cursor'=>DB2_SCROLLABLE));
+//$stmt9FM   = db2_exec($conn1,$sqlDB29FM, array('cursor'=>DB2_SCROLLABLE));
+$stmt9FM   = db2_prepare($conn1,$sqlDB29FM);
+		db2_execute($stmt9FM);
 $rowdb29FM = db2_fetch_assoc($stmt9FM);		
 if($rowdb22F1M['LEGALNAME1']==""){$langgananFM="";}else{$langgananFM=$rowdb22F1M['LEGALNAME1'];}
 if($rowdb22F1M['ORDERPARTNERBRANDCODE']==""){$buyerFM="";}else{$buyerFM=$rowdb22F1M['ORDERPARTNERBRANDCODE'];}
@@ -1065,7 +1121,9 @@ s.TRANSACTIONDATE,s.DECOSUBCODE01,s.DECOSUBCODE02,
 s.DECOSUBCODE03, s.DECOSUBCODE04,
 s.WHSLOCATIONWAREHOUSEZONECODE,
 s.WAREHOUSELOCATIONCODE, s.LOTCODE, f.SUMMARIZEDDESCRIPTION, s.CREATIONUSER";
-	$stmt1AN   = db2_exec($conn1,$sqlDB21AN, array('cursor'=>DB2_SCROLLABLE));
+//	$stmt1AN   = db2_exec($conn1,$sqlDB21AN, array('cursor'=>DB2_SCROLLABLE));
+	$stmt1AN   = db2_prepare($conn1,$sqlDB21AN);
+				db2_execute($stmt1AN);
 	//}				  
     while($rowdb21AN = db2_fetch_assoc($stmt1AN)){ 
 $itemcAN=trim($rowdb21AN['DECOSUBCODE02'])."".trim($rowdb21AN['DECOSUBCODE03'])." ".trim($rowdb21AN['DECOSUBCODE04']);
@@ -1076,7 +1134,9 @@ $sqlDB22A1N = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE, SALESORDER
 		FROM DB2ADMIN.SALESORDER SALESORDER LEFT OUTER JOIN DB2ADMIN.ITXVIEWAKJ 
        	ITXVIEWAKJ ON SALESORDER.CODE=ITXVIEWAKJ.CODE
 		WHERE SALESORDER.CODE='".trim($proj)."' ";
-$stmt2A1N   = db2_exec($conn1,$sqlDB22A1N, array('cursor'=>DB2_SCROLLABLE));
+//$stmt2A1N   = db2_exec($conn1,$sqlDB22A1N, array('cursor'=>DB2_SCROLLABLE));
+$stmt2A1N   = db2_prepare($conn1,$sqlDB22A1N);
+		db2_execute($stmt2A1N);
 $rowdb22A1N = db2_fetch_assoc($stmt2A1N);
 		
 $sqlDB22AN = " SELECT LISTAGG(DISTINCT  TRIM(BALANCE.WAREHOUSELOCATIONCODE),', ') AS WAREHOUSELOCATIONCODE, COUNT(BALANCE.BASEPRIMARYQUANTITYUNIT) AS ROL,SUM(BALANCE.BASEPRIMARYQUANTITYUNIT) AS BERAT,BALANCE.LOTCODE  
@@ -1094,7 +1154,9 @@ s.ITEMELEMENTCODE
 		) STOCKTRANSACTION LEFT OUTER JOIN 
 		DB2ADMIN.BALANCE BALANCE ON BALANCE.ELEMENTSCODE =STOCKTRANSACTION.ITEMELEMENTCODE  
 		GROUP BY BALANCE.LOTCODE ";					  
-		$stmt2AN   = db2_exec($conn1,$sqlDB22AN, array('cursor'=>DB2_SCROLLABLE));	
+//		$stmt2AN   = db2_exec($conn1,$sqlDB22AN, array('cursor'=>DB2_SCROLLABLE));	
+		$stmt2AN   = db2_prepare($conn1,$sqlDB22AN);
+		db2_execute($stmt2AN);
 		$rowdb22AN = db2_fetch_assoc($stmt2AN);
 $sqlDB23AN = " SELECT p.SUBCODE01,p.SUBCODE02,p.SUBCODE03,p.SUBCODE04,p.SUBCODE05,p.SUBCODE06,p.SUBCODE07, p.LONGDESCRIPTION FROM (
 SELECT p2.ITEMTYPEAFICODE,p2.SUBCODE01,p2.SUBCODE02,p2.SUBCODE03,p2.SUBCODE04,
@@ -1114,7 +1176,9 @@ p.SUBCODE01,p.SUBCODE02,
 p.SUBCODE03,p.SUBCODE04,
 p.SUBCODE05,p.SUBCODE06,
 p.SUBCODE07,p.LONGDESCRIPTION ";
-$stmt3AN   = db2_exec($conn1,$sqlDB23AN, array('cursor'=>DB2_SCROLLABLE));
+//$stmt3AN   = db2_exec($conn1,$sqlDB23AN, array('cursor'=>DB2_SCROLLABLE));
+$stmt3AN   = db2_prepare($conn1,$sqlDB23AN);
+		db2_execute($stmt3AN);
 $aiAN=0;
 $aAN[0]="";
 $aAN[1]="";
@@ -1139,7 +1203,9 @@ p.SUBCODE03='".trim($rowdb21AN['DECOSUBCODE03'])."' AND
 p.SUBCODE04='".trim($rowdb21AN['DECOSUBCODE04'])."' AND
 a.NAMENAME ='Width' AND
 p.ITEMTYPECODE ='FKF'  ";
-$stmt8AN   = db2_exec($conn1,$sqlDB28AN, array('cursor'=>DB2_SCROLLABLE));
+//$stmt8AN   = db2_exec($conn1,$sqlDB28AN, array('cursor'=>DB2_SCROLLABLE));
+$stmt8AN   = db2_prepare($conn1,$sqlDB28AN);
+		db2_execute($stmt8AN);
 $rowdb28AN = db2_fetch_assoc($stmt8AN);	
 $sqlDB29AN = " SELECT a.VALUEDECIMAL  FROM PRODUCT p 
 LEFT OUTER JOIN ADSTORAGE a  ON a.UNIQUEID = p.ABSUNIQUEID 
@@ -1149,7 +1215,9 @@ p.SUBCODE03='".trim($rowdb21AN['DECOSUBCODE03'])."' AND
 p.SUBCODE04='".trim($rowdb21AN['DECOSUBCODE04'])."' AND
 a.NAMENAME ='GSM' AND
 p.ITEMTYPECODE ='FKF'  ";
-$stmt9AN   = db2_exec($conn1,$sqlDB29AN, array('cursor'=>DB2_SCROLLABLE));
+//$stmt9AN   = db2_exec($conn1,$sqlDB29AN, array('cursor'=>DB2_SCROLLABLE));
+$stmt9AN   = db2_prepare($conn1,$sqlDB29AN);
+		db2_execute($stmt9AN);
 $rowdb29AN = db2_fetch_assoc($stmt9AN);		
 if($rowdb22A1N['LEGALNAME1']==""){$langgananAN="";}else{$langgananAN=$rowdb22A1N['LEGALNAME1'];}
 if($rowdb22A1N['ORDERPARTNERBRANDCODE']==""){$buyerAN="";}else{$buyerAN=$rowdb22A1N['ORDERPARTNERBRANDCODE'];}
@@ -1287,7 +1355,9 @@ GROUP BY
 	ITXVIEWHEADERKNTORDER.LEGALNAME1,
 	FULLITEMKEYDECODER.SUMMARIZEDDESCRIPTION
 ";
-	$stmt1K   = db2_exec($conn1,$sqlDB21K, array('cursor'=>DB2_SCROLLABLE));
+//	$stmt1K   = db2_exec($conn1,$sqlDB21K, array('cursor'=>DB2_SCROLLABLE));
+	$stmt1K   = db2_prepare($conn1,$sqlDB21K);
+				db2_execute($stmt1K);
 	//}				  
     while($rowdb21K = db2_fetch_assoc($stmt1K)){ 
 if ($rowdb21K['LOGICALWAREHOUSECODE'] =='M904') { $knittK = 'LT2'; }
@@ -1299,7 +1369,9 @@ $sqlDB22K = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE, SALESORDER.O
 		FROM DB2ADMIN.SALESORDER SALESORDER LEFT OUTER JOIN DB2ADMIN.ITXVIEWAKJ 
        	ITXVIEWAKJ ON SALESORDER.CODE=ITXVIEWAKJ.CODE
 		WHERE SALESORDER.CODE='$projectK' ";
-$stmt2K   = db2_exec($conn1,$sqlDB22K, array('cursor'=>DB2_SCROLLABLE));
+//$stmt2K   = db2_exec($conn1,$sqlDB22K, array('cursor'=>DB2_SCROLLABLE));
+$stmt2K   = db2_prepare($conn1,$sqlDB22K);
+		db2_execute($stmt2K);
 $rowdb22K = db2_fetch_assoc($stmt2K);
 if(strlen(trim($rowdb21K['LOTCODE']))=="8"){$WlotK=" AND ( p.PROJECTCODE ='".trim($rowdb21K['PROJAWAL'])."' OR p.ORIGDLVSALORDLINESALORDERCODE ='".trim($rowdb21K['PROJAWAL'])."' OR p.CODE='".trim($rowdb21K['LOTCODE'])."' ) ";}
 else{$WlotK=" AND ( p.PROJECTCODE ='".trim($projectK)."' OR p.ORIGDLVSALORDLINESALORDERCODE ='".trim($projectK)."' ) ";}		
@@ -1322,7 +1394,9 @@ p.SUBCODE01,p.SUBCODE02,
 p.SUBCODE03,p.SUBCODE04,
 p.SUBCODE05,p.SUBCODE06,
 p.SUBCODE07,p.LONGDESCRIPTION ";
-$stmt3K   = db2_exec($conn1,$sqlDB23K, array('cursor'=>DB2_SCROLLABLE));
+//$stmt3K   = db2_exec($conn1,$sqlDB23K, array('cursor'=>DB2_SCROLLABLE));
+$stmt3K   = db2_prepare($conn1,$sqlDB23K);
+		db2_execute($stmt3K);
 $aiK=0;
 $aK[0]="";$aK[1]="";$aK[2]="";$aK[3]="";		
 while($rowdb23K = db2_fetch_assoc($stmt3K)){
@@ -1352,13 +1426,17 @@ SELECT ugp.LONGDESCRIPTION AS WARNA,pr.LONGDESCRIPTION,p.PRODUCTIONORDERCODE,pd.
 WHERE (pd.PROJECTCODE ='$projectK' OR pd.ORIGDLVSALORDLINESALORDERCODE ='$projectK') AND p.PRODUCTIONORDERCODE='$rowdb21K[ORDERCODE]'	
 	GROUP BY pr.LONGDESCRIPTION,p.PRODUCTIONORDERCODE,pd.SUBCODE01,pd.SUBCODE02,pd.SUBCODE03,
 	pd.SUBCODE04,pd.SUBCODE05,pd.SUBCODE06,pd.SUBCODE07,pd.SUBCODE08,pd.INTERNALREFERENCE,ugp.LONGDESCRIPTION ";
-$stmt4K   = db2_exec($conn1,$sqlDB24K, array('cursor'=>DB2_SCROLLABLE));
+//$stmt4K   = db2_exec($conn1,$sqlDB24K, array('cursor'=>DB2_SCROLLABLE));
+$stmt4K   = db2_prepare($conn1,$sqlDB24K);
+		db2_execute($stmt4K);
 $rowdb24K = db2_fetch_assoc($stmt4K);
 		
 $sqlDB25K = " 
 SELECT CASE WHEN PROJECTCODE <> '' THEN PROJECTCODE ELSE ORIGDLVSALORDLINESALORDERCODE  END  AS PROJECT FROM PRODUCTIONDEMAND WHERE CODE='".$rowdb21K['LOTCODE']."'
 ";
-$stmt5K   = db2_exec($conn1,$sqlDB25K, array('cursor'=>DB2_SCROLLABLE));
+//$stmt5K   = db2_exec($conn1,$sqlDB25K, array('cursor'=>DB2_SCROLLABLE));
+$stmt5K   = db2_prepare($conn1,$sqlDB25K);
+	db2_execute($stmt5K);	
 $rowdb25K = db2_fetch_assoc($stmt5K);		
 		
 	if($rowdb22K['LEGALNAME1']==""){$langgananK="";}else{$langgananK=$rowdb22K['LEGALNAME1'];}
@@ -1455,7 +1533,9 @@ $sqlDB21P = "SELECT
 				a.VALUESTRING,
 				a1.VALUESTRING,
 				s.PROJECTCODE";
-	$stmt1P   = db2_exec($conn1,$sqlDB21P, array('cursor'=>DB2_SCROLLABLE));
+//	$stmt1P   = db2_exec($conn1,$sqlDB21P, array('cursor'=>DB2_SCROLLABLE));
+	$stmt1P   = db2_prepare($conn1,$sqlDB21P);
+				db2_execute($stmt1P);
     while($rowdb21P = db2_fetch_assoc($stmt1P)){ 
 if ($rowdb21P['LOGICALWAREHOUSECODE'] =='M904') { $knittP = 'LT2'; }
 else if($rowdb21P['LOGICALWAREHOUSECODE'] ='P501'){ $knittP = 'LT1'; }
@@ -1480,7 +1560,9 @@ $sqlDB22P = "SELECT
 				SALESORDER.CODE = ITXVIEWAKJ.CODE
 			WHERE
 				SALESORDER.CODE = '$projectP'";
-$stmt2P   = db2_exec($conn1,$sqlDB22P, array('cursor'=>DB2_SCROLLABLE));
+//$stmt2P   = db2_exec($conn1,$sqlDB22P, array('cursor'=>DB2_SCROLLABLE));
+$stmt2P   = db2_prepare($conn1,$sqlDB22P);
+		db2_execute($stmt2P);
 $rowdb22P = db2_fetch_assoc($stmt2P);
 if(strlen(trim($rowdb21P['LOTCODE']))=="8"){$WlotP=" AND ( p.PROJECTCODE ='".trim($rowdb21P['PROJAWAL'])."' OR p.ORIGDLVSALORDLINESALORDERCODE ='".trim($rowdb21P['PROJAWAL'])."' OR p.CODE='".trim($rowdb21P['LOTCODE'])."' ) ";}
 else{$WlotP=" AND ( p.PROJECTCODE ='".trim($projectP)."' OR p.ORIGDLVSALORDLINESALORDERCODE ='".trim($projectP)."' ) ";}
@@ -1531,7 +1613,9 @@ $sqlDB24P = " SELECT
 				pd.SUBCODE07,
 				pd.SUBCODE08,
 				pd.INTERNALREFERENCE";
-$stmt4P   = db2_exec($conn1,$sqlDB24P, array('cursor'=>DB2_SCROLLABLE));
+//$stmt4P   = db2_exec($conn1,$sqlDB24P, array('cursor'=>DB2_SCROLLABLE));
+$stmt4P   = db2_prepare($conn1,$sqlDB24P);
+		db2_execute($stmt4P);
 $rowdb24P = db2_fetch_assoc($stmt4P);
 		
 $sqlDB25P = " SELECT
@@ -1544,7 +1628,9 @@ $sqlDB25P = " SELECT
 			WHERE
 				CODE = '".$rowdb21P[' LOTCODE']."'
 			";
-$stmt5P   = db2_exec($conn1,$sqlDB25P, array('cursor'=>DB2_SCROLLABLE));
+//$stmt5P   = db2_exec($conn1,$sqlDB25P, array('cursor'=>DB2_SCROLLABLE));
+$stmt5P   = db2_prepare($conn1,$sqlDB25P);
+		db2_execute($stmt5P);
 $rowdb25P = db2_fetch_assoc($stmt5P);		
 		
 	if($rowdb22P['LEGALNAME1']==""){$langgananP="";}else{$langgananP=$rowdb22P['LEGALNAME1'];}
@@ -1669,7 +1755,9 @@ GROUP BY
 	f.SUMMARIZEDDESCRIPTION,
 	b.LEGALNAME1
 			";
-$stmtJBS   = db2_exec($conn1,$sqlDB2JBS, array('cursor'=>DB2_SCROLLABLE));
+//$stmtJBS   = db2_exec($conn1,$sqlDB2JBS, array('cursor'=>DB2_SCROLLABLE));
+$stmtJBS   = db2_prepare($conn1,$sqlDB2JBS);
+db2_execute($stmtJBS);				
 while ($rowdb2JBS = db2_fetch_assoc($stmtJBS)) {
 $kdJBS = trim($rowdb2JBS['DECOSUBCODE01']) . " " . trim($rowdb2JBS['DECOSUBCODE02']) . " " . trim($rowdb2JBS['DECOSUBCODE03']) . " " . trim($rowdb2JBS['DECOSUBCODE04']) . " " . trim($rowdb2JBS['DECOSUBCODE05']) . " " . trim($rowdb2JBS['DECOSUBCODE06']) . " " . trim($rowdb2JBS['DECOSUBCODE07']) . " " . trim($rowdb2JBS['DECOSUBCODE08']);		
 		

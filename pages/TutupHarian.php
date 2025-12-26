@@ -336,7 +336,9 @@ $selh=round(abs($t2-$t1)/(60*60*45));
 						b.WAREHOUSELOCATIONCODE,
 						prj.PROJECTCODE,
 						prj1.PROJECTCODE";
-		$stmt1   = db2_exec($conn1,$sqlDB21, array('cursor'=>DB2_SCROLLABLE));
+//		$stmt1   = db2_exec($conn1,$sqlDB21, array('cursor'=>DB2_SCROLLABLE));
+		$stmt1   = db2_prepare($conn1,$sqlDB21);
+		db2_execute($stmt1);		
 	//}				  
     while($rowdb21 = db2_fetch_assoc($stmt1)){
 	$itemNo=trim($rowdb21['DECOSUBCODE02'])."".trim($rowdb21['DECOSUBCODE03'])." ".trim($rowdb21['DECOSUBCODE04']);
@@ -356,7 +358,9 @@ $selh=round(abs($t2-$t1)/(60*60*45));
 		FROM DB2ADMIN.SALESORDER SALESORDER LEFT OUTER JOIN DB2ADMIN.ITXVIEWAKJ 
        	ITXVIEWAKJ ON SALESORDER.CODE=ITXVIEWAKJ.CODE
 		WHERE SALESORDER.CODE='$rowdb21[PROJECTCODE]' ";
-	$stmt2   = db2_exec($conn1,$sqlDB22, array('cursor'=>DB2_SCROLLABLE));
+//	$stmt2   = db2_exec($conn1,$sqlDB22, array('cursor'=>DB2_SCROLLABLE));
+	$stmt2   = db2_prepare($conn1,$sqlDB22);
+	db2_execute($stmt2);	
 	$rowdb22 = db2_fetch_assoc($stmt2);		
 	if($rowdb22['LEGALNAME1']==""){$langganan="";}else{$langganan=$rowdb22['LEGALNAME1'];}
 	if($rowdb22['ORDERPARTNERBRANDCODE']==""){$buyer="";}else{$buyer=$rowdb22['LONGDESCRIPTION'];}	
@@ -383,7 +387,9 @@ p.SUBCODE01,p.SUBCODE02,
 p.SUBCODE03,p.SUBCODE04,
 p.SUBCODE05,p.SUBCODE06,
 p.SUBCODE07,p.LONGDESCRIPTION ";
-$stmt3   = db2_exec($conn1,$sqlDB23, array('cursor'=>DB2_SCROLLABLE));
+//$stmt3   = db2_exec($conn1,$sqlDB23, array('cursor'=>DB2_SCROLLABLE));
+$stmt3   = db2_prepare($conn1,$sqlDB23);
+db2_execute($stmt3);
 $ai=0;
 $a[0]="";
 $a[1]="";
@@ -406,7 +412,9 @@ while($rowdb23 = db2_fetch_assoc($stmt3)){
 	   ORDERITEMORDERPARTNERLINK.SUBCODE06='$rowdb21[DECOSUBCODE06]' AND
        ORDERITEMORDERPARTNERLINK.SUBCODE07='$rowdb21[DECOSUBCODE07]' AND
 	   ORDERITEMORDERPARTNERLINK.SUBCODE08='$rowdb21[DECOSUBCODE08]'";
-	$stmt5   = db2_exec($conn1,$sqlDB25, array('cursor'=>DB2_SCROLLABLE));
+//	$stmt5   = db2_exec($conn1,$sqlDB25, array('cursor'=>DB2_SCROLLABLE));
+	$stmt5   = db2_prepare($conn1,$sqlDB25);
+		db2_execute($stmt5);
 	$rowdb25 = db2_fetch_assoc($stmt5);	
 	if($rowdb25['LONGDESCRIPTION']!=""){
 		$item=$rowdb25['LONGDESCRIPTION'];
@@ -425,7 +433,9 @@ while($rowdb23 = db2_fetch_assoc($stmt3)){
 	   SALESORDERLINE.SUBCODE06='$rowdb21[DECOSUBCODE06]' AND
        SALESORDERLINE.SUBCODE07='$rowdb21[DECOSUBCODE07]' AND
 	   SALESORDERLINE.SUBCODE08='$rowdb21[DECOSUBCODE08]' LIMIT 1";
-	$stmt6   = db2_exec($conn1,$sqlDB26, array('cursor'=>DB2_SCROLLABLE));
+//	$stmt6   = db2_exec($conn1,$sqlDB26, array('cursor'=>DB2_SCROLLABLE));
+	$stmt6   = db2_prepare($conn1,$sqlDB26);
+		db2_execute($stmt6);
 	$rowdb26 = db2_fetch_assoc($stmt6);
 	if($rowdb22['EXTERNALREFERENCE']!=""){
 		$PO=$rowdb22['EXTERNALREFERENCE'];
@@ -433,7 +443,9 @@ while($rowdb23 = db2_fetch_assoc($stmt3)){
 		$PO=$rowdb26['EXTERNALREFERENCE'];
 	}
 	$sqlDB27 = " SELECT PROJECTCODE, ORIGDLVSALORDLINESALORDERCODE FROM PRODUCTIONDEMAND  WHERE CODE ='$rowdb21[LOTCODE]' ";
-	$stmt7   = db2_exec($conn1,$sqlDB27, array('cursor'=>DB2_SCROLLABLE));
+//	$stmt7   = db2_exec($conn1,$sqlDB27, array('cursor'=>DB2_SCROLLABLE));
+	$stmt7   = db2_prepare($conn1,$sqlDB27);
+		db2_execute($stmt7);
 	$rowdb27 = db2_fetch_assoc($stmt7);	
 	
 	if($rowdb21['PROJAWAL']!=""){$proAwal=$rowdb21['PROJAWAL'];}else if($rowdb21['PROJAWAL1']!=""){$proAwal=$rowdb21['PROJAWAL1'];}else if($rowdb27['PROJECTCODE']!=""){ $proAwal=$rowdb27['PROJECTCODE']; }else if($rowdb27['ORIGDLVSALORDLINESALORDERCODE']!=""){ $proAwal=$rowdb27['ORIGDLVSALORDLINESALORDERCODE']; }else{ $proAwal=$rowdb21['LOTCODE']; }	
