@@ -330,7 +330,7 @@ ITXVIEWLAPMASUKGREIGE.USERPRIMARYUOMCODE,STOCKTRANSACTION.PROJECTCODE,STOCKTRANS
 				db2_execute($stmt1M);
 	//}				  
     while($rowdb21M = db2_fetch_assoc($stmt1M)){
-$sqlDB22M = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE, SALESORDER.ORDPRNCUSTOMERSUPPLIERCODE,
+$sqlDB22M = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE,SALESORDER.TEMPLATECODE, SALESORDER.ORDPRNCUSTOMERSUPPLIERCODE,
 		ITXVIEWAKJ.LEGALNAME1, ITXVIEWAKJ.ORDERPARTNERBRANDCODE, ITXVIEWAKJ.LONGDESCRIPTION
 		FROM DB2ADMIN.SALESORDER SALESORDER LEFT OUTER JOIN DB2ADMIN.ITXVIEWAKJ 
        	ITXVIEWAKJ ON SALESORDER.CODE=ITXVIEWAKJ.CODE
@@ -495,7 +495,7 @@ $stmt10M   = db2_prepare($conn1,$sqlDB30M);
 $rowdb30M = db2_fetch_assoc($stmt10M);		
 if($rowdb22M['LEGALNAME1']==""){$langgananM="";}else{$langgananM=$rowdb22M['LEGALNAME1'];}
 if($rowdb22M['ORDERPARTNERBRANDCODE']==""){$buyerM="";}else{$buyerM=$rowdb22M['ORDERPARTNERBRANDCODE'];}
-$mcM=$rowdb27M['NO_MESIN'];
+if($rowdb22M['TEMPLATECODE'] == "CWD") {$mcM = "";}else{$mcM=$rowdb27M['NO_MESIN'];}
 if($rowdb25M['GSM1']!=""){$gsmM=round($rowdb25M['GSM1']);}else if($rowdb26M['GSM1']!=""){$gsmM=round($rowdb26M['GSM1']);}else{$gsmM=round($rowdb30M['GSM1']); }
 if($rowdb25M['LEBAR1']!=""){$lbrM=round($rowdb25M['LEBAR1']);}else if($rowdb26M['LEBAR1']!=""){$lbrM=round($rowdb26M['LEBAR1']);}else{ $lbrM=round($rowdb30M['LEBAR1']);}
 if(substr($rowdb21M['EXTERNALREFERENCE'],0,3)!="000" or substr($rowdb21M['EXTERNALREFERENCE'],0,2)!="00"){$lotBM=$rowdb21M['EXTERNALREFERENCE'];}else{$lotBM="";}
