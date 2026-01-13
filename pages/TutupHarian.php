@@ -246,264 +246,399 @@ $selh=round(abs($t2-$t1)/(60*60*45));
 		// Refresh form
 		// echo "<meta http-equiv='refresh' content='0; url=index1.php?p=data-stok-kj'>";
 			}
-			else{	
-	
-		$sqlDB21 = "SELECT
-						SUM(b.BASEPRIMARYQUANTITYUNIT) AS BERAT,
-						SUM(b.BASESECONDARYQUANTITYUNIT) AS YD,
-						COUNT(b.BASESECONDARYQUANTITYUNIT) AS ROLL,
-						b.LOTCODE,
-						b.PROJECTCODE,
-						b.ITEMTYPECODE,
-						b.DECOSUBCODE01,
-						b.DECOSUBCODE02,
-						b.DECOSUBCODE03,
-						b.DECOSUBCODE04,
-						b.DECOSUBCODE05,
-						b.DECOSUBCODE06,
-						b.DECOSUBCODE07,
-						b.DECOSUBCODE08,
-						b.BASEPRIMARYUNITCODE,
-						b.BASESECONDARYUNITCODE,
-						b.WHSLOCATIONWAREHOUSEZONECODE,
-						b.WAREHOUSELOCATIONCODE,
-						prj.PROJECTCODE AS PROJAWAL,
-						prj1.PROJECTCODE AS PROJAWAL1
-					FROM
-						BALANCE b
-					LEFT OUTER JOIN (
-						SELECT
-							STOCKTRANSACTION.ORDERCODE,
-							STOCKTRANSACTION.ORDERLINE,
-							STOCKTRANSACTION.ITEMELEMENTCODE,
-							ITXVIEWBUKMUTGKGKNT.PROJECTCODE
-						FROM
-							STOCKTRANSACTION STOCKTRANSACTION
-						LEFT JOIN INTERNALDOCUMENTLINE INTERNALDOCUMENTLINE 
-					ON
-							STOCKTRANSACTION.ORDERCODE = INTERNALDOCUMENTLINE.INTDOCUMENTPROVISIONALCODE
-							AND 
-					STOCKTRANSACTION.ORDERLINE = INTERNALDOCUMENTLINE.ORDERLINE
-						LEFT JOIN ITXVIEWBUKMUTGKGKNT ITXVIEWBUKMUTGKGKNT 
-					ON
-							INTERNALDOCUMENTLINE.INTDOCUMENTPROVISIONALCODE = ITXVIEWBUKMUTGKGKNT.INTDOCUMENTPROVISIONALCODE
-							AND 
-					INTERNALDOCUMENTLINE.ORDERLINE = ITXVIEWBUKMUTGKGKNT.ORDERLINE
-						WHERE
-							STOCKTRANSACTION.ORDERCOUNTERCODE = 'I02M50'
-						GROUP BY
-							STOCKTRANSACTION.ORDERCODE,
-							STOCKTRANSACTION.ORDERLINE,
-							STOCKTRANSACTION.ITEMELEMENTCODE,
-							ITXVIEWBUKMUTGKGKNT.PROJECTCODE) prj ON
-						b.ELEMENTSCODE = prj.ITEMELEMENTCODE
-					LEFT OUTER JOIN (
-						SELECT
-							STOCKTRANSACTION.ORDERCODE,
-							STOCKTRANSACTION.ORDERLINE,
-							STOCKTRANSACTION.ITEMELEMENTCODE,
-							STOCKTRANSACTION.PROJECTCODE
-						FROM
-							STOCKTRANSACTION STOCKTRANSACTION
-						WHERE
-							STOCKTRANSACTION.TEMPLATECODE = 'OPN'
-							AND STOCKTRANSACTION.ITEMTYPECODE = 'KGF'
-						GROUP BY
-							STOCKTRANSACTION.ORDERCODE,
-							STOCKTRANSACTION.ORDERLINE,
-							STOCKTRANSACTION.ITEMELEMENTCODE,
-							STOCKTRANSACTION.PROJECTCODE) prj1 ON
-						b.ELEMENTSCODE = prj1.ITEMELEMENTCODE
-					WHERE
-						(b.ITEMTYPECODE = 'FKG'
-							OR b.ITEMTYPECODE = 'KGF')
-						AND b.LOGICALWAREHOUSECODE = 'M021'
-					GROUP BY
-						b.ITEMTYPECODE,
-						b.DECOSUBCODE01,
-						b.DECOSUBCODE02,
-						b.DECOSUBCODE03,
-						b.DECOSUBCODE04,
-						b.DECOSUBCODE05,
-						b.DECOSUBCODE06,
-						b.DECOSUBCODE07,
-						b.DECOSUBCODE08,
-						b.PROJECTCODE,
-						b.LOTCODE,
-						b.BASEPRIMARYUNITCODE,
-						b.BASESECONDARYUNITCODE,
-						b.WHSLOCATIONWAREHOUSEZONECODE,
-						b.WAREHOUSELOCATIONCODE,
-						prj.PROJECTCODE,
-						prj1.PROJECTCODE";
+			else{
+
+		$sqlDB21 = "
+            SELECT
+                SUM(b.BASEPRIMARYQUANTITYUNIT) AS BERAT,
+                COUNT(b.BASESECONDARYQUANTITYUNIT) AS ROLL,
+                b.LOTCODE,
+                b.PROJECTCODE,
+                b.ITEMTYPECODE,
+                b.DECOSUBCODE01,
+                b.DECOSUBCODE02,
+                b.DECOSUBCODE03,
+                b.DECOSUBCODE04,
+                b.DECOSUBCODE05,
+                b.DECOSUBCODE06,
+                b.DECOSUBCODE07,
+                b.DECOSUBCODE08,
+                b.BASEPRIMARYUNITCODE,
+                b.WHSLOCATIONWAREHOUSEZONECODE,
+                b.WAREHOUSELOCATIONCODE,
+
+                prj.PROJECTCODE AS PROJAWAL,
+                prj1.PROJECTCODE AS PROJAWAL1,
+
+                pm.PROJECTCODE AS PROJECTCODE_PM,
+                pm.ORIGDLVSALORDLINESALORDERCODE AS ORIGDLVSALORDLINESALORDERCODE_PM,
+
+                itmdesc.SUMMARIZEDDESCRIPTION_ITEM,
+
+                llg.LEGALNAME1_LLG,
+                llg.ORDERPARTNERBRANDCODE_LLG,
+                llg.LONGDESCRIPTION_LLG,
+
+                gyr.LONGDESC_GABUNG_GYR
+
+            FROM BALANCE b
+
+            LEFT OUTER JOIN (
+                SELECT
+                    st.ITEMELEMENTCODE,
+                    v.PROJECTCODE
+                FROM STOCKTRANSACTION st
+                LEFT JOIN INTERNALDOCUMENTLINE idl
+                    ON st.ORDERCODE = idl.INTDOCUMENTPROVISIONALCODE
+                    AND st.ORDERLINE = idl.ORDERLINE
+                LEFT JOIN ITXVIEWBUKMUTGKGKNT v
+                    ON idl.INTDOCUMENTPROVISIONALCODE = v.INTDOCUMENTPROVISIONALCODE
+                    AND idl.ORDERLINE = v.ORDERLINE
+                WHERE st.ORDERCOUNTERCODE = 'I02M50'
+                GROUP BY st.ITEMELEMENTCODE, v.PROJECTCODE
+            ) prj ON b.ELEMENTSCODE = prj.ITEMELEMENTCODE
+
+            LEFT OUTER JOIN (
+                SELECT
+                    st.ITEMELEMENTCODE,
+                    st.PROJECTCODE
+                FROM STOCKTRANSACTION st
+                WHERE st.TEMPLATECODE = 'OPN'
+                  AND st.ITEMTYPECODE = 'KGF'
+                GROUP BY st.ITEMELEMENTCODE, st.PROJECTCODE
+            ) prj1 ON b.ELEMENTSCODE = prj1.ITEMELEMENTCODE
+
+            LEFT OUTER JOIN (
+                SELECT PROJECTCODE, ORIGDLVSALORDLINESALORDERCODE, CODE
+                FROM PRODUCTIONDEMAND
+            ) pm ON pm.CODE = b.LOTCODE
+
+            LEFT OUTER JOIN (
+                SELECT DISTINCT
+                    TRIM(p.SUMMARIZEDDESCRIPTION) AS SUMMARIZEDDESCRIPTION_ITEM,
+                    p.SUBCODE02,
+                    p.SUBCODE03,
+                    p.SUBCODE04
+                FROM FULLITEMKEYDECODER p
+                WHERE p.ITEMTYPECODE IN ('KGF','FKG')
+            ) itmdesc
+                ON itmdesc.SUBCODE02 = b.DECOSUBCODE02
+               AND itmdesc.SUBCODE03 = b.DECOSUBCODE03
+               AND itmdesc.SUBCODE04 = b.DECOSUBCODE04
+
+            LEFT OUTER JOIN (
+                SELECT
+                    so.CODE,
+                    akj.LEGALNAME1 AS LEGALNAME1_LLG,
+                    akj.ORDERPARTNERBRANDCODE AS ORDERPARTNERBRANDCODE_LLG,
+                    akj.LONGDESCRIPTION AS LONGDESCRIPTION_LLG
+                FROM SALESORDER so
+                LEFT OUTER JOIN ITXVIEWAKJ akj
+                    ON so.CODE = akj.CODE
+            ) llg ON llg.CODE = b.PROJECTCODE
+
+            LEFT OUTER JOIN (
+                SELECT
+                    x.CODE AS LOTCODE,
+                    LISTAGG(x.LONGDESCRIPTION, ', ')
+                        WITHIN GROUP (ORDER BY x.BOMCOMPSEQUENCE) AS LONGDESC_GABUNG_GYR
+                FROM (
+                    SELECT
+                        pd.CODE,
+                        prd.LONGDESCRIPTION,
+                        pr.BOMCOMPSEQUENCE
+                    FROM PRODUCTIONDEMAND pd
+                    LEFT JOIN PRODUCTIONRESERVATION pr
+                        ON pd.CODE = pr.ORDERCODE
+                    LEFT JOIN PRODUCT prd
+                        ON prd.ITEMTYPECODE = 'GYR'
+                       AND prd.SUBCODE01 = pr.SUBCODE01
+                       AND prd.SUBCODE02 = pr.SUBCODE02
+                       AND prd.SUBCODE03 = pr.SUBCODE03
+                       AND prd.SUBCODE04 = pr.SUBCODE04
+                       AND prd.SUBCODE05 = pr.SUBCODE05
+                       AND prd.SUBCODE06 = pr.SUBCODE06
+                       AND prd.SUBCODE07 = pr.SUBCODE07
+                    WHERE pd.ITEMTYPEAFICODE = 'KGF'
+                ) x
+                GROUP BY x.CODE
+            ) gyr ON gyr.LOTCODE = b.LOTCODE
+
+            WHERE b.ITEMTYPECODE IN ('FKG','KGF')
+              AND b.LOGICALWAREHOUSECODE = 'M021'
+
+            GROUP BY
+                b.ITEMTYPECODE,
+                b.DECOSUBCODE01, b.DECOSUBCODE02, b.DECOSUBCODE03, b.DECOSUBCODE04,
+                b.DECOSUBCODE05, b.DECOSUBCODE06, b.DECOSUBCODE07, b.DECOSUBCODE08,
+                b.PROJECTCODE,
+                b.LOTCODE,
+                b.BASEPRIMARYUNITCODE,
+                b.WHSLOCATIONWAREHOUSEZONECODE,
+                b.WAREHOUSELOCATIONCODE,
+                prj.PROJECTCODE,
+                prj1.PROJECTCODE,
+                pm.PROJECTCODE,
+                pm.ORIGDLVSALORDLINESALORDERCODE,
+                itmdesc.SUMMARIZEDDESCRIPTION_ITEM,
+                llg.LEGALNAME1_LLG,
+                llg.ORDERPARTNERBRANDCODE_LLG,
+                llg.LONGDESCRIPTION_LLG,
+                gyr.LONGDESC_GABUNG_GYR
+        ";
 //		$stmt1   = db2_exec($conn1,$sqlDB21, array('cursor'=>DB2_SCROLLABLE));
 		$stmt1   = db2_prepare($conn1,$sqlDB21);
 		db2_execute($stmt1);		
-	//}				  
-    while($rowdb21 = db2_fetch_assoc($stmt1)){
-	$itemNo=trim($rowdb21['DECOSUBCODE02'])."".trim($rowdb21['DECOSUBCODE03'])." ".trim($rowdb21['DECOSUBCODE04']);
-	if($rowdb21['ITEMTYPECODE']=="KGF"){$jns="KAIN";}else if($rowdb21['ITEMTYPECODE']=="FKG"){$jns="KRAH";}
-	if($rowdb21['PROJAWAL']!=""){
-		$proj=$rowdb21['PROJAWAL'];}
-	else if($rowdb21['PROJAWAL1']!=""){
-		$proj=$rowdb21['PROJAWAL1'];}
-	else if($rowdb27['PROJECTCODE']!=""){ 
-		$proj=$rowdb27['PROJECTCODE']; }
-	else if($rowdb27['ORIGDLVSALORDLINESALORDERCODE']!=""){ 
-		$proj=$rowdb27['ORIGDLVSALORDLINESALORDERCODE']; }
-	else{ 
-		$proj=$rowdb21['LOTCODE']; }	
-	$sqlDB22 = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE, SALESORDER.ORDPRNCUSTOMERSUPPLIERCODE,
-		ITXVIEWAKJ.LEGALNAME1, ITXVIEWAKJ.ORDERPARTNERBRANDCODE, ITXVIEWAKJ.LONGDESCRIPTION
-		FROM DB2ADMIN.SALESORDER SALESORDER LEFT OUTER JOIN DB2ADMIN.ITXVIEWAKJ 
-       	ITXVIEWAKJ ON SALESORDER.CODE=ITXVIEWAKJ.CODE
-		WHERE SALESORDER.CODE='$rowdb21[PROJECTCODE]' ";
-//	$stmt2   = db2_exec($conn1,$sqlDB22, array('cursor'=>DB2_SCROLLABLE));
-	$stmt2   = db2_prepare($conn1,$sqlDB22);
-	db2_execute($stmt2);	
-	$rowdb22 = db2_fetch_assoc($stmt2);		
-	if($rowdb22['LEGALNAME1']==""){$langganan="";}else{$langganan=$rowdb22['LEGALNAME1'];}
-	if($rowdb22['ORDERPARTNERBRANDCODE']==""){$buyer="";}else{$buyer=$rowdb22['LONGDESCRIPTION'];}	
-	if($rowdb22['EXTERNALREFERENCE']!=""){
-		$PO=$rowdb22['EXTERNALREFERENCE'];
-	}else{
-		$PO=$rowdb26['EXTERNALREFERENCE'];
-	}
-	$sqlDB23 = " SELECT p.SUBCODE01,p.SUBCODE02,p.SUBCODE03,p.SUBCODE04,p.SUBCODE05,p.SUBCODE06,p.SUBCODE07, p.LONGDESCRIPTION FROM (
-SELECT p2.ITEMTYPEAFICODE,p2.SUBCODE01,p2.SUBCODE02,p2.SUBCODE03,p2.SUBCODE04,
-p2.SUBCODE05,p2.SUBCODE06,p2.SUBCODE07  FROM PRODUCTIONDEMAND p 
-LEFT OUTER JOIN PRODUCTIONRESERVATION p2 ON p.CODE =p2.ORDERCODE 
-WHERE p.ITEMTYPEAFICODE ='KGF' AND p.SUBCODE01='".trim($rowdb21['DECOSUBCODE01'])."' 
-AND p.SUBCODE02 ='".trim($rowdb21['DECOSUBCODE02'])."' AND p.SUBCODE03 ='".trim($rowdb21['DECOSUBCODE03'])."' AND
-p.SUBCODE04='".trim($rowdb21['DECOSUBCODE04'])."' AND (p.PROJECTCODE ='".trim($proj)."' OR p.ORIGDLVSALORDLINESALORDERCODE  ='".trim($proj)."')
-) a LEFT OUTER JOIN PRODUCT p ON
-p.ITEMTYPECODE ='GYR' AND
-p.SUBCODE01= a.SUBCODE01 AND p.SUBCODE02= a.SUBCODE02 AND 
-p.SUBCODE03= a.SUBCODE03 AND p.SUBCODE04= a.SUBCODE04 AND 
-p.SUBCODE05= a.SUBCODE05 AND p.SUBCODE06= a.SUBCODE06 AND
-p.SUBCODE07= a.SUBCODE07 
-GROUP BY 
-p.SUBCODE01,p.SUBCODE02, 
-p.SUBCODE03,p.SUBCODE04,
-p.SUBCODE05,p.SUBCODE06,
-p.SUBCODE07,p.LONGDESCRIPTION ";
-//$stmt3   = db2_exec($conn1,$sqlDB23, array('cursor'=>DB2_SCROLLABLE));
-$stmt3   = db2_prepare($conn1,$sqlDB23);
-db2_execute($stmt3);
-$ai=0;
-$a[0]="";
-$a[1]="";
-$a[2]="";
-$a[3]="";		
-while($rowdb23 = db2_fetch_assoc($stmt3)){
-	$a[$ai]=$rowdb23['LONGDESCRIPTION'];
-	$ai++;
-}	
-	$sqlDB25 = " SELECT ORDERITEMORDERPARTNERLINK.ORDPRNCUSTOMERSUPPLIERCODE,
-       ORDERITEMORDERPARTNERLINK.LONGDESCRIPTION 
-	   FROM DB2ADMIN.ORDERITEMORDERPARTNERLINK ORDERITEMORDERPARTNERLINK WHERE
-       ORDERITEMORDERPARTNERLINK.ITEMTYPEAFICODE='$rowdb21[ITEMTYPECODE]' AND
-	   ORDERITEMORDERPARTNERLINK.ORDPRNCUSTOMERSUPPLIERCODE='$rowdb22[ORDPRNCUSTOMERSUPPLIERCODE]' AND
-	   ORDERITEMORDERPARTNERLINK.SUBCODE01='$rowdb21[DECOSUBCODE01]' AND
-       ORDERITEMORDERPARTNERLINK.SUBCODE02='$rowdb21[DECOSUBCODE02]' AND
-       ORDERITEMORDERPARTNERLINK.SUBCODE03='$rowdb21[DECOSUBCODE03]' AND
-	   ORDERITEMORDERPARTNERLINK.SUBCODE04='$rowdb21[DECOSUBCODE04]' AND
-       ORDERITEMORDERPARTNERLINK.SUBCODE05='$rowdb21[DECOSUBCODE05]' AND
-	   ORDERITEMORDERPARTNERLINK.SUBCODE06='$rowdb21[DECOSUBCODE06]' AND
-       ORDERITEMORDERPARTNERLINK.SUBCODE07='$rowdb21[DECOSUBCODE07]' AND
-	   ORDERITEMORDERPARTNERLINK.SUBCODE08='$rowdb21[DECOSUBCODE08]'";
-//	$stmt5   = db2_exec($conn1,$sqlDB25, array('cursor'=>DB2_SCROLLABLE));
-	$stmt5   = db2_prepare($conn1,$sqlDB25);
-		db2_execute($stmt5);
-	$rowdb25 = db2_fetch_assoc($stmt5);	
-	if($rowdb25['LONGDESCRIPTION']!=""){
-		$item=$rowdb25['LONGDESCRIPTION'];
-	}else{
-		$item=trim($rowdb21['DECOSUBCODE02'])."".trim($rowdb21['DECOSUBCODE03']);
-	}
-	$sqlDB26 = " SELECT SALESORDERLINE.EXTERNALREFERENCE 
-       FROM DB2ADMIN.SALESORDERLINE WHERE
-       SALESORDERLINE.ITEMTYPEAFICODE='$rowdb21[ITEMTYPECODE]' AND	   
-	   SALESORDERLINE.PROJECTCODE='$rowdb21[PROJECTCODE]' AND
-	   SALESORDERLINE.SUBCODE01='$rowdb21[DECOSUBCODE01]' AND
-       SALESORDERLINE.SUBCODE02='$rowdb21[DECOSUBCODE02]' AND
-       SALESORDERLINE.SUBCODE03='$rowdb21[DECOSUBCODE03]' AND
-	   SALESORDERLINE.SUBCODE04='$rowdb21[DECOSUBCODE04]' AND
-       SALESORDERLINE.SUBCODE05='$rowdb21[DECOSUBCODE05]' AND
-	   SALESORDERLINE.SUBCODE06='$rowdb21[DECOSUBCODE06]' AND
-       SALESORDERLINE.SUBCODE07='$rowdb21[DECOSUBCODE07]' AND
-	   SALESORDERLINE.SUBCODE08='$rowdb21[DECOSUBCODE08]' LIMIT 1";
-//	$stmt6   = db2_exec($conn1,$sqlDB26, array('cursor'=>DB2_SCROLLABLE));
-	$stmt6   = db2_prepare($conn1,$sqlDB26);
-		db2_execute($stmt6);
-	$rowdb26 = db2_fetch_assoc($stmt6);
-	if($rowdb22['EXTERNALREFERENCE']!=""){
-		$PO=$rowdb22['EXTERNALREFERENCE'];
-	}else{
-		$PO=$rowdb26['EXTERNALREFERENCE'];
-	}
-	$sqlDB27 = " SELECT PROJECTCODE, ORIGDLVSALORDLINESALORDERCODE FROM PRODUCTIONDEMAND  WHERE CODE ='$rowdb21[LOTCODE]' ";
-//	$stmt7   = db2_exec($conn1,$sqlDB27, array('cursor'=>DB2_SCROLLABLE));
-	$stmt7   = db2_prepare($conn1,$sqlDB27);
-		db2_execute($stmt7);
-	$rowdb27 = db2_fetch_assoc($stmt7);	
-	
-	if($rowdb21['PROJAWAL']!=""){$proAwal=$rowdb21['PROJAWAL'];}else if($rowdb21['PROJAWAL1']!=""){$proAwal=$rowdb21['PROJAWAL1'];}else if($rowdb27['PROJECTCODE']!=""){ $proAwal=$rowdb27['PROJECTCODE']; }else if($rowdb27['ORIGDLVSALORDLINESALORDERCODE']!=""){ $proAwal=$rowdb27['ORIGDLVSALORDLINESALORDERCODE']; }else{ $proAwal=$rowdb21['LOTCODE']; }	
-	
-	$query = "INSERT INTO dbnow_gkg.tblopname (
-						langganan
-						,buyer
-						,proj_akhir
-						,proj_awal
-						,tipe
-						,no_item
-						,benang_1
-						,benang_2
-						,benang_3
-						,benang_4
-						,lot
-						,rol
-						,[weight]
-						,satuan
-						,[zone]
-						,lokasi
-						,tgl_tutup
-						,tgl_buat
-					) VALUES ( 
-							?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
-					)";
+	//}	
+	$insertSql = "
+            INSERT INTO dbnow_gkg.tblopname (
+                langganan, buyer, proj_akhir, proj_awal, tipe, no_item,
+                benang_1, benang_2, benang_3, benang_4,
+                lot, rol, [weight], satuan, [zone], lokasi,
+                tgl_tutup, tgl_buat
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ";
 
-	$params = [
-		cek($langganan),
-		cek($buyer),
-		cek($rowdb21['PROJECTCODE']),
-		cek($proAwal),
-		cek($jns),
-		cek($itemNo),
-		cek(str_replace("'", "''", $a[0])),
-		cek(str_replace("'", "''", $a[1])),
-		cek(str_replace("'", "''", $a[2])),
-		cek(str_replace("'", "''", $a[3])),
-		cek($rowdb21['LOTCODE']),
-		cek($rowdb21['ROLL']),
-		cek(round($rowdb21['BERAT'], 3)),
-		cek($rowdb21['BASEPRIMARYUNITCODE']),
-		cek($rowdb21['WHSLOCATIONWAREHOUSEZONECODE']),
-		cek($rowdb21['WAREHOUSELOCATIONCODE']),
-		cek($Awal),
-		cek(date('Y-m-d H:i:s')),
-	];
-	
-	$simpan=sqlsrv_query($con,$query, $params) or die("GAGAL SIMPAN");	
-	
+	sqlsrv_begin_transaction($con);
+
+	$insertStmt = sqlsrv_prepare($con, $insertSql, array_fill(0, 18, null));
+	if ($insertStmt === false) {
+		sqlsrv_rollback($con);
+		die(print_r(sqlsrv_errors(), true));
 	}
-	if($simpan){		
-		echo "<script>";
-		echo "alert('Stok Tgl ".$Awal." Sudah ditutup')";
-		echo "</script>";
-        echo "<meta http-equiv='refresh' content='0; url=TutupHarian'>";
+
+	$ok = true;
+
+		while ($rowdb21 = db2_fetch_assoc($stmt1)) {
+
+			$itemNo = trim($rowdb21['DECOSUBCODE02']) . trim($rowdb21['DECOSUBCODE03']) . " " . trim($rowdb21['DECOSUBCODE04']);
+			$jns    = ($rowdb21['ITEMTYPECODE'] === 'KGF') ? 'KAIN' : 'KRAH';
+
+			// proj_awal mengikuti kode 2
+			if (!empty($rowdb21['PROJAWAL'])) {
+				$proAwal = $rowdb21['PROJAWAL'];
+			} elseif (!empty($rowdb21['PROJAWAL1'])) {
+				$proAwal = $rowdb21['PROJAWAL1'];
+			} elseif (!empty($rowdb21['PROJECTCODE_PM'])) {
+				$proAwal = $rowdb21['PROJECTCODE_PM'];
+			} elseif (!empty($rowdb21['ORIGDLVSALORDLINESALORDERCODE_PM'])) {
+				$proAwal = $rowdb21['ORIGDLVSALORDLINESALORDERCODE_PM'];
+			} else {
+				$proAwal = $rowdb21['LOTCODE'];
+			}
+
+			$longdesc  = $rowdb21['LONGDESC_GABUNG_GYR'] ?? '';
+			$arrBenang = array_values(array_filter(array_map('trim', explode(',', $longdesc))));
+
+			// PARAMS pakai cek() helper (Opsi B)
+			$params = [
+				cek($rowdb21['LEGALNAME1_LLG'] ?? null),
+				cek($rowdb21['LONGDESCRIPTION_LLG'] ?? null),
+				cek($rowdb21['PROJECTCODE'] ?? null),
+				cek($proAwal),
+				cek($jns),
+				cek($itemNo),
+
+				cek($arrBenang[0] ?? null),
+				cek($arrBenang[1] ?? null),
+				cek($arrBenang[2] ?? null),
+				cek($arrBenang[3] ?? null),
+
+				cek($rowdb21['LOTCODE'] ?? null),
+				(int)cek($rowdb21['ROLL'] ?? 0),
+				(float)round((float)cek($rowdb21['BERAT'] ?? 0), 3),
+				cek($rowdb21['BASEPRIMARYUNITCODE'] ?? null),
+				cek($rowdb21['WHSLOCATIONWAREHOUSEZONECODE'] ?? null),
+				cek($rowdb21['WAREHOUSELOCATIONCODE'] ?? null),
+				cek($Awal),
+				cek(date('Y-m-d H:i:s')),
+			];
+
+			// Ringkas: prepare + execute per baris (sesuai gaya Anda)
+			$insertStmt = sqlsrv_prepare($con, $insertSql, $params);
+			if ($insertStmt === false) {
+				$ok = false;
+				break;
+			}
+			if (!sqlsrv_execute($insertStmt)) {
+				$ok = false;
+				break;
+			}
+		}
+
+		if ($ok) {
+			sqlsrv_commit($con);
+			echo "<script>alert('Stok Tgl {$Awal} Sudah ditutup');</script>";
+			echo "<meta http-equiv='refresh' content='0; url=TutupHarian'>";
+		} else {
+			sqlsrv_rollback($con);
+			die("GAGAL SIMPAN: " . print_r(sqlsrv_errors(), true));
+		}
+
+//     // while($rowdb21 = db2_fetch_assoc($stmt1)){
+// 	// $itemNo=trim($rowdb21['DECOSUBCODE02'])."".trim($rowdb21['DECOSUBCODE03'])." ".trim($rowdb21['DECOSUBCODE04']);
+// 	// if($rowdb21['ITEMTYPECODE']=="KGF"){$jns="KAIN";}else if($rowdb21['ITEMTYPECODE']=="FKG"){$jns="KRAH";}
+// 	// if($rowdb21['PROJAWAL']!=""){
+// 	// 	$proj=$rowdb21['PROJAWAL'];}
+// 	// else if($rowdb21['PROJAWAL1']!=""){
+// 	// 	$proj=$rowdb21['PROJAWAL1'];}
+// 	// else if($rowdb27['PROJECTCODE']!=""){ 
+// 	// 	$proj=$rowdb27['PROJECTCODE']; }
+// 	// else if($rowdb27['ORIGDLVSALORDLINESALORDERCODE']!=""){ 
+// 	// 	$proj=$rowdb27['ORIGDLVSALORDLINESALORDERCODE']; }
+// 	// else{ 
+// 	// 	$proj=$rowdb21['LOTCODE']; }	
+// 	// $sqlDB22 = " SELECT SALESORDER.CODE, SALESORDER.EXTERNALREFERENCE, SALESORDER.ORDPRNCUSTOMERSUPPLIERCODE,
+// 	// 	ITXVIEWAKJ.LEGALNAME1, ITXVIEWAKJ.ORDERPARTNERBRANDCODE, ITXVIEWAKJ.LONGDESCRIPTION
+// 	// 	FROM DB2ADMIN.SALESORDER SALESORDER LEFT OUTER JOIN DB2ADMIN.ITXVIEWAKJ 
+//     //    	ITXVIEWAKJ ON SALESORDER.CODE=ITXVIEWAKJ.CODE
+// 	// 	WHERE SALESORDER.CODE='$rowdb21[PROJECTCODE]' ";
+// //	$stmt2   = db2_exec($conn1,$sqlDB22, array('cursor'=>DB2_SCROLLABLE));
+// 	// $stmt2   = db2_prepare($conn1,$sqlDB22);
+// 	// db2_execute($stmt2);	
+// 	// $rowdb22 = db2_fetch_assoc($stmt2);		
+// 	// if($rowdb22['LEGALNAME1']==""){$langganan="";}else{$langganan=$rowdb22['LEGALNAME1'];}
+// 	// if($rowdb22['ORDERPARTNERBRANDCODE']==""){$buyer="";}else{$buyer=$rowdb22['LONGDESCRIPTION'];}	
+// 	// if($rowdb22['EXTERNALREFERENCE']!=""){
+// 	// 	$PO=$rowdb22['EXTERNALREFERENCE'];
+// 	// }else{
+// 	// 	$PO=$rowdb26['EXTERNALREFERENCE'];
+// 	// }
+// // 	$sqlDB23 = " SELECT p.SUBCODE01,p.SUBCODE02,p.SUBCODE03,p.SUBCODE04,p.SUBCODE05,p.SUBCODE06,p.SUBCODE07, p.LONGDESCRIPTION FROM (
+// // SELECT p2.ITEMTYPEAFICODE,p2.SUBCODE01,p2.SUBCODE02,p2.SUBCODE03,p2.SUBCODE04,
+// // p2.SUBCODE05,p2.SUBCODE06,p2.SUBCODE07  FROM PRODUCTIONDEMAND p 
+// // LEFT OUTER JOIN PRODUCTIONRESERVATION p2 ON p.CODE =p2.ORDERCODE 
+// // WHERE p.ITEMTYPEAFICODE ='KGF' AND p.SUBCODE01='".trim($rowdb21['DECOSUBCODE01'])."' 
+// // AND p.SUBCODE02 ='".trim($rowdb21['DECOSUBCODE02'])."' AND p.SUBCODE03 ='".trim($rowdb21['DECOSUBCODE03'])."' AND
+// // p.SUBCODE04='".trim($rowdb21['DECOSUBCODE04'])."' AND (p.PROJECTCODE ='".trim($proj)."' OR p.ORIGDLVSALORDLINESALORDERCODE  ='".trim($proj)."')
+// // ) a LEFT OUTER JOIN PRODUCT p ON
+// // p.ITEMTYPECODE ='GYR' AND
+// // p.SUBCODE01= a.SUBCODE01 AND p.SUBCODE02= a.SUBCODE02 AND 
+// // p.SUBCODE03= a.SUBCODE03 AND p.SUBCODE04= a.SUBCODE04 AND 
+// // p.SUBCODE05= a.SUBCODE05 AND p.SUBCODE06= a.SUBCODE06 AND
+// // p.SUBCODE07= a.SUBCODE07 
+// // GROUP BY 
+// // p.SUBCODE01,p.SUBCODE02, 
+// // p.SUBCODE03,p.SUBCODE04,
+// // p.SUBCODE05,p.SUBCODE06,
+// // p.SUBCODE07,p.LONGDESCRIPTION ";
+// // //$stmt3   = db2_exec($conn1,$sqlDB23, array('cursor'=>DB2_SCROLLABLE));
+// // $stmt3   = db2_prepare($conn1,$sqlDB23);
+// // db2_execute($stmt3);
+// // $ai=0;
+// // $a[0]="";
+// // $a[1]="";
+// // $a[2]="";
+// // $a[3]="";		
+// // while($rowdb23 = db2_fetch_assoc($stmt3)){
+// // 	$a[$ai]=$rowdb23['LONGDESCRIPTION'];
+// // 	$ai++;
+// // }	
+// // 	$sqlDB25 = " SELECT ORDERITEMORDERPARTNERLINK.ORDPRNCUSTOMERSUPPLIERCODE,
+// //        ORDERITEMORDERPARTNERLINK.LONGDESCRIPTION 
+// // 	   FROM DB2ADMIN.ORDERITEMORDERPARTNERLINK ORDERITEMORDERPARTNERLINK WHERE
+// //        ORDERITEMORDERPARTNERLINK.ITEMTYPEAFICODE='$rowdb21[ITEMTYPECODE]' AND
+// // 	   ORDERITEMORDERPARTNERLINK.ORDPRNCUSTOMERSUPPLIERCODE='$rowdb22[ORDPRNCUSTOMERSUPPLIERCODE]' AND
+// // 	   ORDERITEMORDERPARTNERLINK.SUBCODE01='$rowdb21[DECOSUBCODE01]' AND
+// //        ORDERITEMORDERPARTNERLINK.SUBCODE02='$rowdb21[DECOSUBCODE02]' AND
+// //        ORDERITEMORDERPARTNERLINK.SUBCODE03='$rowdb21[DECOSUBCODE03]' AND
+// // 	   ORDERITEMORDERPARTNERLINK.SUBCODE04='$rowdb21[DECOSUBCODE04]' AND
+// //        ORDERITEMORDERPARTNERLINK.SUBCODE05='$rowdb21[DECOSUBCODE05]' AND
+// // 	   ORDERITEMORDERPARTNERLINK.SUBCODE06='$rowdb21[DECOSUBCODE06]' AND
+// //        ORDERITEMORDERPARTNERLINK.SUBCODE07='$rowdb21[DECOSUBCODE07]' AND
+// // 	   ORDERITEMORDERPARTNERLINK.SUBCODE08='$rowdb21[DECOSUBCODE08]'";
+// // //	$stmt5   = db2_exec($conn1,$sqlDB25, array('cursor'=>DB2_SCROLLABLE));
+// // 	$stmt5   = db2_prepare($conn1,$sqlDB25);
+// // 		db2_execute($stmt5);
+// // 	$rowdb25 = db2_fetch_assoc($stmt5);	
+// // 	if($rowdb25['LONGDESCRIPTION']!=""){
+// // 		$item=$rowdb25['LONGDESCRIPTION'];
+// // 	}else{
+// // 		$item=trim($rowdb21['DECOSUBCODE02'])."".trim($rowdb21['DECOSUBCODE03']);
+// // 	}
+// // 	$sqlDB26 = " SELECT SALESORDERLINE.EXTERNALREFERENCE 
+// //        FROM DB2ADMIN.SALESORDERLINE WHERE
+// //        SALESORDERLINE.ITEMTYPEAFICODE='$rowdb21[ITEMTYPECODE]' AND	   
+// // 	   SALESORDERLINE.PROJECTCODE='$rowdb21[PROJECTCODE]' AND
+// // 	   SALESORDERLINE.SUBCODE01='$rowdb21[DECOSUBCODE01]' AND
+// //        SALESORDERLINE.SUBCODE02='$rowdb21[DECOSUBCODE02]' AND
+// //        SALESORDERLINE.SUBCODE03='$rowdb21[DECOSUBCODE03]' AND
+// // 	   SALESORDERLINE.SUBCODE04='$rowdb21[DECOSUBCODE04]' AND
+// //        SALESORDERLINE.SUBCODE05='$rowdb21[DECOSUBCODE05]' AND
+// // 	   SALESORDERLINE.SUBCODE06='$rowdb21[DECOSUBCODE06]' AND
+// //        SALESORDERLINE.SUBCODE07='$rowdb21[DECOSUBCODE07]' AND
+// // 	   SALESORDERLINE.SUBCODE08='$rowdb21[DECOSUBCODE08]' LIMIT 1";
+// // //	$stmt6   = db2_exec($conn1,$sqlDB26, array('cursor'=>DB2_SCROLLABLE));
+// // 	$stmt6   = db2_prepare($conn1,$sqlDB26);
+// // 		db2_execute($stmt6);
+// // 	$rowdb26 = db2_fetch_assoc($stmt6);
+// // 	if($rowdb22['EXTERNALREFERENCE']!=""){
+// // 		$PO=$rowdb22['EXTERNALREFERENCE'];
+// // 	}else{
+// // 		$PO=$rowdb26['EXTERNALREFERENCE'];
+// // 	}
+// // 	$sqlDB27 = " SELECT PROJECTCODE, ORIGDLVSALORDLINESALORDERCODE FROM PRODUCTIONDEMAND  WHERE CODE ='$rowdb21[LOTCODE]' ";
+// // //	$stmt7   = db2_exec($conn1,$sqlDB27, array('cursor'=>DB2_SCROLLABLE));
+// // 	$stmt7   = db2_prepare($conn1,$sqlDB27);
+// // 		db2_execute($stmt7);
+// // 	$rowdb27 = db2_fetch_assoc($stmt7);	
+	
+// // 	if($rowdb21['PROJAWAL']!=""){$proAwal=$rowdb21['PROJAWAL'];}else if($rowdb21['PROJAWAL1']!=""){$proAwal=$rowdb21['PROJAWAL1'];}else if($rowdb27['PROJECTCODE']!=""){ $proAwal=$rowdb27['PROJECTCODE']; }else if($rowdb27['ORIGDLVSALORDLINESALORDERCODE']!=""){ $proAwal=$rowdb27['ORIGDLVSALORDLINESALORDERCODE']; }else{ $proAwal=$rowdb21['LOTCODE']; }	
+	
+// // 	$query = "INSERT INTO dbnow_gkg.tblopname (
+// // 						langganan
+// // 						,buyer
+// // 						,proj_akhir
+// // 						,proj_awal
+// // 						,tipe
+// // 						,no_item
+// // 						,benang_1
+// // 						,benang_2
+// // 						,benang_3
+// // 						,benang_4
+// // 						,lot
+// // 						,rol
+// // 						,[weight]
+// // 						,satuan
+// // 						,[zone]
+// // 						,lokasi
+// // 						,tgl_tutup
+// // 						,tgl_buat
+// // 					) VALUES ( 
+// // 							?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+// // 					)";
+
+// 	$params = [
+// 		cek($langganan),
+// 		cek($buyer),
+// 		cek($rowdb21['PROJECTCODE']),
+// 		cek($proAwal),
+// 		cek($jns),
+// 		cek($itemNo),
+// 		cek(str_replace("'", "''", $a[0])),
+// 		cek(str_replace("'", "''", $a[1])),
+// 		cek(str_replace("'", "''", $a[2])),
+// 		cek(str_replace("'", "''", $a[3])),
+// 		cek($rowdb21['LOTCODE']),
+// 		cek($rowdb21['ROLL']),
+// 		cek(round($rowdb21['BERAT'], 3)),
+// 		cek($rowdb21['BASEPRIMARYUNITCODE']),
+// 		cek($rowdb21['WHSLOCATIONWAREHOUSEZONECODE']),
+// 		cek($rowdb21['WAREHOUSELOCATIONCODE']),
+// 		cek($Awal),
+// 		cek(date('Y-m-d H:i:s')),
+// 	];
+	
+// 	$simpan=sqlsrv_query($con,$query, $params) or die("GAGAL SIMPAN");	
+	
+// 	}
+// 	if($simpan){		
+// 		echo "<script>";
+// 		echo "alert('Stok Tgl ".$Awal." Sudah ditutup')";
+// 		echo "</script>";
+//         echo "<meta http-equiv='refresh' content='0; url=TutupHarian'>";
 		
-		}			
+// 		}			
  }
 }
 ?>
